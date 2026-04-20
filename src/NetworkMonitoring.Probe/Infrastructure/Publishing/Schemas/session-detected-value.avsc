@@ -1,0 +1,71 @@
+{
+  "type": "record",
+  "name": "SessionDetected",
+  "namespace": "net.networkmonitoring.events",
+  "doc": "Kafka value for SessionDetected; aligns with specs/001-session-detection/contracts/console-record-schema.md",
+  "fields": [
+    {
+      "name": "eventType",
+      "type": "string",
+      "doc": "Constant SessionDetected for this subject."
+    },
+    {
+      "name": "occurredAtUtc",
+      "type": "string",
+      "doc": "ISO-8601 instant when the record was emitted (probe clock, UTC)."
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "doc": "Event producer identifier, e.g. probe."
+    },
+    {
+      "name": "schemaVersion",
+      "type": "int",
+      "doc": "Contract version for this payload shape; starts at 1."
+    },
+    {
+      "name": "sessionId",
+      "type": ["null", "int"],
+      "default": null,
+      "doc": "Persistent id when assigned by infrastructure; null until then."
+    },
+    {
+      "name": "sourceIp",
+      "type": "string"
+    },
+    {
+      "name": "destinationIp",
+      "type": "string"
+    },
+    {
+      "name": "sourcePort",
+      "type": ["null", "int"],
+      "default": null
+    },
+    {
+      "name": "destinationPort",
+      "type": ["null", "int"],
+      "default": null
+    },
+    {
+      "name": "protocol",
+      "type": "string"
+    },
+    {
+      "name": "firstSeenUtc",
+      "type": "string",
+      "doc": "ISO-8601 observation window start (UTC)."
+    },
+    {
+      "name": "lastSeenUtc",
+      "type": "string",
+      "doc": "ISO-8601 observation window end (UTC)."
+    },
+    {
+      "name": "bytesObserved",
+      "type": "long",
+      "doc": "Non-negative byte count for the observation."
+    }
+  ]
+}

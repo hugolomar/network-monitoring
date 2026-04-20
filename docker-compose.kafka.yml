@@ -1,0 +1,129 @@
+# Reference stack: Apache Kafka (KRaft, 3 brokers) + Confluent Schema Registry.
+# ADR 0007 (KRaft, ~3 brokers) + ADR 0006/0008 (Registry, TLS target in non-dev).
+# Dev: PLAINTEXT on EXTERNAL listeners; production should use TLS/mTLS per quickstart / ADR 0008.
+
+networks:
+  kafka-net:
+    driver: bridge
+
+volumes:
+  kafka-1-data: {}
+  kafka-2-data: {}
+  kafka-3-data: {}
+
+services:
+  kafka-1:
+    image: confluentinc/cp-kafka:7.6.1
+    hostname: kafka-1
+    networks:
+      - kafka-net
+    ports:
+      - "9092:9092"
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,EXTERNAL://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # Use /var/lib/kafka/data (Confluent entrypoint fixes ownership). Keep logs + metadata under the same mount.
+      KAFKA_LOG_DIRS: /var/lib/kafka/data/kraft-combined-logs
+      KAFKA_METADATA_LOG_DIR: /var/lib/kafka/data/kraft-metadata
+    volumes:
+      - kafka-1-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka-1:29092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+
+  kafka-2:
+    image: confluentinc/cp-kafka:7.6.1
+    hostname: kafka-2
+    networks:
+      - kafka-net
+    ports:
+      - "9093:9093"
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,EXTERNAL://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:29092,EXTERNAL://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /var/lib/kafka/data/kraft-combined-logs
+      KAFKA_METADATA_LOG_DIR: /var/lib/kafka/data/kraft-metadata
+    volumes:
+      - kafka-2-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka-2:29092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+
+  kafka-3:
+    image: confluentinc/cp-kafka:7.6.1
+    hostname: kafka-3
+    networks:
+      - kafka-net
+    ports:
+      - "9094:9094"
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 3
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-3:29092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /var/lib/kafka/data/kraft-combined-logs
+      KAFKA_METADATA_LOG_DIR: /var/lib/kafka/data/kraft-metadata
+    volumes:
+      - kafka-3-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server kafka-3:29092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.1
+    hostname: schema-registry
+    networks:
+      - kafka-net
+    ports:
+      - "8081:8081"
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:29092,kafka-2:29092,kafka-3:29092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081

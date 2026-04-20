@@ -128,7 +128,38 @@
 - **Rationale**: Preserves hexagonal boundaries; satisfies US1 + US2.
 - **Alternatives considered**: Separate use case for Kafka — duplicates orchestration and drift risk.
 
+## Decision 16: Reference stack image lineage (US2)
+- **Decision**: Local reference stack uses **Confluent Platform 7.6.1** images:
+  `confluentinc/cp-kafka:7.6.1` (KRaft, three brokers) and `confluentinc/cp-schema-registry:7.6.1`,
+  defined in `docker-compose.kafka.yml`.
+- **Rationale**: Matches **Confluent .NET** client and Schema Registry Serdes versions used by the
+  probe; predictable listener and tooling behavior for developers.
+- **Alternatives considered**: Apache Kafka JVM-only images without Registry — rejected for this
+  feature because Avro + Registry is mandatory per ADR 0006.
+
+## Decision 17: .NET client library versions for Kafka/Avro
+- **Decision**: Probe references **Confluent.Kafka**, **Confluent.SchemaRegistry**, and
+  **Confluent.SchemaRegistry.Serdes.Avro** at **2.10.1**, and **Apache.Avro** at **1.12.0**
+  (`NetworkMonitoring.Probe.csproj`).
+- **Rationale**: Supported combination for `GenericRecord` + Schema Registry serialization; Avro C#
+  API uses namespaces `Avro` / `Avro.Generic` and `GenericRecord.Add` for field values (not legacy
+  `Apache.Avro` / `Put`).
+- **Alternatives considered**: Older Confluent 1.x clients — rejected to stay on maintained 2.x.
+
 ## Execution Results
-- `dotnet test src/NetworkMonitoring.Probe.sln` completed successfully with all tests passing.
+- `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` (2026-04-20): **all
+  tests green**; unit suite **24** passed; integration suite **2** passed and **1** skipped
+  (`KafkaSessionPublishIntegrationTests`, requires `RUN_KAFKA_INTEGRATION=1` and the Kafka compose
+  stack).
 - Startup smoke run (`timeout 8 dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`)
-  confirmed worker startup and graceful shutdown.
+  confirmed worker startup and graceful shutdown (US1 path).
+
+## SC-005 (manual sampling checklist)
+- **Intent**: With publication enabled, consume **`sessions.detected`** and verify sampled messages
+  match **`session-detected-value.avsc`** semantics (field presence, types, and session identity
+  consistency).
+- **Recorded outcome (automation)**: The opt-in integration test
+  `KafkaSessionPublishIntegrationTests.PublishSessionDetected_ProducesConsumableAvroValue` exercises
+  produce + consume + field assertions when `RUN_KAFKA_INTEGRATION=1`.
+- **Recorded outcome (manual 100% sampling)**: Not run in CI; operators should follow
+  `quickstart.md` with a real consumer and attach evidence to release checklists when required.

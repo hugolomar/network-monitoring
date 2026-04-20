@@ -90,6 +90,15 @@ description: "Task list for 001-session-detection (US1 delivered; US2 event stre
 
 ---
 
+## Requirements traceability (Phases 1–4)
+
+| Spec ID | How US1 delivery maps (tasks / code) |
+|---------|--------------------------------------|
+| **FR-011** | **T012**, **T032**, **T033** — configurable sliding-window suppression of repeated session emissions in `ProcessObservationsUseCase`; `ProbeOptions.SessionDeduplicationWindowMinutes` (default **10** per spec) in `src/NetworkMonitoring.Probe/Application/Configuration/ProbeOptions.cs`, bound from config in **T005** / **T013**. |
+| **FR-012** | **T005**, **T013** — single configuration surface: capture interface, tshark path, optional filter, deduplication window via `ProbeOptions` + `appsettings` + `ServiceCollectionExtensions`. |
+
+---
+
 ## Phase 5: Platform infrastructure (Kafka KRaft + Schema Registry)
 
 **Purpose**: Reproducible stack for US2 and SC-005. Align with **ADR 0007** (KRaft, ~3 brokers, no ZooKeeper) and **ADR 0008** (TLS/mTLS target; document dev relaxation).
@@ -98,10 +107,10 @@ description: "Task list for 001-session-detection (US1 delivered; US2 event stre
 
 **⚠️** No edits under `specs/002-device-discovery/`.
 
-- [ ] T034 [P] Add reference compose (e.g. `docker-compose.kafka.yml` at repository root or path agreed in plan) running **Apache Kafka in KRaft mode** with **three brokers** and **Confluent-compatible Schema Registry**, suitable for local/integration validation per `docs/adr/0007-kafka-kraft-without-zookeeper.md`
-- [ ] T035 [P] Document bootstrap servers, Registry URL, listener ports, and **security posture** (production mTLS vs documented non-production relaxation) in `specs/001-session-detection/quickstart.md` per `docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md`
-- [ ] T036 Add **`scripts/kafka-topics-init.sh`** (or equivalent) that **explicitly** creates topic **`sessions.detected`** with **documented** partition count and replication factor for the reference stack; script MUST be invocable after brokers are healthy (compose `depends_on` + healthcheck, documented manual step, or `make` target). Include **idempotent** behavior where practical (`--if-not-exists` or equivalent).
-- [ ] T037 Document in `specs/001-session-detection/quickstart.md`: (1) order of operations—compose up → run topic init → verify topic; (2) Registry subject **`sessions.detected-value`** and first schema registration path per `specs/001-session-detection/contracts/session-detected-avro.md`; (3) **production note**: same explicit provisioning via IaC/pipeline, not auto-create as policy.
+- [X] T034 [P] Add reference compose (e.g. `docker-compose.kafka.yml` at repository root or path agreed in plan) running **Apache Kafka in KRaft mode** with **three brokers** and **Confluent-compatible Schema Registry**, suitable for local/integration validation per `docs/adr/0007-kafka-kraft-without-zookeeper.md`
+- [X] T035 [P] Document bootstrap servers, Registry URL, listener ports, and **security posture** (production mTLS vs documented non-production relaxation) in `specs/001-session-detection/quickstart.md` per `docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md`
+- [X] T036 Add **`scripts/kafka-topics-init.sh`** (or equivalent) that **explicitly** creates topic **`sessions.detected`** with **documented** partition count and replication factor for the reference stack; script MUST be invocable after brokers are healthy (compose `depends_on` + healthcheck, documented manual step, or `make` target). Include **idempotent** behavior where practical (`--if-not-exists` or equivalent).
+- [X] T037 Document in `specs/001-session-detection/quickstart.md`: (1) order of operations—compose up → run topic init → verify topic; (2) Registry subject **`sessions.detected-value`** and first schema registration path per `specs/001-session-detection/contracts/session-detected-avro.md`; (3) **production note**: same explicit provisioning via IaC/pipeline, not auto-create as policy.
 
 **Checkpoint**: `docker compose` (or equivalent) brings up Kafka + Registry; **`sessions.detected` exists by explicit init**, not as an undocumented side effect of auto-create; operators follow quickstart end-to-end.
 
@@ -115,18 +124,18 @@ description: "Task list for 001-session-detection (US1 delivered; US2 event stre
 
 ### Tests for User Story 2
 
-- [ ] T038 [P] [US2] Add unit tests for session→Avro field mapping and key serialization helpers in `tests/NetworkMonitoring.Probe.UnitTests/Infrastructure/Publishing/` (new files as needed)
-- [ ] T039 [US2] Add integration test that produces to a test broker or Testcontainers-based Kafka (if adopted) in `tests/NetworkMonitoring.Probe.IntegrationTests/` validating end-to-end publish + consume of one `SessionDetected` record (skip or `[Fact(Skip=...)]` until compose wiring stable if necessary)
+- [X] T038 [P] [US2] Add unit tests for session→Avro field mapping and key serialization helpers in `tests/NetworkMonitoring.Probe.UnitTests/Infrastructure/Publishing/` (new files as needed)
+- [X] T039 [US2] Add integration test that produces to a test broker or Testcontainers-based Kafka (if adopted) in `tests/NetworkMonitoring.Probe.IntegrationTests/` validating end-to-end publish + consume of one `SessionDetected` record (skip or `[Fact(Skip=...)]` until compose wiring stable if necessary)
 
 ### Implementation for User Story 2
 
-- [ ] T040 [P] [US2] Add NuGet packages for `Confluent.Kafka`, `Confluent.SchemaRegistry`, and Avro serde (e.g. `Confluent.SchemaRegistry.Serdes.Avro` or project-standard equivalents) to `src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
-- [ ] T041 [US2] Extend `src/NetworkMonitoring.Probe/Application/Configuration/ProbeOptions.cs` (and `appsettings.json` / env templates) with: `EnableKafka`, `KafkaBootstrapServers`, `SchemaRegistryUrl`, `KafkaSessionTopic` (default `sessions.detected`), SSL/mTLS-related settings (cert paths, passwords) aligned with ADR 0008
-- [ ] T042 [US2] Implement Avro serialization for `SessionDetected` consistent with `specs/001-session-detection/contracts/session-detected-value.avsc` in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/` (e.g. `SessionDetectedAvroSerializer.cs` or equivalent)
-- [ ] T043 [US2] Implement `KafkaSessionPublisher` (or named adapter) in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/` that publishes Avro values and sets **partition key** from the same session identity fields as deduplication (see `ProcessObservationsUseCase` / spec FR-014)
-- [ ] T044 [US2] Register publisher(s) in `src/NetworkMonitoring.Probe/Host/DependencyInjection/ServiceCollectionExtensions.cs`: support **config-driven** output—e.g. console only, Kafka only, or both (composite) via `Probe` flags—so **use-case code** does not branch on infrastructure (hexagonal boundary); default for **documented production** SHOULD be Kafka-capable with console **off** unless operators need local visibility
-- [ ] T045 [US2] Update `src/NetworkMonitoring.Probe/Application/UseCases/ProcessObservationsUseCase.cs` **only if** key derivation or publish hooks must remain DRY; avoid leaking Kafka types into Application layer
-- [ ] T046 [P] [US2] Update `specs/001-session-detection/contracts/probe-output-contract.md` with Kafka adapter file references and `PublishSessionDetected` behavior
+- [X] T040 [P] [US2] Add NuGet packages for `Confluent.Kafka`, `Confluent.SchemaRegistry`, and Avro serde (e.g. `Confluent.SchemaRegistry.Serdes.Avro` or project-standard equivalents) to `src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
+- [X] T041 [US2] Extend `src/NetworkMonitoring.Probe/Application/Configuration/ProbeOptions.cs` (and `appsettings.json` / env templates) with: `EnableKafka`, `KafkaBootstrapServers`, `SchemaRegistryUrl`, `KafkaSessionTopic` (default `sessions.detected`), SSL/mTLS-related settings (cert paths, passwords) aligned with ADR 0008
+- [X] T042 [US2] Implement Avro serialization for `SessionDetected` consistent with `specs/001-session-detection/contracts/session-detected-value.avsc` in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/` (e.g. `SessionDetectedAvroSerializer.cs` or equivalent)
+- [X] T043 [US2] Implement `KafkaSessionPublisher` (or named adapter) in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/` that publishes Avro values and sets **partition key** from the same session identity fields as deduplication (see `ProcessObservationsUseCase` / spec FR-014)
+- [X] T044 [US2] Register publisher(s) in `src/NetworkMonitoring.Probe/Host/DependencyInjection/ServiceCollectionExtensions.cs`: support **config-driven** output—e.g. console only, Kafka only, or both (composite) via `Probe` flags—so **use-case code** does not branch on infrastructure (hexagonal boundary); default for **documented production** SHOULD be Kafka-capable with console **off** unless operators need local visibility
+- [X] T045 [US2] Update `src/NetworkMonitoring.Probe/Application/UseCases/ProcessObservationsUseCase.cs` **only if** key derivation or publish hooks must remain DRY; avoid leaking Kafka types into Application layer
+- [X] T046 [P] [US2] Update `specs/001-session-detection/contracts/probe-output-contract.md` with Kafka adapter file references and `PublishSessionDetected` behavior
 
 **Checkpoint**: Probe can emit to Kafka with console unchanged; invalid observations still skip Kafka publish.
 
@@ -136,10 +145,10 @@ description: "Task list for 001-session-detection (US1 delivered; US2 event stre
 
 **Purpose**: Docs, constitution check, SC-005 evidence.
 
-- [ ] T047 [P] Update `specs/001-session-detection/quickstart.md` with end-to-end **Kafka publish** validation steps and troubleshooting
-- [ ] T048 [P] Record Kafka/Registry image versions and compatibility notes in `specs/001-session-detection/research.md`
-- [ ] T049 Run `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` and note results in `research.md`
-- [ ] T050 Manual SC-005 checklist: consume `sessions.detected`, verify 100% sampled messages match `session-detected-value.avsc` semantics; document outcome in `specs/001-session-detection/research.md` or checklist artifact
+- [X] T047 [P] Update `specs/001-session-detection/quickstart.md` with end-to-end **Kafka publish** validation steps and troubleshooting
+- [X] T048 [P] Record Kafka/Registry image versions and compatibility notes in `specs/001-session-detection/research.md`
+- [X] T049 Run `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` and note results in `research.md`
+- [X] T050 Manual SC-005 checklist: consume `sessions.detected`, verify 100% sampled messages match `session-detected-value.avsc` semantics; document outcome in `specs/001-session-detection/research.md` or checklist artifact
 
 ---
 
@@ -179,4 +188,4 @@ description: "Task list for 001-session-detection (US1 delivered; US2 event stre
 - **Kafka topic**: reference and production paths rely on **explicit** topic creation (Phase 5); align staging/prod with team IaC standards.
 - **`/speckit.analyze`** recommended before **`/speckit.implement`** once tasks are checked off.
 - Path to this file: `/home/hugo/network-monitoring/specs/001-session-detection/tasks.md`
-- **Task count**: T001–T033 complete (33); T034–T050 pending (**17** new tasks). **Total defined: 50.**
+- **Task count**: T001–T050 complete (**50**). **Total defined: 50.**

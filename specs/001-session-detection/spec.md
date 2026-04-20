@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-session-detection`  
 **Created**: 2026-04-03  
-**Status**: Draft  
+**Status**: In progress — US1 (operator-visible output) delivered; US2 (Kafka / SC-005) in `tasks.md` Phases 5–7  
 **Input**: User description: "First probe increment to validate session capture and visibility."
 
 ## User Scenarios & Testing *(mandatory)*
