@@ -31,7 +31,17 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Shared Domain Integrity**: Confirm whether this feature introduces or updates `Session`,
+  `Device`, or related shared entities. If yes, specify inheritance from
+  `src/NetworkMonitoring.Domain/SeedWork/Entity.cs` and aggregate root usage.
+- **SeedWork Immutability**: Confirm no changes are planned under
+  `src/NetworkMonitoring.Domain/SeedWork` except
+  `NetworkMonitoring.Domain.csproj` and `GlobalUsings.cs` when strictly necessary.
+- **Boundary Contracts**: List event/API contracts touched and compatibility strategy.
+- **Security Controls**: Document authentication/authorization and service transport security.
+- **Incremental Compatibility Confirmation**: If changes may alter behavior/contracts/assumptions
+  of previously delivered modules, record explicit maintainer confirmation before implementation.
+- **Verification Path**: Define objective validation for each critical requirement.
 
 ## Project Structure
 
