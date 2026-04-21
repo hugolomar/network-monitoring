@@ -46,7 +46,7 @@ console as structured records.
 
 ## Event stream (Kafka + Schema Registry) — reference stack (US2 / SC-005)
 
-**Security posture**: The reference `docker-compose.kafka.yml` uses **PLAINTEXT** on external
+**Security posture**: The reference `docker-compose.reference-stack.yml` uses **PLAINTEXT** on external
 listeners for local validation only. In **integration, staging, and production**, target **TLS/mTLS**
 for Kafka and Registry clients per `docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md` and
 map certificates via `Probe` options (`KafkaSecurityProtocol`, `KafkaSslCaLocation`,
@@ -54,14 +54,14 @@ map certificates via `Probe` options (`KafkaSecurityProtocol`, `KafkaSslCaLocati
 
 ### Order of operations
 1. From repo root, start the stack:
-   - `docker compose -f docker-compose.kafka.yml up -d`
+   - `docker compose -f docker-compose.reference-stack.yml up -d`
 2. Wait until all three Kafka brokers report healthy (compose healthchecks), then **explicitly**
    create the topic (do not rely on broker auto-create for `sessions.detected` in documented flows):
    - `./scripts/kafka-topics-init.sh`  
    Defaults: **3 partitions**, **replication factor 3** (override with
    `SESSIONS_DETECTED_PARTITIONS`, `SESSIONS_DETECTED_REPLICATION_FACTOR` if the stack differs).
 3. Confirm topic exists (example):
-   - `docker compose -f docker-compose.kafka.yml exec -T kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --describe --topic sessions.detected`
+   - `docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --describe --topic sessions.detected`
 4. **Schema Registry**: subject **`sessions.detected-value`** is registered when the probe (or
    tests) first produces Avro values with `AutoRegisterSchemas` enabled. For governed environments,
    register the schema from `contracts/session-detected-value.avsc` via your standard tooling and
@@ -73,7 +73,7 @@ map certificates via `Probe` options (`KafkaSecurityProtocol`, `KafkaSslCaLocati
   clients; prints `sessions.detected` details if the topic exists.
 - **After changing Kafka data paths in compose**, if brokers fail with permission or corrupt KRaft
   state, reset dev volumes once:  
-  `docker compose -f docker-compose.kafka.yml down -v`  
+  `docker compose -f docker-compose.reference-stack.yml down -v`  
   then `up -d` again and re-run `./scripts/kafka-topics-init.sh`.
 
 ### Listener reference (host machine)
@@ -114,6 +114,18 @@ Example: run with Kafka enabled (adjust interface and capture as needed):
   only in dev environments.
 - **Connection refused to `localhost:9092`**: confirm compose is running and ports are not used by
   another stack.
+
+## Queryable history (US3 / SC-006) — reference path *(when implemented)*
+
+**Spec**: US3, **FR-017–FR-021**, **SC-006**. **ADR**:
+`docs/adr/0009-elasticsearch-for-session-detection-query.md`.
+**Plan**: `plan.md` — *Planned outcomes by user story → US3*.
+
+When the repo adds **Elasticsearch** and **Kafka Connect** to **`docker-compose.reference-stack.yml`**: (1) keep **Kafka +
+Registry** and topic **`sessions.detected`** as today; (2) run Connect with an **Elasticsearch Sink**
+on that topic (or a derived topic per plan); (3) document index/data-stream setup and **bounded**
+query examples (**FR-019**); (4) document **emission-to-query** expectations (**FR-020**); (5) run
+**SC-006** by sampling hits and comparing to `session-detected-value.avsc` / console parity rules.
 
 ## Out of scope (other modules)
 

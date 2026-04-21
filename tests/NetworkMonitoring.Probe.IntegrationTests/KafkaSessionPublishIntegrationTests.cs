@@ -23,7 +23,7 @@ public sealed class KafkaSessionPublishIntegrationTests
     {
         Skip.If(
             Environment.GetEnvironmentVariable("RUN_KAFKA_INTEGRATION") != "1",
-            "Set RUN_KAFKA_INTEGRATION=1 with docker compose -f docker-compose.kafka.yml up and ./scripts/kafka-topics-init.sh.");
+            "Set RUN_KAFKA_INTEGRATION=1 with docker compose -f docker-compose.reference-stack.yml up and ./scripts/kafka-topics-init.sh.");
 
         var bootstrap = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS")
             ?? "localhost:9092,localhost:9093,localhost:9094";

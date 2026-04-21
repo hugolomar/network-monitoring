@@ -6,13 +6,12 @@ alwaysApply: true
 
 # network-monitoring Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-20
+Auto-generated from all feature plans. Last updated: 2026-04-21
 
 ## Active Technologies
 - C# / .NET 10 + .NET Worker runtime, shared domain SeedWork abstractions, tshark capture adapter, console serialization pipeline (Kafka-ready contracts) (002-device-discovery)
 - N/A in this increment (discovery emission only) (002-device-discovery)
-- C# / .NET 10 + .NET Worker host; shared SeedWork domain; **tshark** CLI; **Confluent.Kafka** (001-session-detection)
-
+- C# / .NET 10 + .NET Worker host; SeedWork; tshark; Confluent.Kafka + Schema Registry + Avro; Kafka KRaft; US3: Elasticsearch + Kafka Connect (ADR 0009) (001-session-detection)
 - C# / .NET 10 + .NET Worker/Console runtime, shared SeedWork domain abstractions, tshark CLI integration (001-session-detection)
 
 ## Project Structure
@@ -31,10 +30,8 @@ tests/
 C# / .NET 10: Follow standard conventions
 
 ## Recent Changes
-- 001-session-detection: Added C# / .NET 10 + .NET Worker host; shared SeedWork domain; **tshark** CLI; **Confluent.Kafka**
-- 002-device-discovery: Added C# / .NET 10 + .NET Worker runtime, shared domain SeedWork abstractions, tshark capture adapter, console serialization pipeline (Kafka-ready contracts)
+- 001-session-detection: Plan merge — US1–US3 symmetric coverage; US3 ES + Connect (ADR 0009); research Decisions 18–19
 
-- 001-session-detection: Added C# / .NET 10 + .NET Worker/Console runtime, shared SeedWork domain abstractions, tshark CLI integration
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->

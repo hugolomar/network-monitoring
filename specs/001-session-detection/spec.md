@@ -2,7 +2,8 @@
 
 **Feature Branch**: `001-session-detection`  
 **Created**: 2026-04-03  
-**Status**: In progress — US1 (operator-visible output) delivered; US2 (Kafka / SC-005) in `tasks.md` Phases 5–7  
+**Status**: In progress — US1 (operator-visible output) delivered; US2 (Kafka / SC-005) delivered; **US3**
+(queryable past session detections) specified — implementation follows in `plan.md` / `tasks.md`  
 **Input**: User description: "First probe increment to validate session capture and visibility."
 
 ## User Scenarios & Testing *(mandatory)*
@@ -47,11 +48,49 @@ required fields and meaning.
 
 ---
 
+### User Story 3 - Query past session detections (Priority: P3)
+
+As an **analyst or platform operator**, I want to **search and filter** session detections that
+**have already been emitted** so I can **investigate, audit, or correlate** behavior **without relying
+solely on live capture output**.
+
+**Why this priority**: Live output proves the probe; the event stream feeds the platform;
+**searchable access to history** supports operational and investigative use of the **same**
+detections.
+
+**Independent Test**: Given session detections that have been emitted to the organization’s
+**asynchronous event stream** and are **available through the agreed query capability**, when the
+operator applies **documented filters**, **then** returned records match the **same session
+semantics and required fields** as the published session event contract, and non-matching
+detections are excluded.
+
+**Acceptance Scenarios**:
+
+1. **Given** detections exist within a time range, **When** the operator queries with that range,
+   **Then** matching detections are returned with required fields present and consistent meaning.
+2. **Given** normalized source, destination, ports (when applicable), and protocol, **When** the
+   operator applies matching filters, **Then** only detections that satisfy those criteria are
+   returned.
+3. **Given** no detection satisfies the filters, **When** the operator runs the query, **Then** the
+   outcome is an **empty result** as the normal case (not a fault).
+4. **Given** a validated detection was emitted to the stream, **When** it has become **available for
+   query** (within any **documented** eligibility delay), **Then** it can be found using filters that
+   describe it.
+
+---
+
 ### Edge Cases
 
 - No traffic is present during capture and therefore no session entities are produced.
 - Partial or malformed packet observations occur and cannot form valid session entities.
 - Capture starts or stops during active traffic bursts.
+- **(US3)** Queries over very broad criteria could return large result sets; operators need **bounded**
+  retrieval per interaction (see FR-019).
+- **(US3)** There may be a **delay** between stream emission and query availability; behavior MUST be
+  **documented for operators** when it is not immediate (see FR-020).
+- **(US3)** Duplicate or overlapping records in query results MUST NOT contradict the **declared
+  contract**; any deduplication or consolidation rules MUST be **documented** for consumers of the
+  query capability.
 
 ## Requirements *(mandatory)*
 
@@ -91,7 +130,7 @@ required fields and meaning.
   (interface), **how** capture is performed (tool path), an **optional** traffic filter, and the
   **duplicate-suppression window** for session emissions.
 
-### Event stream publication *(session detections; next delivery phase)*
+### Event stream publication *(User Story 2)*
 
 These requirements implement **User Story 2**. They add **asynchronous publication** of the same
 validated session outcomes as the operator-visible mode, without replacing that mode unless a
@@ -113,10 +152,35 @@ deployment turns it off.
   organizational security policy. **Non-production** environments MAY use relaxed controls only when
   explicitly documented as such.
 
+### Queryable session detections *(User Story 3)*
+
+These requirements add an **organization-agreed** way to **consult** session detections **after**
+they have been published to the asynchronous event stream. They do **not** redefine capture or
+publication semantics; they require **alignment** with existing contracts.
+
+- **FR-017**: The system MUST provide a **documented query capability** (product- and
+  deployment-specific name) through which authorized operators can **retrieve** past session
+  detections using **filters** that include at least: a **time range**, and the same **normalized**
+  address, port (when applicable), and protocol dimensions as in emitted records (per FR-006).
+- **FR-018**: Results of the query capability MUST present each session detection with the **same
+  semantic meaning** and **required fields** as the **versioned session event contract** under
+  `specs/001-session-detection/contracts/`; the query capability MUST NOT introduce **conflicting**
+  interpretations of “session” or of required attributes.
+- **FR-019**: Each interactive query interaction MUST return a **bounded** set of results (e.g.
+  paging, cursors, or explicit limits) so operators receive a **finite** batch unless a **documented**
+  operational exception applies.
+- **FR-020**: If detections are not **immediately** available for query after stream publication, the
+  **maximum acceptable delay** or the fact of **eventual consistency** MUST be **documented** for
+  operators setting expectations.
+- **FR-021**: Access to the query capability MUST follow **organization-defined** access rules (who
+  may see which detections); enforcement details belong to implementation and security architecture,
+  not to this specification.
+
 ### Key Entities *(include if feature involves data)*
 
 - **Session**: Represents a network communication observation with source, destination, protocol,
-  timing, and traffic-size context required for monitoring.
+  timing, and traffic-size context required for monitoring. **Queryable results** (US3) refer to the
+  **same** session semantics as emitted records, not a parallel definition.
 
 ## Success Criteria *(mandatory)*
 
@@ -133,6 +197,9 @@ deployment turns it off.
 - **SC-005**: When stream publication is enabled in a controlled run, 100% of sampled session events
   on the **configured destination** (defaulting to the platform standard name) match the declared
   contract for required fields and semantics.
+- **SC-006**: When the query capability (US3) is exercised in a controlled environment, 100% of
+  sampled **returned** session detections match the declared contract for required fields and
+  semantics.
 
 ## Assumptions
 
@@ -145,3 +212,6 @@ deployment turns it off.
   agree on meaning.
 - Duplicate-suppression state for emission lives **in the running probe** only; it is not a
   substitute for authoritative session storage and does not persist across restarts.
+- **User Story 3** builds on **User Story 2**: session detections MUST be **published** to the
+  organization’s asynchronous event stream before query scenarios can be satisfied; the query
+  capability does not replace stream publication.

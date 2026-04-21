@@ -7,7 +7,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 echo "== docker compose ps =="
-docker compose -f docker-compose.kafka.yml ps
+docker compose -f docker-compose.reference-stack.yml ps
 
 echo ""
 echo "== Schema Registry (subjects) =="
@@ -28,15 +28,15 @@ echo ""
 
 echo ""
 echo "== Kafka broker API (kafka-1 internal) =="
-docker compose -f docker-compose.kafka.yml exec -T kafka-1 \
+docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 \
   kafka-broker-api-versions --bootstrap-server kafka-1:29092 >/dev/null
 echo "OK: kafka-1:29092"
 
 echo ""
 echo "== Topic sessions.detected (if created) =="
-if docker compose -f docker-compose.kafka.yml exec -T kafka-1 \
+if docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 \
   kafka-topics --bootstrap-server kafka-1:29092 --list 2>/dev/null | grep -qx 'sessions.detected'; then
-  docker compose -f docker-compose.kafka.yml exec -T kafka-1 \
+  docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 \
     kafka-topics --bootstrap-server kafka-1:29092 --describe --topic sessions.detected
 else
   echo "(topic not present yet — run ./scripts/kafka-topics-init.sh)"

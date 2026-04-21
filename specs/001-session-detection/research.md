@@ -131,7 +131,7 @@
 ## Decision 16: Reference stack image lineage (US2)
 - **Decision**: Local reference stack uses **Confluent Platform 7.6.1** images:
   `confluentinc/cp-kafka:7.6.1` (KRaft, three brokers) and `confluentinc/cp-schema-registry:7.6.1`,
-  defined in `docker-compose.kafka.yml`.
+  defined in `docker-compose.reference-stack.yml`.
 - **Rationale**: Matches **Confluent .NET** client and Schema Registry Serdes versions used by the
   probe; predictable listener and tooling behavior for developers.
 - **Alternatives considered**: Apache Kafka JVM-only images without Registry — rejected for this
@@ -163,3 +163,22 @@
   produce + consume + field assertions when `RUN_KAFKA_INTEGRATION=1`.
 - **Recorded outcome (manual 100% sampling)**: Not run in CI; operators should follow
   `quickstart.md` with a real consumer and attach evidence to release checklists when required.
+
+## Decision 18: Queryable session history (US3) — store and ingest
+- **Decision**: Use **Elasticsearch** as the **reference** system for indexing and querying past
+  session detections, with **Kafka Connect** (Elasticsearch **Sink** connector) as the reference ingest
+  path from **`sessions.detected`**, per `docs/adr/0009-elasticsearch-for-session-detection-query.md`.
+- **Rationale**: Search-first filters (time range, normalized addresses, ports, protocol); mature
+  Connect sink; satisfies FR-017–FR-021 and SC-006 without using Kafka alone as the operator history UI.
+- **Alternatives considered**: RDBMS as primary interactive search store — deferred per ADR 0009;
+  Kafka-only replay for “query” — rejected for US3.
+
+## Decision 19: US3 reference dev stack (implementation pending)
+- **Decision**: Extend the existing **`docker-compose.reference-stack.yml`** with **Elasticsearch** and **Kafka
+  Connect** on **`kafka-net`** (single reference manifest), sufficient to run **SC-006** sampling in
+  dev/integration. Pin connector and ES image versions during implementation (e.g. align Connect
+  image with broker **7.6.x** line or org standard). Document **full stack** vs **Kafka-only**
+  (`docker compose … up` with an explicit service list).
+- **Rationale**: Simplest default `up` for the full stack; same reproducibility pattern as Decision 14.
+- **Alternatives considered**: Second compose file on an external network — possible but not required
+  for this repo. Managed-only ES/Connect without local reference — acceptable if documented.

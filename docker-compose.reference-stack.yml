@@ -1,5 +1,5 @@
-# Reference stack: Apache Kafka (KRaft, 3 brokers) + Confluent Schema Registry.
-# ADR 0007 (KRaft, ~3 brokers) + ADR 0006/0008 (Registry, TLS target in non-dev).
+# Reference dev stack: Kafka (KRaft, 3 brokers) + Schema Registry; US3 adds Elasticsearch + Connect here.
+# ADR 0007 (KRaft) + ADR 0006/0008 (Registry, TLS target in non-dev). Formerly docker-compose.kafka.yml.
 # Dev: PLAINTEXT on EXTERNAL listeners; production should use TLS/mTLS per quickstart / ADR 0008.
 
 networks:

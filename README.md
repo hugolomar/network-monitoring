@@ -33,7 +33,7 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "Fu
 ## Kafka (local reference stack)
 
 ```bash
-docker compose -f docker-compose.kafka.yml up -d
+docker compose -f docker-compose.reference-stack.yml up -d
 ./scripts/kafka-topics-init.sh
 ./scripts/verify-kafka-stack.sh
 ```

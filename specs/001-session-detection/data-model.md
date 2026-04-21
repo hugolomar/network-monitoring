@@ -16,6 +16,10 @@ The same **logical** session detection outcome is emitted to **operator-visible 
 when enabled, to the **event stream** (Kafka value per `session-detected-value.avsc`). Field
 semantics MUST stay aligned; only encoding differs (JSON text vs Avro bytes).
 
+**US3 (query projection)**: A **secondary store** (reference: **Elasticsearch**, **ADR 0009**) may index
+events for **search**; indexed documents MUST reflect the **same** session semantics as the Kafka value
+and console JSONL (**FR-018**). That projection is **not** a new domain entity in the shared model.
+
 Before dispatching a `SessionDetected` record, the probe MAY apply **emission deduplication**:
 - **Identity key**: normalized source IP, destination IP, source port, destination port, and
   protocol for the validated observation.
