@@ -1,6 +1,6 @@
 # Network monitoring
 
-Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repo also holds specs, ADRs, and reference Docker Compose for local Kafka.
+Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). This repository includes specs, ADRs, reference Docker Compose (Kafka; optional Elasticsearch and Kafka Connect for queryable history), and **shell helpers** under `scripts/` grouped by role — see **Repository layout** below.
 
 ## Prerequisites
 
@@ -34,13 +34,15 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "Fu
 
 ```bash
 docker compose -f docker-compose.reference-stack.yml up -d
-./scripts/kafka-topics-init.sh
-./scripts/verify-kafka-stack.sh
+./scripts/bootstrap/kafka-topics-init.sh
+./scripts/stack/verify-kafka-stack.sh
 ```
+
+The full path (Schema Registry, optional Elasticsearch + Kafka Connect, connector registration) is in the quickstart.
 
 ## More detail
 
-- Feature flow and operators’ steps: [`specs/001-session-detection/quickstart.md`](specs/001-session-detection/quickstart.md)
+- Feature flow and operator steps: [`specs/001-session-detection/quickstart.md`](specs/001-session-detection/quickstart.md)
 - Architecture decisions: [`docs/adr/`](docs/adr/)
 
 ## Repository layout
@@ -51,4 +53,7 @@ docker compose -f docker-compose.reference-stack.yml up -d
 | `src/NetworkMonitoring.Domain/` | Shared domain (SeedWork + entities/value objects) |
 | `tests/` | Unit and integration tests |
 | `specs/` | Feature specifications and contracts |
-| `scripts/` | Kafka topic init and stack smoke checks |
+| `scripts/stack/` | Smoke checks: Kafka/Registry; Elasticsearch/Connect |
+| `scripts/bootstrap/` | Idempotent init: topics, index templates |
+| `scripts/connectors/` | Kafka Connect JSON + `register-*.sh` |
+| `scripts/acceptance/` | Spec checks (e.g. SC-006 sampling, `RUN_ES_INTEGRATION=1`) |

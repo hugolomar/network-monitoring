@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Idempotent topic creation for reference stack (docker-compose.reference-stack.yml).
-# Run from repo root after brokers are healthy: ./scripts/kafka-topics-init.sh
+# Run from repo root after brokers are healthy: ./scripts/bootstrap/kafka-topics-init.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 COMPOSE_FILE="${ROOT}/docker-compose.reference-stack.yml"
 BOOTSTRAP_INTERNAL="${KAFKA_BOOTSTRAP_INTERNAL:-kafka-1:29092,kafka-2:29092,kafka-3:29092}"
 TOPIC="${KAFKA_SESSION_TOPIC:-sessions.detected}"

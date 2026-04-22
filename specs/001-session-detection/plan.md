@@ -50,7 +50,7 @@ Architecture decision records (binding for implementation planning): **`docs/adr
 - **Intent**: Same validated detections on **Kafka** for platform consumers; **FR-013–FR-016**;
   payload **FR-015** → **`session-detected-value.avsc`** / Registry subject **`sessions.detected-value`**.
 - **Primary pieces**: Infrastructure **Kafka + Avro** publisher; **explicit** topic **`sessions.detected`**;
-  `docker-compose.reference-stack.yml`, `scripts/kafka-topics-init.sh`, Registry; **mTLS** story non-dev (**ADR 0008**).
+  `docker-compose.reference-stack.yml`, `scripts/bootstrap/kafka-topics-init.sh`, Registry; **mTLS** story non-dev (**ADR 0008**).
 - **Verification**: **SC-005**; opt-in integration test `KafkaSessionPublishIntegrationTests` with
   `RUN_KAFKA_INTEGRATION=1`; manual steps in `quickstart.md`.
 

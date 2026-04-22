@@ -3,7 +3,7 @@
 **Feature Branch**: `001-session-detection`  
 **Created**: 2026-04-03  
 **Status**: In progress — US1 (operator-visible output) delivered; US2 (Kafka / SC-005) delivered; **US3**
-(queryable past session detections) specified — implementation follows in `plan.md` / `tasks.md`  
+(queryable past session detections) reference path delivered (Elasticsearch + Kafka Connect) per `tasks.md` / `quickstart.md`  
 **Input**: User description: "First probe increment to validate session capture and visibility."
 
 ## User Scenarios & Testing *(mandatory)*
@@ -90,7 +90,9 @@ detections are excluded.
   **documented for operators** when it is not immediate (see FR-020).
 - **(US3)** Duplicate or overlapping records in query results MUST NOT contradict the **declared
   contract**; any deduplication or consolidation rules MUST be **documented** for consumers of the
-  query capability.
+  query capability. **Stream-side** emission semantics remain **FR-011** / **FR-013**; this bullet
+  covers how the **query surface** may still present overlaps (e.g. projection or replay) without
+  conflicting with **FR-018**.
 
 ## Requirements *(mandatory)*
 

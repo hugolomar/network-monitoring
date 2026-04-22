@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Smoke-check the reference Kafka + Schema Registry stack (from repo root).
-# Usage: ./scripts/verify-kafka-stack.sh
+# Usage: ./scripts/stack/verify-kafka-stack.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
 echo "== docker compose ps =="
@@ -39,7 +39,7 @@ if docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 \
   docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 \
     kafka-topics --bootstrap-server kafka-1:29092 --describe --topic sessions.detected
 else
-  echo "(topic not present yet — run ./scripts/kafka-topics-init.sh)"
+  echo "(topic not present yet — run ./scripts/bootstrap/kafka-topics-init.sh)"
 fi
 
 echo ""

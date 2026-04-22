@@ -151,6 +151,10 @@
   tests green**; unit suite **24** passed; integration suite **2** passed and **1** skipped
   (`KafkaSessionPublishIntegrationTests`, requires `RUN_KAFKA_INTEGRATION=1` and the Kafka compose
   stack).
+- `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` (2026-04-22, after US3
+  reference artifacts): **same** — **24** unit passed; integration **2** passed, **1** skipped (Kafka
+  integration opt-in unchanged). US3 stack validation is **manual/scripted** (`scripts/stack/verify-elasticsearch-stack.sh`,
+  `scripts/acceptance/verify-sc006-elasticsearch-sampling.sh` with `RUN_ES_INTEGRATION=1`), not CI-gated by default.
 - Startup smoke run (`timeout 8 dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`)
   confirmed worker startup and graceful shutdown (US1 path).
 
@@ -173,12 +177,24 @@
 - **Alternatives considered**: RDBMS as primary interactive search store — deferred per ADR 0009;
   Kafka-only replay for “query” — rejected for US3.
 
-## Decision 19: US3 reference dev stack (implementation pending)
-- **Decision**: Extend the existing **`docker-compose.reference-stack.yml`** with **Elasticsearch** and **Kafka
-  Connect** on **`kafka-net`** (single reference manifest), sufficient to run **SC-006** sampling in
-  dev/integration. Pin connector and ES image versions during implementation (e.g. align Connect
-  image with broker **7.6.x** line or org standard). Document **full stack** vs **Kafka-only**
-  (`docker compose … up` with an explicit service list).
-- **Rationale**: Simplest default `up` for the full stack; same reproducibility pattern as Decision 14.
-- **Alternatives considered**: Second compose file on an external network — possible but not required
-  for this repo. Managed-only ES/Connect without local reference — acceptable if documented.
+## Decision 19: US3 reference dev stack (Elasticsearch + Connect)
+- **Decision**: **`docker-compose.reference-stack.yml`** includes **Elasticsearch** and **Kafka Connect**
+  on **`kafka-net`**, plus a **Schema Registry healthcheck** so Connect can depend on a ready Registry.
+  **Image pins (reference)**:
+  - **Elasticsearch**: `docker.elastic.co/elasticsearch/elasticsearch:8.11.4` (single-node, `xpack.security.enabled=false` for local dev only).
+  - **Kafka Connect**: `confluentinc/cp-kafka-connect:7.6.1` (aligns with Decision 16 broker line).
+  - **Elasticsearch Sink plugin**: `confluentinc/kafka-connect-elasticsearch:14.1.6` (installed on first `connect` container start via `confluent-hub`, cached in `connect-plugins` volume; version must exist on Confluent Hub — see hub API).
+- **Rationale**: Same single-manifest `up` for full stack; reproduces **SC-006** sampling with scripts in
+  `scripts/` (see `stack/`, `bootstrap/`, `connectors/`, `acceptance/`). **Kafka-only** subset documented in `quickstart.md`.
+- **Alternatives considered**: Pre-baked Connect image with baked-in plugin — deferred; hub install +
+  named volume keeps compose file readable.
+
+## SC-006 (Elasticsearch query sampling)
+- **Intent**: With the **US3** stack up, connector running, and documents in **`sessions-detected`**
+  (from topic **`sessions.detected`**), sample `_search` hits and verify **required** business fields
+  present and consistent with **`session-detected-value.avsc`** / `elasticsearch-session-detected-mapping.md`.
+- **Automation (opt-in)**: `RUN_ES_INTEGRATION=1 ./scripts/acceptance/verify-sc006-elasticsearch-sampling.sh` (see
+  `quickstart.md`). Skips when unset so CI without ES does not fail.
+- **Recorded outcome (manual)**: Operators run the script (or equivalent bounded queries) after traffic
+  + probe publication; attach evidence to release notes when required. **Emission-to-query latency** is
+  **environment-specific** — document measured notes here when available (FR-020).
