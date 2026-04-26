@@ -37,7 +37,8 @@ valid observation regardless of emission throttling.
 
 ## Validation Notes (2026-04-19)
 - Automated validation command executed: `dotnet test src/NetworkMonitoring.Probe.sln`.
-- Observed result: all probe unit/integration tests passed (19/19 total).
+- Observed result: all non-Kafka-gated probe tests passed; current suite reports 24 unit tests passed,
+  2 integration tests passed, and 1 Kafka integration test skipped unless `RUN_KAFKA_INTEGRATION=1`.
 - Coverage highlights:
   - invalid discovery rejection with continuation,
   - schema-level `DeviceDetected` field validation,
@@ -46,4 +47,4 @@ valid observation regardless of emission throttling.
 ## Out of Scope
 - Backend persistence/inventory storage
 - UI/API management flows
-- Requirements not covered by `specs/002-device-discovery/`
+- Requirements not covered by `specs/003-device-discovery/`

@@ -1,6 +1,6 @@
 # Network monitoring
 
-Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). This repository includes specs, ADRs, reference Docker Compose (Kafka; optional Elasticsearch and Kafka Connect for queryable history), and **shell helpers** under `scripts/` grouped by role — see **Repository layout** below.
+Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repository also includes session indexing with Elasticsearch + Kafka Connect as a query projection, feature specs, ADRs, reference Docker Compose, and **shell helpers** under `scripts/` grouped by role — see **Repository layout** below.
 
 ## Prerequisites
 
@@ -38,11 +38,13 @@ docker compose -f docker-compose.reference-stack.yml up -d
 ./scripts/stack/verify-kafka-stack.sh
 ```
 
-The full path (Schema Registry, optional Elasticsearch + Kafka Connect, connector registration) is in the quickstart.
+The Kafka publication path is documented in the session detection quickstart. The full indexing path (Elasticsearch + Kafka Connect, connector registration) is documented in the session indexing quickstart.
 
 ## More detail
 
-- Feature flow and operator steps: [`specs/001-session-detection/quickstart.md`](specs/001-session-detection/quickstart.md)
+- Session detection flow and operator steps: [`specs/001-session-detection/quickstart.md`](specs/001-session-detection/quickstart.md)
+- Session indexing flow and operator steps: [`specs/002-session-indexing/quickstart.md`](specs/002-session-indexing/quickstart.md)
+- Device discovery flow and operator steps: [`specs/003-device-discovery/quickstart.md`](specs/003-device-discovery/quickstart.md)
 - Architecture decisions: [`docs/adr/`](docs/adr/)
 
 ## Repository layout
@@ -56,4 +58,4 @@ The full path (Schema Registry, optional Elasticsearch + Kafka Connect, connecto
 | `scripts/stack/` | Smoke checks: Kafka/Registry; Elasticsearch/Connect |
 | `scripts/bootstrap/` | Idempotent init: topics, index templates |
 | `scripts/connectors/` | Kafka Connect JSON + `register-*.sh` |
-| `scripts/acceptance/` | Spec checks (e.g. SC-006 sampling, `RUN_ES_INTEGRATION=1`) |
+| `scripts/acceptance/` | Spec checks (e.g. session indexing sampling, `RUN_ES_INTEGRATION=1`) |

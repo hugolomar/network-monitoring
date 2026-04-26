@@ -1,7 +1,7 @@
 # Avro `SessionDetected` → Elasticsearch document fields
 
 **Source contract**: `session-detected-value.avsc` (`net.networkmonitoring.events.SessionDetected`).  
-**US3 purpose**: `FR-006` (normalized comparable values), `FR-018` (same semantics as stream/console, no second definition of “session”).
+**Purpose**: `002-session-indexing` keeps indexed documents aligned with the `SessionDetected` event contract: normalized comparable values and no second definition of “session”.
 
 ## Field mapping (1:1 names)
 
@@ -24,7 +24,7 @@
 ## Index identity & duplicates
 
 - **Kafka key**: String partition key (same identity as stream duplicate suppression) — the Elasticsearch Sink may use it as **document `_id`** when `key.ignore` is `false` (see `scripts/connectors/elasticsearch-sink-sessions-detected.json`), aligning **query-side** idempotency with stream semantics where the connector allows.
-- **Overlap in query results** (replays, reindexes): still governed by the spec **Edge Cases (US3)** and **FR-011** / **FR-013** / **FR-018**: projection docs must not contradict the **declared contract**; any deduplication for analysts is **documented** in `quickstart.md` and connector notes.
+- **Overlap in query results** (replays, reindexes): still governed by the session indexing edge cases and by stream emission semantics from `001-session-detection`: projection docs must not contradict the **declared contract**; any deduplication for analysts is **documented** in `quickstart.md` and connector notes.
 
 ## Index naming
 

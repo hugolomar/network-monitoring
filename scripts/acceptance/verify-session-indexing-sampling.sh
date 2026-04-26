@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# SC-006: sample returned Elasticsearch documents and fail if _source drifts from
+# Session indexing: sample returned Elasticsearch documents and fail if _source drifts from
 # session-detected-value.avsc field semantics (presence of required business fields).
 # Opt-in: set RUN_ES_INTEGRATION=1 to execute checks (default: skip to avoid false failures in CI without ES).
-# Usage: RUN_ES_INTEGRATION=1 ./scripts/acceptance/verify-sc006-elasticsearch-sampling.sh
+# Usage: RUN_ES_INTEGRATION=1 ./scripts/acceptance/verify-session-indexing-sampling.sh
 # Needs: python3 to parse _search JSON.
 set -euo pipefail
 
 if [[ "${RUN_ES_INTEGRATION:-0}" != "1" ]]; then
-  echo "SKIP: set RUN_ES_INTEGRATION=1 to run SC-006 Elasticsearch sampling (needs stack + data)."
+  echo "SKIP: set RUN_ES_INTEGRATION=1 to run session indexing Elasticsearch sampling (needs stack + data)."
   exit 0
 fi
 
@@ -24,11 +24,11 @@ if ! curl -fsS -o /dev/null "$ES_URL" 2>/dev/null; then
   exit 1
 fi
 
-echo "== SC-006 sample query ($INDEX) =="
+echo "== Session indexing sample query ($INDEX) =="
 body='{"size":20,"query":{"match_all":{}},"sort":[{"occurredAtUtc":{"order":"desc"}}]}'
 res=$(curl -sS -H "Content-Type: application/json" -X POST "$ES_URL/$INDEX/_search" -d "$body" || true)
 
-export ES_SC006_INDEX="$INDEX"
+export ES_SESSION_INDEX_NAME="$INDEX"
 # stdin to Python must be the _search body; do not use `| python3 <<'PY'`
 # (the heredoc replaces stdin and breaks json.loads).
 printf '%s' "$res" | python3 -c "$(cat <<'PY'
@@ -46,7 +46,7 @@ required = [
     "lastSeenUtc",
     "bytesObserved",
 ]
-index = os.environ.get("ES_SC006_INDEX", "sessions-detected")
+index = os.environ.get("ES_SESSION_INDEX_NAME", "sessions-detected")
 raw = sys.stdin.read()
 try:
     res = json.loads(raw)
@@ -60,7 +60,7 @@ n = len(hits)
 if n == 0:
     print(
         f"No hits in {index} (no data to sample). Pass when index empty is acceptable for a dry check; "
-        "ingest + probe data required for full SC-006."
+        "ingest + probe data required for full session indexing validation."
     )
     sys.exit(0)
 
@@ -74,10 +74,10 @@ for i, hit in enumerate(hits[:20]):
             failed = True
 
 if failed:
-    print("SC-006 sampling FAILED", file=sys.stderr)
+    print("Session indexing sampling FAILED", file=sys.stderr)
     sys.exit(1)
 print(
-    f"SC-006: sampled {n} hit(s) — required field keys present (contract parity check, sample-based)."
+    f"Session indexing: sampled {n} hit(s) — required field keys present (contract parity check, sample-based)."
 )
 PY
 )"

@@ -1,16 +1,16 @@
 ---
-description: "Task list for 001-session-detection (US1–US3 reference stack: Elasticsearch + Kafka Connect for query projection)"
+description: "Task list for 001-session-detection (console + Kafka session visibility)"
 ---
 
 # Tasks: Probe Session Detection Visibility
 
 **Input**: Design documents from `/home/hugo/network-monitoring/specs/001-session-detection/`  
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md  
-**ADRs**: `docs/adr/0006-avro-schema-registry-for-session-kafka-payloads.md`, `docs/adr/0007-kafka-kraft-without-zookeeper.md`, `docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md`, `docs/adr/0009-elasticsearch-for-session-detection-query.md`
+**ADRs**: `docs/adr/0006-avro-schema-registry-for-session-kafka-payloads.md`, `docs/adr/0007-kafka-kraft-without-zookeeper.md`, `docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md`
 
 **Tests**: Unit + integration per plan; add broker-side integration when compose stack exists (SC-005).
 
-**Organization**: Phases 1–4 = completed MVP (**US1**). Phases 5–7 = **User Story 2** (Kafka + Schema Registry, KRaft, TLS/mTLS per ADRs). Phase 8 = **User Story 3** (Elasticsearch read projection + Kafka Connect ingest per **ADR 0009**). **Do not modify `specs/002-device-discovery/` from this list.**
+**Organization**: Phases 1–4 = completed MVP (**US1**). Phases 5–7 = **User Story 2** (Kafka + Schema Registry, KRaft, TLS/mTLS per ADRs). **Do not modify `specs/003-device-discovery/` from this list.**
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -105,7 +105,7 @@ description: "Task list for 001-session-detection (US1–US3 reference stack: El
 
 **Topic provisioning (professional standard)**: The reference compose/integration path MUST **explicitly** create topic **`sessions.detected`** (chosen partition count and replication factor documented). **Do not** treat **broker auto-create** as the supported way to obtain that topic in this repo’s documented flow—auto-create may hide misconfiguration and yields **default** (often wrong) partitions/RF. Production/staging SHOULD use the same discipline via **IaC or approved admin tooling** (Terraform, operator, pipeline), not reliance on the first producer.
 
-**⚠️** No edits under `specs/002-device-discovery/`.
+**⚠️** No edits under `specs/003-device-discovery/`.
 
 - [X] T034 [P] Add reference compose (e.g. `docker-compose.reference-stack.yml` at repository root or path agreed in plan) running **Apache Kafka in KRaft mode** with **three brokers** and **Confluent-compatible Schema Registry**, suitable for local/integration validation per `docs/adr/0007-kafka-kraft-without-zookeeper.md`
 - [X] T035 [P] Document bootstrap servers, Registry URL, listener ports, and **security posture** (production mTLS vs documented non-production relaxation) in `specs/001-session-detection/quickstart.md` per `docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md`
@@ -152,32 +152,6 @@ description: "Task list for 001-session-detection (US1–US3 reference stack: El
 
 ---
 
-## Phase 8: User Story 3 — Queryable session history (Elasticsearch + Kafka Connect) (Priority: P3) — COMPLETE
-
-**Purpose**: Satisfy **FR-017–FR-021** and **SC-006** with **Elasticsearch** as a **query projection** of `SessionDetected` events; **Kafka** remains the log. Reference ingest: **Kafka Connect** Elasticsearch **Sink** from **`sessions.detected`** per **`docs/adr/0009-elasticsearch-for-session-detection-query.md`** and `plan.md` (US3).
-
-**Independent Test**: With Kafka topic populated and connector running, **query** Elasticsearch using documented filters (time range, normalized addresses, ports when applicable, protocol); sampled hits match **`contracts/session-detected-value.avsc`** semantics (**SC-006**). Results use **bounded** page size / pagination (**FR-019**).
-
-**Prerequisites**: `docker-compose.reference-stack.yml`, `scripts/bootstrap/kafka-topics-init.sh`, and probe Kafka path (Phases 5–7) operational.
-
-**⚠️** No edits under `specs/002-device-discovery/`.
-
-- [X] T051 [US3] Extend **`docker-compose.reference-stack.yml`** at repository root with **Elasticsearch** and **Kafka Connect** worker service(s) on the existing **`kafka-net`** network so one `up` can run the full reference stack; document in `specs/001-session-detection/quickstart.md` the **Kafka-only** variant via explicit service list (e.g. brokers + Schema Registry without ES/Connect)
-- [X] T052 [US3] Add `scripts/stack/verify-elasticsearch-stack.sh` that checks Elasticsearch and Kafka Connect HTTP health (mirror conventions in `scripts/stack/verify-kafka-stack.sh`) and prints actionable failures
-- [X] T053 [P] [US3] Add `specs/001-session-detection/contracts/elasticsearch-session-detected-mapping.md` documenting Avro → Elasticsearch field mapping from `specs/001-session-detection/contracts/session-detected-value.avsc` (normalization **FR-006**, semantic parity **FR-018**)
-- [X] T054 [P] [US3] Add Elasticsearch index template (or data stream) JSON under `scripts/bootstrap/elasticsearch/index-template-sessions-detected.json` plus `scripts/bootstrap/elasticsearch/apply-index-template.sh` (or equivalent) to apply mappings from `elasticsearch-session-detected-mapping.md` in dev
-- [X] T055 [US3] Add connector config `scripts/connectors/elasticsearch-sink-sessions-detected.json` for the Elasticsearch Sink: consume **`sessions.detected`**, target index/data stream name, key/id strategy documented to control duplicates (align with spec edge cases on documented dedup semantics)
-- [X] T056 [US3] Add `scripts/connectors/register-elasticsearch-sink-connector.sh` that registers the connector via Connect REST API with idempotent behavior where the API allows (create-or-update pattern documented on failure)
-- [X] T057 [US3] Extend `specs/001-session-detection/quickstart.md` with end-to-end **US3** steps: unified compose **full stack** (or Kafka-only subset) → topic → ES/Connect healthy → index template → register connector → probe publish → **Elasticsearch `_search`** examples using **`size`**, sort, and `search_after` or explicit limits (**FR-019**)
-- [X] T058 [P] [US3] Document **emission-to-query** latency and **eventual consistency** expectations for operators (**FR-020**) in `specs/001-session-detection/quickstart.md` and add a short measured note in `specs/001-session-detection/research.md`
-- [X] T059 [P] [US3] Document **TLS** and **authentication** for Elasticsearch and Connect in non-dev vs documented dev relaxation (`specs/001-session-detection/quickstart.md`) consistent with **ADR 0009** and constitution Article 8 (**FR-021** at operational level)
-- [X] T060 [US3] Add `scripts/acceptance/verify-sc006-elasticsearch-sampling.sh` (or extend `scripts/stack/verify-elasticsearch-stack.sh`) that runs a **bounded** query, samples hits, and fails if required fields/semantics diverge from `session-detected-value.avsc` (gate with an env flag such as `RUN_ES_INTEGRATION=1` if needed)
-- [X] T061 [P] [US3] Pin **Elasticsearch** and **Kafka Connect** image versions and connector plugin strategy in `specs/001-session-detection/research.md` (follow-up to Decision 19) and cross-reference in `specs/001-session-detection/quickstart.md`
-
-**Checkpoint**: Operators can bring up the **unified** reference compose (Kafka + Registry + ES + Connect), index session detections, and reproduce **SC-006** using the documented query + script path; **Kafka-only** remains documented for lighter runs.
-
----
-
 ## Dependencies & Execution Order
 
 | Phase | Depends on |
@@ -186,9 +160,8 @@ description: "Task list for 001-session-detection (US1–US3 reference stack: El
 | 5 | 1–4 |
 | 6 | 5 (brokers + Registry reachable); 1–4 |
 | 7 | 6 |
-| 8 | 5–7 (topic + Avro stream available); **US3** assumes **US2** path per spec |
 
-**User stories**: US2 builds on US1; US3 builds on US2 (events on stream before query projection); US1 remains independently demoable via console.
+**User stories**: US2 builds on US1; US1 remains independently demoable via console.
 
 ---
 
@@ -197,7 +170,6 @@ description: "Task list for 001-session-detection (US1–US3 reference stack: El
 - T034 and T035 after plan approval
 - T038 and T040 early in Phase 6 (different files)
 - T047 and T048 in Phase 7
-- **US3**: T053, T054, T058, T059, T061 after T051 (mapping/docs vs infra scripts); T052 can follow T051
 
 ---
 
@@ -206,15 +178,14 @@ description: "Task list for 001-session-detection (US1–US3 reference stack: El
 1. Bring up **`docker-compose.reference-stack.yml`** (Phase 5); confirm topic + subject.
 2. Implement **Phase 6** publisher behind `IMessagePublisher`; keep domain untouched.
 3. **Phase 7**: automate what you can; document manual SC-005 until CI has broker.
-4. **Phase 8**: add ES + Connect stack; mapping + connector; document **FR-019–FR-021** and **SC-006** verification.
 
 ---
 
 ## Notes
 
 - **SeedWork**: no edits except allowed `NetworkMonitoring.Domain.csproj` / `GlobalUsings.cs`.
-- **Contracts**: `sessions.detected` / `sessions.detected-value` are stable per constitution Article 6–7; breaking changes need explicit version strategy. **US3** mapping docs must stay aligned (**FR-018**).
+- **Contracts**: `sessions.detected` / `sessions.detected-value` are stable per constitution Article 6–7; breaking changes need explicit version strategy.
 - **Kafka topic**: reference and production paths rely on **explicit** topic creation (Phase 5); align staging/prod with team IaC standards.
 - **`/speckit.analyze`** recommended before **`/speckit.implement`** once tasks are checked off.
 - Path to this file: `/home/hugo/network-monitoring/specs/001-session-detection/tasks.md`
-- **Task count**: T001–T061 **complete** (**61**). **Total defined: 61.**
+- **Task count**: T001–T050 **complete** (**50**). **Total defined: 50.**

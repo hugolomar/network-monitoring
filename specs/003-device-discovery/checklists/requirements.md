@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-04-06  
-**Feature**: `specs/002-device-discovery/spec.md`
+**Feature**: `specs/003-device-discovery/spec.md`
 
 ## Content Quality
 

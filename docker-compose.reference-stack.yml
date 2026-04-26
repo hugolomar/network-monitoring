@@ -1,5 +1,5 @@
-# Reference dev stack: Kafka (KRaft, 3 brokers) + Schema Registry; US3 adds Elasticsearch + Connect here.
-# ADR 0007 (KRaft) + ADR 0006/0008 (Registry, TLS target in non-dev). Formerly docker-compose.kafka.yml.
+# Reference dev stack for session event streaming and session indexing.
+# Kafka + Schema Registry support publication; Elasticsearch + Kafka Connect support indexing.
 # Dev: PLAINTEXT on EXTERNAL listeners; production should use TLS/mTLS per quickstart / ADR 0008.
 
 networks:

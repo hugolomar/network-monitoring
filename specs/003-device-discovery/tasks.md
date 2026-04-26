@@ -1,10 +1,10 @@
 ---
-description: "Task list for 002-device-discovery"
+description: "Task list for 003-device-discovery"
 ---
 
 # Tasks: Device Discovery Separation
 
-**Input**: Design documents from `/specs/002-device-discovery/`  
+**Input**: Design documents from `/specs/003-device-discovery/`  
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/, quickstart.md
 
 **Tests**: Include automated unit/integration tests for discovery validation, schema stability, and consolidation behavior.
@@ -21,9 +21,9 @@ description: "Task list for 002-device-discovery"
 
 **Purpose**: Prepare feature artifacts and baseline wiring for discovery-focused implementation.
 
-- [X] T001 Create discovery task scaffolding references in `specs/002-device-discovery/tasks.md` and align local working notes in `specs/002-device-discovery/quickstart.md`
+- [X] T001 Create discovery task scaffolding references in `specs/003-device-discovery/tasks.md` and align local working notes in `specs/003-device-discovery/quickstart.md`
 - [X] T002 [P] Add discovery-specific app configuration placeholders in `src/NetworkMonitoring.Probe/appsettings.json` and `src/NetworkMonitoring.Probe/appsettings.Development.json`
-- [X] T003 [P] Keep `specs/002-device-discovery/spec.md` scoped to device discovery only (no unrelated functional areas)
+- [X] T003 [P] Keep `specs/003-device-discovery/spec.md` scoped to device discovery only (no unrelated functional areas)
 
 ---
 
@@ -33,10 +33,10 @@ description: "Task list for 002-device-discovery"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [X] T004 Add SeedWork guardrail check for 002 execution in `specs/002-device-discovery/plan.md` (no edits under `src/NetworkMonitoring.Domain/SeedWork` except constitution-approved exceptions)
-- [X] T005 [P] Add explicit maintainer confirmation record for incremental compatibility in `specs/002-device-discovery/plan.md` (Article 23 trace)
+- [X] T004 Add SeedWork guardrail check for 002 execution in `specs/003-device-discovery/plan.md` (no edits under `src/NetworkMonitoring.Domain/SeedWork` except constitution-approved exceptions)
+- [X] T005 [P] Add explicit maintainer confirmation record for incremental compatibility in `specs/003-device-discovery/plan.md` (Article 23 trace)
 - [X] T006 [P] Introduce discovery validation model contract in `src/NetworkMonitoring.Probe/Application/Models/DiscoveryValidationResult.cs` and use-case mapping helpers
-- [X] T007 Define discovery output schema serializer boundary alignment in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/ConsoleRecordSerializer.cs` using `specs/002-device-discovery/contracts/device-detected-schema.md`
+- [X] T007 Define discovery output schema serializer boundary alignment in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/ConsoleRecordSerializer.cs` using `specs/003-device-discovery/contracts/device-detected-schema.md`
 - [X] T008 Add foundational unit test fixture helpers for discovery observations in `tests/NetworkMonitoring.Probe.UnitTests/Application/UseCases/ProcessObservationsUseCaseTests.cs`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
@@ -61,7 +61,7 @@ description: "Task list for 002-device-discovery"
 - [X] T013 [US1] Implement explicit validation-result aggregation for discovery inputs in `src/NetworkMonitoring.Probe/Application/UseCases/ProcessObservationsUseCase.cs`
 - [X] T014 [US1] Ensure invalid discovery inputs are logged and skipped without exceptions-as-flow in `src/NetworkMonitoring.Probe/Application/UseCases/ProcessObservationsUseCase.cs`
 - [X] T015 [US1] Align `DeviceDetected` serialization fields with 002 schema contract in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/ConsoleRecordSerializer.cs`
-- [X] T016 [US1] Update quickstart verification wording for discovery-only MVP path in `specs/002-device-discovery/quickstart.md`
+- [X] T016 [US1] Update quickstart verification wording for discovery-only MVP path in `specs/003-device-discovery/quickstart.md`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -84,7 +84,7 @@ description: "Task list for 002-device-discovery"
 - [X] T020 [US2] Add deterministic lifecycle update behavior to `Device` entity in `src/NetworkMonitoring.Domain/Shared/Entities/Device.cs`
 - [X] T021 [US2] Apply consolidation semantics in discovery use case orchestration in `src/NetworkMonitoring.Probe/Application/UseCases/ProcessObservationsUseCase.cs`
 - [X] T022 [US2] Ensure consolidated output remains schema-stable in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/ConsoleRecordSerializer.cs`
-- [X] T023 [US2] Document consolidation rules in `specs/002-device-discovery/data-model.md`
+- [X] T023 [US2] Document consolidation rules in `specs/003-device-discovery/data-model.md`
 
 **Checkpoint**: User Stories 1 and 2 are independently testable with deterministic discovery behavior.
 
@@ -94,17 +94,17 @@ description: "Task list for 002-device-discovery"
 
 **Goal**: Keep device discovery requirements and supporting docs free of unrelated platform features.
 
-**Independent Test**: Review `specs/002-device-discovery/**/*.md` and confirm nothing prescribes behavior that belongs in another feature’s specification.
+**Independent Test**: Review `specs/003-device-discovery/**/*.md` and confirm nothing prescribes behavior that belongs in another feature’s specification.
 
 ### Tests for User Story 3
 
-- [X] T024 [P] [US3] Pass consistency review on `specs/002-device-discovery/spec.md` for device-only scope
+- [X] T024 [P] [US3] Pass consistency review on `specs/003-device-discovery/spec.md` for device-only scope
 
 ### Implementation for User Story 3
 
-- [X] T025 [US3] Keep `specs/002-device-discovery/contracts/device-discovery-contract.md` limited to device publication semantics
-- [X] T026 [US3] Align `specs/002-device-discovery/quickstart.md` and `specs/002-device-discovery/research.md` with device-only narrative
-- [X] T027 [US3] Align `specs/002-device-discovery/data-model.md` and `specs/002-device-discovery/plan.md` with the same boundary
+- [X] T025 [US3] Keep `specs/003-device-discovery/contracts/device-discovery-contract.md` limited to device publication semantics
+- [X] T026 [US3] Align `specs/003-device-discovery/quickstart.md` and `specs/003-device-discovery/research.md` with device-only narrative
+- [X] T027 [US3] Align `specs/003-device-discovery/data-model.md` and `specs/003-device-discovery/plan.md` with the same boundary
 
 **Checkpoint**: Device discovery documentation stands on its own without importing external feature requirements.
 
@@ -114,9 +114,9 @@ description: "Task list for 002-device-discovery"
 
 **Purpose**: Final quality checks across discovery implementation and docs.
 
-- [X] T028 [P] Run full test suite and record discovery-focused results in `specs/002-device-discovery/research.md`
-- [X] T029 Validate quickstart end-to-end discovery flow and capture outcome notes in `specs/002-device-discovery/quickstart.md`
-- [X] T030 [P] Run cross-artifact consistency pass (`spec.md`, `plan.md`, `tasks.md`, `contracts/`) and update `specs/002-device-discovery/checklists/requirements.md`
+- [X] T028 [P] Run full test suite and record discovery-focused results in `specs/003-device-discovery/research.md`
+- [X] T029 Validate quickstart end-to-end discovery flow and capture outcome notes in `specs/003-device-discovery/quickstart.md`
+- [X] T030 [P] Run cross-artifact consistency pass (`spec.md`, `plan.md`, `tasks.md`, `contracts/`) and update `specs/003-device-discovery/checklists/requirements.md`
 
 ---
 
@@ -183,7 +183,7 @@ Task: "T013 [US1] Implement explicit validation-result aggregation"
 1. Baseline foundations.
 2. Discovery emission (US1).
 3. Consolidation semantics (US2).
-4. Compatibility hardening and ownership split (US3).
+4. Compatibility hardening and self-contained ownership (US3).
 5. Final polish and validation.
 
 ### Parallel Team Strategy

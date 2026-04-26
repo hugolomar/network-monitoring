@@ -54,5 +54,5 @@ non-positive values keep **`Id` null**.
 
 - [ADR 0004](0004-entity-id-revert-to-integer.md): **Guid → integer family** (this ADR keeps that;
   adds **`?`** for transient entities).
-- Specs: `specs/001-session-detection/data-model.md`, `specs/002-device-discovery/data-model.md`,
+- Specs: `specs/001-session-detection/data-model.md`, `specs/003-device-discovery/data-model.md`,
   and console schemas for nullable `sessionId` / `deviceId`.

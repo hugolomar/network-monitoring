@@ -47,8 +47,9 @@
 
 ## Implementation Validation (2026-04-19)
 - `dotnet test src/NetworkMonitoring.Probe.sln` passed:
-  - `NetworkMonitoring.Probe.UnitTests`: 17 passed, 0 failed.
-  - `NetworkMonitoring.Probe.IntegrationTests`: 2 passed, 0 failed.
+  - `NetworkMonitoring.Probe.UnitTests`: 24 passed, 0 failed.
+  - `NetworkMonitoring.Probe.IntegrationTests`: 2 passed, 0 failed, 1 Kafka integration test skipped
+    unless `RUN_KAFKA_INTEGRATION=1`.
 - Discovery validation behavior verified with invalid MAC evidence tests (invalid discovery inputs
   are skipped and stream processing continues).
 - Consolidation behavior verified for repeated device detections:

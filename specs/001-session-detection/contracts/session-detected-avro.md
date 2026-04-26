@@ -49,4 +49,4 @@ avoids mismatches between broker metadata and Registry subjects.
 
 - The probe serializes **one Avro record per Kafka message value** using the registered schema for
   subject `sessions.detected-value`. **Device** events are out of scope for this contract; they will
-  use a separate topic and subject when specified under `specs/002-device-discovery/`.
+  use a separate topic and subject when specified under `specs/003-device-discovery/`.

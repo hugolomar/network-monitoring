@@ -1,6 +1,6 @@
 # Feature Specification: Device Discovery Separation
 
-**Feature Branch**: `002-device-discovery`  
+**Feature Branch**: `003-device-discovery`  
 **Created**: 2026-04-06  
 **Status**: Draft  
 **Input**: User description: "Independent specification for device discovery with clear scope,
@@ -54,7 +54,7 @@ set so that implementation and review do not depend on unrelated feature documen
 **Why this priority**: Keeps ownership and change impact localized when the platform grows (for example
 Kafka or additional adapters).
 
-**Independent Test**: Using only artifacts under `specs/002-device-discovery/` (including
+**Independent Test**: Using only artifacts under `specs/003-device-discovery/` (including
 `contracts/`), a reviewer can state what “done” means for device discovery without importing
 requirements from other feature specifications.
 
@@ -95,7 +95,7 @@ requirements from other feature specifications.
   `SeedWork.Entity`, with `Device` remaining an aggregate root.
 - **FR-008**: Device discovery behavior, validation rules, consolidation semantics, and
   `DeviceDetected` contracts MUST be fully specified in this increment or in linked artifacts under
-  `specs/002-device-discovery/` (for example `contracts/`).
+  `specs/003-device-discovery/` (for example `contracts/`).
 - **FR-009**: Requirements that are not part of device discovery MUST NOT be introduced or duplicated
   in this specification; they belong in their own feature specifications.
 - **FR-010**: Discovery validation MUST use a structured validation result (e.g.
