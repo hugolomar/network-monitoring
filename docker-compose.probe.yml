@@ -1,0 +1,12 @@
+services:
+  probe:
+    build:
+      context: .
+      dockerfile: src/NetworkMonitoring.Probe/Dockerfile
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      Probe__InterfaceName: eth0

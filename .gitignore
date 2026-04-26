@@ -1,0 +1,54 @@
+# Build outputs (.NET)
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+out/
+
+# NuGet / restore (legacy packages folder; SDK uses global cache)
+packages/
+*.nupkg
+*.snupkg
+
+# Visual Studio / Rider / VS Code (local)
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+.idea/
+# Quita la siguiente línea si quieres versionar launch.json / tasks.json del equipo
+.vscode/
+
+# Tests & coverage
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+*.opencover.xml
+
+# OS & editors
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*~
+
+# Secrets & entorno local (no subir claves ni .env real)
+.env
+.env.*
+!.env.example
+
+# Logs y capturas locales
+*.log
+
+# Documentación / binarios solo en tu máquina (p. ej. PDFs de referencia)
+docs/local/
+
+# Docker / herramientas locales (añade si aparecen)
+# .terraform/

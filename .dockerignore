@@ -1,0 +1,17 @@
+.git
+.cursor
+.specify
+.dockerignore
+Dockerfile*
+node_modules/
+**/bin
+**/obj
+**/.vs
+**/.idea
+**/*.user
+**/*.suo
+**/*.tmp
+**/*.log
+tests/TestResults
+coverage/
+.env*

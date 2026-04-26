@@ -1,0 +1,26 @@
+{
+  "index_patterns": ["sessions-detected*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "eventType": { "type": "keyword" },
+        "occurredAtUtc": { "type": "date", "format": "strict_date_optional_time||epoch_millis" },
+        "source": { "type": "keyword" },
+        "schemaVersion": { "type": "integer" },
+        "sessionId": { "type": "integer" },
+        "sourceIp": { "type": "keyword" },
+        "destinationIp": { "type": "keyword" },
+        "sourcePort": { "type": "integer" },
+        "destinationPort": { "type": "integer" },
+        "protocol": { "type": "keyword" },
+        "firstSeenUtc": { "type": "date", "format": "strict_date_optional_time||epoch_millis" },
+        "lastSeenUtc": { "type": "date", "format": "strict_date_optional_time||epoch_millis" },
+        "bytesObserved": { "type": "long" }
+      }
+    }
+  }
+}
