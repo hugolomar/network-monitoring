@@ -182,7 +182,7 @@ identity and the fake receiver observes no duplicate downstream effect.
 ## Assumptions
 
 - `003-device-discovery` is complete and owns probe-side detection plus `DeviceDetected` publication.
-- `005-device-backend` will implement the real Devices API and persistence; this feature defines and
+- `005-device-inventory` will implement the real device inventory API and persistence; this feature defines and
   exercises the intake contract with a fake or test receiver.
 - `006-device-ui` will implement presentation concerns later; no UI behavior is part of this feature.
 - The normalized MAC address is the stable device identity for ingestion idempotency.

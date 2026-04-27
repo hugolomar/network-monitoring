@@ -64,7 +64,7 @@
 - **Decision**: Validate `POST /devices` forwarding, idempotency, retry, and rejection behavior with a
   fake/test HTTP receiver in 004.
 - **Rationale**: The real backend/API and persistence are explicitly out of scope until
-  `005-device-backend`, but the ingestion contract must still be objectively testable.
+  `005-device-inventory`, but the ingestion contract must still be objectively testable.
 - **Alternatives considered**:
   - Implement a minimal real backend now: rejected as scope creep into 005.
   - Only document the HTTP contract: rejected because SC-001 through SC-005 require executable

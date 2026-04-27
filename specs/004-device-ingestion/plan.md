@@ -11,7 +11,7 @@ UI, login/RBAC, and probe-side discovery changes remain outside this increment.
 Implement a separate Integration Console worker that consumes `DeviceDetected` Avro events from
 Kafka topic `devices.detected`, validates the event identity, maps valid detections to a stable
 `POST /devices` intake contract, and forwards them to a configurable backend base URL. Because the
-real backend is deferred to `005-device-backend`, validation uses a fake/test HTTP receiver while
+real backend is deferred to `005-device-inventory`, validation uses a fake/test HTTP receiver while
 preserving the downstream contract and idempotency expectations.
 
 The design follows the existing probe patterns: .NET Worker hosting, Application ports/use cases,

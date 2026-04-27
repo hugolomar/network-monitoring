@@ -3,7 +3,7 @@
 ## Purpose
 
 Define the outbound HTTP request emitted by the Integration Console after consuming a valid
-`DeviceDetected` event. The real backend implementation belongs to `005-device-backend`; this contract
+`DeviceDetected` event. The real backend implementation belongs to `005-device-inventory`; this contract
 is validated in 004 with a fake/test receiver.
 
 ## Endpoint

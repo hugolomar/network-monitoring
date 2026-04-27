@@ -45,7 +45,7 @@
 
 ## Dependencies And Assumptions
 
-- [x] CHK023 Are dependencies on `003-device-discovery`, `005-device-backend`, and `006-device-ui` documented without expanding 004 scope? [Assumption, Spec §Assumptions]
+- [x] CHK023 Are dependencies on `003-device-discovery`, `005-device-inventory`, and `006-device-ui` documented without expanding 004 scope? [Assumption, Spec §Assumptions]
 - [x] CHK024 Are security requirements stated at the correct level for this non-user-facing worker, with service transport configurable and login/RBAC deferred? [Scope, Plan §Security Controls]
 - [x] CHK025 Are processing-position/acknowledgement expectations for succeeded, rejected, and retry-exhausted events specified clearly enough for implementation tasks? [Clarity, Contracts §Consumer Behavior]
 

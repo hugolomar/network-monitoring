@@ -30,6 +30,19 @@ dotnet run --project src/NetworkMonitoring.IntegrationConsole/NetworkMonitoring.
 Configuration and validation steps are documented in
 [`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md).
 
+## Device Inventory backend
+
+`NetworkMonitoring.Backend` is the real Device Inventory API. It accepts the Integration Console
+`POST /devices` contract, persists one logical device per normalized MAC in PostgreSQL, and exposes
+`GET /devices` for inventory validation:
+
+```bash
+dotnet run --project src/NetworkMonitoring.Backend/NetworkMonitoring.Backend.csproj
+```
+
+Local PostgreSQL/backend container validation is documented in
+[`specs/005-device-inventory/quickstart.md`](specs/005-device-inventory/quickstart.md).
+
 ## Tests
 
 ```bash
@@ -63,6 +76,7 @@ quickstart.
 - Session indexing flow and operator steps: [`specs/002-session-indexing/quickstart.md`](specs/002-session-indexing/quickstart.md)
 - Device discovery flow and operator steps: [`specs/003-device-discovery/quickstart.md`](specs/003-device-discovery/quickstart.md)
 - Device ingestion flow and operator steps: [`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md)
+- Device Inventory backend flow and operator steps: [`specs/005-device-inventory/quickstart.md`](specs/005-device-inventory/quickstart.md)
 - Architecture decisions: [`docs/adr/`](docs/adr/)
 
 ## Repository layout
@@ -71,6 +85,7 @@ quickstart.
 |------|--------|
 | `src/NetworkMonitoring.Probe/` | Probe worker (Application / Infrastructure / Host) |
 | `src/NetworkMonitoring.IntegrationConsole/` | Device ingestion worker (Kafka consumer + HTTP forwarding) |
+| `src/NetworkMonitoring.Backend/` | Device Inventory backend API (HTTP + PostgreSQL persistence) |
 | `src/NetworkMonitoring.Domain/` | Shared domain (SeedWork + entities/value objects) |
 | `tests/` | Unit and integration tests |
 | `specs/` | Feature specifications and contracts |
