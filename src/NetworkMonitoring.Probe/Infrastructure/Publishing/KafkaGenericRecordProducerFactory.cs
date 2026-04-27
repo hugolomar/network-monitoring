@@ -22,6 +22,16 @@ public sealed class KafkaGenericRecordProducerFactory : IKafkaGenericRecordProdu
 {
     public IKafkaGenericRecordProducer Create(ProbeOptions options)
     {
+        if (string.IsNullOrWhiteSpace(options.KafkaBootstrapServers))
+        {
+            throw new InvalidOperationException("Probe:KafkaBootstrapServers is required when Kafka publishing is enabled.");
+        }
+
+        if (string.IsNullOrWhiteSpace(options.SchemaRegistryUrl))
+        {
+            throw new InvalidOperationException("Probe:SchemaRegistryUrl is required when Kafka publishing is enabled.");
+        }
+
         var srConfig = new SchemaRegistryConfig { Url = options.SchemaRegistryUrl };
         var schemaRegistry = new CachedSchemaRegistryClient(srConfig);
 

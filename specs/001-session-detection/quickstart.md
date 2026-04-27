@@ -33,7 +33,7 @@ structured records. Optionally publish the same validated detections to Kafka.
 
 ## Validation Commands (example flow)
 - Build and test:
-  - `dotnet test src/NetworkMonitoring.Probe.sln`
+  - `dotnet test src/NetworkMonitoring.sln`
 - Start probe:
   - `dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
 - Optional startup smoke check:
@@ -89,7 +89,7 @@ Example: run with Kafka enabled:
 
 ### Validate publication
 - Automated (opt-in):
-  - `RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter FullyQualifiedName~KafkaSessionEventPublishIntegrationTests`
+  - `RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter FullyQualifiedName~KafkaSessionEventPublishIntegrationTests`
 - Manual: consume `sessions.detected`, deserialize Avro using Registry, and confirm fields match
   `session-detected-value.avsc` (SC-005).
 

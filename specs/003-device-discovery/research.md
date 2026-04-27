@@ -79,7 +79,7 @@
   potential prior-module impact.
 
 ## Implementation Validation (2026-04-19)
-- `dotnet test src/NetworkMonitoring.Probe.sln` passed:
+- `dotnet test src/NetworkMonitoring.sln` passed:
   - `NetworkMonitoring.Probe.UnitTests`: 24 passed, 0 failed.
   - `NetworkMonitoring.Probe.IntegrationTests`: 2 passed, 0 failed, 1 Kafka integration test skipped
     unless `RUN_KAFKA_INTEGRATION=1`.
@@ -91,7 +91,7 @@
   - schema-stable serialized `DeviceDetected` payload fields.
 
 ## Implementation Validation (2026-04-27)
-- `dotnet test src/NetworkMonitoring.Probe.sln` passed:
+- `dotnet test src/NetworkMonitoring.sln` passed:
   - `NetworkMonitoring.Probe.UnitTests`: 34 passed, 0 failed.
   - `NetworkMonitoring.Probe.IntegrationTests`: 2 passed, 0 failed, 2 Kafka integration tests skipped
     unless `RUN_KAFKA_INTEGRATION=1`.

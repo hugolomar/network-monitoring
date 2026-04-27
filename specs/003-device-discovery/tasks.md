@@ -159,7 +159,7 @@ change console discovery behavior or `sessions.detected` publication.
 
 - [X] T042 [P] Update stale session-scope note about `PublishDeviceDetected` no-op in `specs/001-session-detection/contracts/probe-output-contract.md`
 - [X] T043 [P] Update `README.md` quickstart/detail text so device stream validation points to `specs/003-device-discovery/quickstart.md`
-- [X] T044 Run `dotnet test src/NetworkMonitoring.Probe.sln` and record results in `specs/003-device-discovery/research.md`
+- [X] T044 Run `dotnet test src/NetworkMonitoring.sln` and record results in `specs/003-device-discovery/research.md`
 - [X] T045 Run or document the gated `RUN_KAFKA_INTEGRATION=1` device publish validation and record SC-005/SC-006 outcome in `specs/003-device-discovery/research.md`
 - [X] T046 Run cross-artifact consistency pass for `specs/003-device-discovery/spec.md`, `plan.md`, `tasks.md`, `data-model.md`, `contracts/`, and `quickstart.md`, then update `specs/003-device-discovery/checklists/requirements.md`
 

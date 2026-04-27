@@ -24,7 +24,7 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 
 **Purpose**: Create the probe solution and baseline project structure.
 
-- [X] T001 Create solution file `src/NetworkMonitoring.Probe.sln` and add project folders under `src/`
+- [X] T001 Create solution file `src/NetworkMonitoring.sln` and add project folders under `src/`
 - [X] T002 Create project file `src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj` and internal folders for Application/Infrastructure/Host layering
 - [X] T003 [P] Create test project files `tests/NetworkMonitoring.Probe.UnitTests/NetworkMonitoring.Probe.UnitTests.csproj` and `tests/NetworkMonitoring.Probe.IntegrationTests/NetworkMonitoring.Probe.IntegrationTests.csproj`
 - [X] T004 [P] Add shared references and package references in all new `.csproj` files (xUnit, test SDK, hosting/configuration packages, and project references)
@@ -147,7 +147,7 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 
 - [X] T047 [P] Update `specs/001-session-detection/quickstart.md` with end-to-end **Kafka publish** validation steps and troubleshooting
 - [X] T048 [P] Record Kafka/Registry image versions and compatibility notes in `specs/001-session-detection/research.md`
-- [X] T049 Run `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` and note results in `research.md`
+- [X] T049 Run `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.sln` and note results in `research.md`
 - [X] T050 Manual SC-005 checklist: consume `sessions.detected`, verify 100% sampled messages match `session-detected-value.avsc` semantics; document outcome in `specs/001-session-detection/research.md` or checklist artifact
 
 ---

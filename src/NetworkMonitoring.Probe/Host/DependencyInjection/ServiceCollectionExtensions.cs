@@ -13,7 +13,16 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddProbeServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ProbeOptions>(configuration.GetSection(ProbeOptions.SectionName));
+        services
+            .AddOptions<ProbeOptions>()
+            .Bind(configuration.GetSection(ProbeOptions.SectionName))
+            .Validate(
+                options => !options.EnableKafka || !string.IsNullOrWhiteSpace(options.KafkaBootstrapServers),
+                "Probe:KafkaBootstrapServers is required when Probe:EnableKafka is true.")
+            .Validate(
+                options => !options.EnableKafka || !string.IsNullOrWhiteSpace(options.SchemaRegistryUrl),
+                "Probe:SchemaRegistryUrl is required when Probe:EnableKafka is true.")
+            .ValidateOnStart();
 
         services.AddSingleton<TsharkObservationMapper>();
         services.AddSingleton<ConsoleRecordSerializer>();

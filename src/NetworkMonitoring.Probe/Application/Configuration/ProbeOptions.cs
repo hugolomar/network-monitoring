@@ -20,9 +20,9 @@ public sealed class ProbeOptions
     /// <summary>Kafka Avro publication (US2). Off by default for local capture-only runs.</summary>
     public bool EnableKafka { get; init; } = false;
 
-    public string KafkaBootstrapServers { get; init; } = "localhost:9092,localhost:9093,localhost:9094";
+    public string? KafkaBootstrapServers { get; init; }
 
-    public string SchemaRegistryUrl { get; init; } = "http://localhost:8081";
+    public string? SchemaRegistryUrl { get; init; }
 
     public string KafkaSessionTopic { get; init; } = "sessions.detected";
 

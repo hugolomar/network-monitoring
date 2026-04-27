@@ -35,7 +35,7 @@ For event-stream publication, configure:
    normalized-MAC message keys.
 
 ## Validation Commands (example flow)
-- `dotnet test src/NetworkMonitoring.Probe.sln`
+- `dotnet test src/NetworkMonitoring.sln`
 - `dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
 - `timeout 8 dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
 - `docker compose -f docker-compose.probe.yml up --build`
@@ -59,7 +59,7 @@ only. Integration, staging, and production should use TLS/mTLS for Kafka and Reg
 
 ### Validate publication
 - Automated (opt-in):
-  - `RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter FullyQualifiedName~KafkaDeviceEventPublishIntegrationTests`
+  - `RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter FullyQualifiedName~KafkaDeviceEventPublishIntegrationTests`
 - Manual: consume `devices.detected`, deserialize Avro using Schema Registry, verify fields match
   `device-detected-value.avsc`, and verify each Kafka key equals the payload `macAddress`.
 
@@ -70,7 +70,7 @@ only. Integration, staging, and production should use TLS/mTLS for Kafka and Reg
 - With Kafka enabled, valid device detections are available on `devices.detected`.
 
 ## Validation Notes (2026-04-19)
-- Automated validation command executed: `dotnet test src/NetworkMonitoring.Probe.sln`.
+- Automated validation command executed: `dotnet test src/NetworkMonitoring.sln`.
 - Observed result: all non-Kafka-gated probe tests passed; current suite reports 24 unit tests passed,
   2 integration tests passed, and 1 Kafka integration test skipped unless `RUN_KAFKA_INTEGRATION=1`.
 - Coverage highlights:

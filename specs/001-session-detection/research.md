@@ -147,11 +147,11 @@
 - **Alternatives considered**: Older Confluent 1.x clients — rejected to stay on maintained 2.x.
 
 ## Execution Results
-- `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` (2026-04-20): **all
+- `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.sln` (2026-04-20): **all
   tests green**; unit suite **24** passed; integration suite **2** passed and **1** skipped
   (`KafkaSessionEventPublishIntegrationTests`, requires `RUN_KAFKA_INTEGRATION=1` and the Kafka compose
   stack).
-- `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` (2026-04-22, after Kafka publication artifacts): **same** — **24** unit passed; integration **2** passed, **1** skipped (Kafka
+- `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.sln` (2026-04-22, after Kafka publication artifacts): **same** — **24** unit passed; integration **2** passed, **1** skipped (Kafka
   integration opt-in unchanged).
 - Startup smoke run (`timeout 8 dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`)
   confirmed worker startup and graceful shutdown (US1 path).

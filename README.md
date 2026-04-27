@@ -18,17 +18,30 @@ dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj
 
 Configure the `Probe` section in `src/NetworkMonitoring.Probe/appsettings.json` (interface name, capture filter, `EnableConsole` / `EnableKafka`, etc.).
 
+## Integration Console — device ingestion
+
+`NetworkMonitoring.IntegrationConsole` is a separate worker that consumes `DeviceDetected` events from
+Kafka and forwards valid detections to a configurable fake/test `POST /devices` receiver:
+
+```bash
+dotnet run --project src/NetworkMonitoring.IntegrationConsole/NetworkMonitoring.IntegrationConsole.csproj
+```
+
+Configuration and validation steps are documented in
+[`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md).
+
 ## Tests
 
 ```bash
-dotnet test src/NetworkMonitoring.Probe.sln
+dotnet test src/NetworkMonitoring.sln
 ```
 
 Optional Kafka end-to-end tests (requires the Compose stack and topic init; see **More detail** below):
 
 ```bash
-RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "FullyQualifiedName~KafkaSessionEventPublishIntegrationTests"
-RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "FullyQualifiedName~KafkaDeviceEventPublishIntegrationTests"
+RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQualifiedName~KafkaSessionEventPublishIntegrationTests"
+RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQualifiedName~KafkaDeviceEventPublishIntegrationTests"
+RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQualifiedName~KafkaDeviceIngestionIntegrationTests"
 ```
 
 ## Kafka (local reference stack)
@@ -49,6 +62,7 @@ quickstart.
 - Session detection flow and operator steps: [`specs/001-session-detection/quickstart.md`](specs/001-session-detection/quickstart.md)
 - Session indexing flow and operator steps: [`specs/002-session-indexing/quickstart.md`](specs/002-session-indexing/quickstart.md)
 - Device discovery flow and operator steps: [`specs/003-device-discovery/quickstart.md`](specs/003-device-discovery/quickstart.md)
+- Device ingestion flow and operator steps: [`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md)
 - Architecture decisions: [`docs/adr/`](docs/adr/)
 
 ## Repository layout
@@ -56,6 +70,7 @@ quickstart.
 | Path | Purpose |
 |------|--------|
 | `src/NetworkMonitoring.Probe/` | Probe worker (Application / Infrastructure / Host) |
+| `src/NetworkMonitoring.IntegrationConsole/` | Device ingestion worker (Kafka consumer + HTTP forwarding) |
 | `src/NetworkMonitoring.Domain/` | Shared domain (SeedWork + entities/value objects) |
 | `tests/` | Unit and integration tests |
 | `specs/` | Feature specifications and contracts |
