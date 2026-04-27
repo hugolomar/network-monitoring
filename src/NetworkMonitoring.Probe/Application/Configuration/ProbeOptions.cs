@@ -26,6 +26,8 @@ public sealed class ProbeOptions
 
     public string KafkaSessionTopic { get; init; } = "sessions.detected";
 
+    public string KafkaDeviceTopic { get; init; } = "devices.detected";
+
     /// <summary>e.g. Plaintext, Ssl, SaslSsl — see <see cref="Confluent.Kafka.SecurityProtocol"/>.</summary>
     public string? KafkaSecurityProtocol { get; init; }
 

@@ -33,7 +33,7 @@ Architecture decision records for this feature: `docs/adr/0006-avro-schema-regis
 - **Intent**: Publish the same validated detections on Kafka for platform consumers.
 - **Primary pieces**: Kafka + Avro publisher, explicit topic `sessions.detected`, Schema Registry subject
   `sessions.detected-value`, reference Kafka stack, and TLS/mTLS configuration posture.
-- **Verification**: SC-005; opt-in integration test `KafkaSessionPublishIntegrationTests` with
+- **Verification**: SC-005; opt-in integration test `KafkaSessionEventPublishIntegrationTests` with
   `RUN_KAFKA_INTEGRATION=1`; manual validation in `quickstart.md`.
 
 ## Technical Context

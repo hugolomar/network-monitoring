@@ -19,7 +19,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ConsoleRecordSerializer>();
         services.AddSingleton<ITrafficProvider, TsharkTrafficProvider>();
         services.AddSingleton<ConsolePublisher>();
-        services.AddSingleton<KafkaSessionPublisher>();
+        services.AddSingleton<IKafkaGenericRecordProducerFactory, KafkaGenericRecordProducerFactory>();
+        services.AddSingleton<KafkaProbeEventPublisher>();
         services.AddSingleton<IMessagePublisher>(sp => CreateMessagePublisher(sp));
         services.AddSingleton<ProcessObservationsUseCase>();
 
@@ -37,7 +38,7 @@ public static class ServiceCollectionExtensions
 
         if (options.EnableKafka)
         {
-            publishers.Add(sp.GetRequiredService<KafkaSessionPublisher>());
+            publishers.Add(sp.GetRequiredService<KafkaProbeEventPublisher>());
         }
 
         if (publishers.Count == 0)

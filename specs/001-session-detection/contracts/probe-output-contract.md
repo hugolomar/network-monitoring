@@ -26,7 +26,7 @@ entities without coupling to a concrete destination.
   (shape per `contracts/console-record-schema.md`).
 
 ### Kafka + Avro (US2)
-- `KafkaSessionPublisher` (`src/NetworkMonitoring.Probe/Infrastructure/Publishing/KafkaSessionPublisher.cs`)
+- `KafkaProbeEventPublisher` (`src/NetworkMonitoring.Probe/Infrastructure/Publishing/KafkaProbeEventPublisher.cs`)
   implements `IMessagePublisher.PublishSessionDetected` by serializing the same validated `Session` to
   **Avro** (`GenericRecord`) using the embedded schema copy of
   `contracts/session-detected-value.avsc`, **Confluent wire format**, and **Schema Registry**
@@ -42,15 +42,16 @@ entities without coupling to a concrete destination.
   only, or both from `ProbeOptions.EnableConsole` / `EnableKafka` (if both flags are off, console is
   forced so the probe remains usable).
 
-`PublishDeviceDetected` is a no-op on `KafkaSessionPublisher` in this feature scope (device stream
-is separate work).
+`PublishDeviceDetected` is outside this session contract. Later device-discovery work may implement
+that method in the same adapter; consumers validating this feature should still rely only on the
+`SessionDetected` behavior described above.
 
 ## Compatibility Rule
 - Any new output adapter must implement the same port and preserve payload schema for
   `SessionDetected`.
 
 ## Implementation Note (Current State)
-- Implemented port adapters: `ConsolePublisher`, `KafkaSessionPublisher`, and optional
+- Implemented port adapters: `ConsolePublisher`, `KafkaProbeEventPublisher`, and optional
   `CompositeMessagePublisher` under `src/NetworkMonitoring.Probe/Infrastructure/Publishing/`.
 - Console serializer: `ConsoleRecordSerializer` in
   `src/NetworkMonitoring.Probe/Infrastructure/Publishing/ConsoleRecordSerializer.cs`.

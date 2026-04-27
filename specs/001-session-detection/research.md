@@ -149,7 +149,7 @@
 ## Execution Results
 - `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` (2026-04-20): **all
   tests green**; unit suite **24** passed; integration suite **2** passed and **1** skipped
-  (`KafkaSessionPublishIntegrationTests`, requires `RUN_KAFKA_INTEGRATION=1` and the Kafka compose
+  (`KafkaSessionEventPublishIntegrationTests`, requires `RUN_KAFKA_INTEGRATION=1` and the Kafka compose
   stack).
 - `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.Probe.sln` (2026-04-22, after Kafka publication artifacts): **same** — **24** unit passed; integration **2** passed, **1** skipped (Kafka
   integration opt-in unchanged).
@@ -161,7 +161,7 @@
   match **`session-detected-value.avsc`** semantics (field presence, types, and session identity
   consistency).
 - **Recorded outcome (automation)**: The opt-in integration test
-  `KafkaSessionPublishIntegrationTests.PublishSessionDetected_ProducesConsumableAvroValue` exercises
+  `KafkaSessionEventPublishIntegrationTests.PublishSessionDetected_ProducesConsumableAvroValue` exercises
   produce + consume + field assertions when `RUN_KAFKA_INTEGRATION=1`.
 - **Recorded outcome (manual 100% sampling)**: Not run in CI; operators should follow
   `quickstart.md` with a real consumer and attach evidence to release checklists when required.

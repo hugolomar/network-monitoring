@@ -1,8 +1,9 @@
 # Contract: DeviceDetected Schema
 
 ## Encoding
-- UTF-8 text
-- One JSON object per line (JSONL) for current console mode
+- Console mode: UTF-8 text, one JSON object per line (JSONL).
+- Kafka mode: Avro value registered in Schema Registry under subject `devices.detected-value`; see
+  `device-detected-avro.md` and `device-detected-value.avsc`.
 
 ## Envelope Fields
 - `eventType`: `"DeviceDetected"`
@@ -25,7 +26,8 @@
 - Records missing required identity/lifecycle fields are not emitted.
 - Invalid-source observations surface diagnostics and processing continues.
 - Repeated traffic for the same normalized MAC may produce **fewer** `DeviceDetected` lines than raw
-  observations when `DeviceDeduplicationWindowMinutes` is positive (see `002` functional requirements).
+  observations when `DeviceDeduplicationWindowMinutes` is positive (see `spec.md` FR-012).
+- Kafka publication uses the same validation and deduplication semantics as console output.
 
 ## Compatibility Rule
 - Any schema-breaking change requires explicit contract versioning and compatibility declaration.

@@ -2,9 +2,9 @@
 
 **Feature Branch**: `003-device-discovery`  
 **Created**: 2026-04-06  
-**Status**: Draft  
+**Status**: In progress — console discovery/consolidation delivered; device event stream publication pending  
 **Input**: User description: "Independent specification for device discovery with clear scope,
-validation, contracts, and evolution notes."
+validation, contracts, event-stream publication, and evolution notes."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -66,6 +66,33 @@ requirements from other feature specifications.
 
 ---
 
+### User Story 4 - Publish Device Detections to Event Stream (Priority: P2)
+
+As a platform operator, I want validated device detections published to the organization's
+asynchronous event stream so downstream consumers can process discovered assets without coupling
+directly to the probe process.
+
+**Why this priority**: Console output validates discovery locally; event-stream publication is the
+platform integration point for device discovery consumers.
+
+**Independent Test**: With device stream publication enabled against a controlled Kafka environment,
+consume the configured device destination and verify sampled messages match the declared
+`DeviceDetected` contract, use the normalized MAC as the correlation key, and exclude invalid
+discovery inputs.
+
+**Acceptance Scenarios**:
+
+1. **Given** device stream publication is enabled and the stream is reachable, **When** the probe emits
+   a validated `DeviceDetected` record, **Then** a corresponding event is available on the configured
+   destination.
+2. **Given** invalid discovery evidence, **When** the probe rejects that evidence, **Then** no device
+   event is published for that evidence and later observations continue to be processed.
+3. **Given** repeated detections for the same normalized MAC within the configured device
+   deduplication window, **When** publication is enabled, **Then** event-stream publication follows the
+   same suppression behavior as operator-visible output while in-memory consolidation still runs.
+
+---
+
 ### Edge Cases
 
 - Observation contains MAC but no valid IP evidence for device fields.
@@ -74,6 +101,8 @@ requirements from other feature specifications.
 - Same device appears with multiple observed IPs in short intervals.
 - Out-of-order observation timestamps arrive for the same device identity.
 - High-frequency duplicate detections occur during traffic bursts.
+- Event stream is temporarily unavailable while device detection continues.
+- Device publication is enabled without operator-visible console output.
 
 ## Requirements *(mandatory)*
 
@@ -89,8 +118,8 @@ requirements from other feature specifications.
   detections of the same device identity.
 - **FR-005**: The system MUST preserve device temporal lifecycle semantics, including initial and
   latest observation timestamps.
-- **FR-006**: The system MUST define a stable device event contract suitable for console output now
-  and Kafka publication in future increments.
+- **FR-006**: The system MUST define a stable device event contract suitable for operator-visible
+  console output and Kafka publication in this increment.
 - **FR-007**: The device domain model MUST remain in shared domain and inherit identity from
   `SeedWork.Entity`, with `Device` remaining an aggregate root.
 - **FR-008**: Device discovery behavior, validation rules, consolidation semantics, and
@@ -113,6 +142,24 @@ requirements from other feature specifications.
   emission deduplication so every consolidated state may be published. The default when configuration
   is omitted MUST be 10 minutes. Domain consolidation (timestamps, observed IPs) MUST still run on
   every valid observation even when an emission is suppressed.
+- **FR-013**: When device event publication is enabled, the system MUST emit one event per validated
+  `DeviceDetected` output, subject to the same device deduplication and consolidation rules, to the
+  configured asynchronous event-stream destination.
+- **FR-014**: The device event-stream destination name MUST be configurable. When not overridden, it
+  MUST default to the platform standard topic name `devices.detected`.
+- **FR-015**: Each published device event MUST include a stable correlation key derived from the
+  normalized MAC address so downstream consumers can partition and reconcile detections for the same
+  device consistently.
+- **FR-016**: Published device event payloads MUST conform to the versioned `DeviceDetected` event
+  contract shipped with this feature under `specs/003-device-discovery/contracts/`, including rules
+  for compatible evolution of that contract.
+- **FR-017**: Device stream publication MUST preserve the same validation behavior as
+  operator-visible output: invalid discovery inputs MUST NOT produce device events, and expected
+  invalid inputs MUST NOT stop later observations from being processed.
+- **FR-018**: Communication with the device event stream MUST be encrypted in transit. In
+  production-class environments, the probe MUST authenticate to the stream in a manner that satisfies
+  organizational security policy. Non-production environments MAY use relaxed controls only when
+  explicitly documented as such.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -135,11 +182,17 @@ requirements from other feature specifications.
   consistent across 100% of sampled cases in the validation dataset.
 - **SC-004**: Maintainers can state device discovery scope and obligations from this specification
   alone in under 5 minutes.
+- **SC-005**: When device stream publication is enabled in a controlled run, 100% of sampled events on
+  the configured destination (defaulting to `devices.detected`) match the declared `DeviceDetected`
+  contract for required fields and semantics.
+- **SC-006**: In the same controlled run, 100% of sampled device event keys match the normalized MAC
+  address in the corresponding payload.
 
 ## Assumptions
 
-- Backend persistence and inventory reconciliation details are handled in later increments.
+- Downstream consumers of `devices.detected` are handled in later increments.
 - Existing shared-domain abstractions remain available and authoritative for discovery modeling.
+- Kafka is the target asynchronous event stream for this increment's reference implementation.
 - The probe host may load a shared `Probe` configuration section; this specification defines behavior
   and keys only for device discovery (including `DeviceDeduplicationWindowMinutes` and any
   discovery-relevant settings referenced herein). Other keys in the same section may exist for

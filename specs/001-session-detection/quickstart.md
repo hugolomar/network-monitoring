@@ -89,7 +89,7 @@ Example: run with Kafka enabled:
 
 ### Validate publication
 - Automated (opt-in):
-  - `RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter FullyQualifiedName~KafkaSessionPublishIntegrationTests`
+  - `RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter FullyQualifiedName~KafkaSessionEventPublishIntegrationTests`
 - Manual: consume `sessions.detected`, deserialize Avro using Registry, and confirm fields match
   `session-detected-value.avsc` (SC-005).
 

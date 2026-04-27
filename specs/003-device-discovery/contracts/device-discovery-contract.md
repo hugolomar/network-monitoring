@@ -12,11 +12,14 @@ Define the device-specific output contract for discovery events.
 - Consolidation semantics must produce deterministic device lifecycle updates.
 - Output schema remains stable across repeated emissions unless explicitly versioned.
 - Optional emission throttling by normalized MAC and `DeviceDeduplicationWindowMinutes` may reduce
-  line frequency without skipping domain consolidation (see `002` specification FR-012).
+  output frequency without skipping domain consolidation (see `spec.md` FR-012).
 
 ## Current Adapter Context
-- Current destination is structured console output.
-- Kafka publication is planned as a destination swap without changing discovery use-case boundaries.
+- Current operator-visible destination is structured console output.
+- Event-stream destination is Kafka topic `devices.detected` with Avro value subject
+  `devices.detected-value`.
+- Kafka publication must be an Infrastructure adapter behind the same application port; discovery
+  use-case boundaries do not change.
 
 ## Implementation Note (Current State)
 - Use case: `ProcessObservationsUseCase` in

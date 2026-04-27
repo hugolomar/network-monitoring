@@ -24,10 +24,11 @@ Configure the `Probe` section in `src/NetworkMonitoring.Probe/appsettings.json` 
 dotnet test src/NetworkMonitoring.Probe.sln
 ```
 
-Optional Kafka end-to-end test (requires the Compose stack and topic init; see **More detail** below):
+Optional Kafka end-to-end tests (requires the Compose stack and topic init; see **More detail** below):
 
 ```bash
-RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "FullyQualifiedName~KafkaSessionPublishIntegrationTests"
+RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "FullyQualifiedName~KafkaSessionEventPublishIntegrationTests"
+RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.Probe.sln --filter "FullyQualifiedName~KafkaDeviceEventPublishIntegrationTests"
 ```
 
 ## Kafka (local reference stack)
@@ -38,7 +39,10 @@ docker compose -f docker-compose.reference-stack.yml up -d
 ./scripts/stack/verify-kafka-stack.sh
 ```
 
-The Kafka publication path is documented in the session detection quickstart. The full indexing path (Elasticsearch + Kafka Connect, connector registration) is documented in the session indexing quickstart.
+The session Kafka publication path is documented in the session detection quickstart. Device stream
+validation for `devices.detected` is documented in the device discovery quickstart. The full indexing
+path (Elasticsearch + Kafka Connect, connector registration) is documented in the session indexing
+quickstart.
 
 ## More detail
 

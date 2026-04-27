@@ -6,13 +6,15 @@ alwaysApply: true
 
 # network-monitoring Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-21
+Auto-generated from all feature plans. Last updated: 2026-04-27
 
 ## Active Technologies
 - C# / .NET 10 + .NET Worker runtime, shared domain SeedWork abstractions, tshark capture adapter, console serialization pipeline (Kafka-ready contracts) (003-device-discovery)
 - N/A in this increment (discovery emission only) (003-device-discovery)
 - Elasticsearch 8.11.4 + Kafka Connect 7.6.1 Elasticsearch Sink, fed from `sessions.detected` (002-session-indexing)
 - C# / .NET 10 + .NET Worker/Console runtime, shared SeedWork domain abstractions, tshark CLI integration (001-session-detection)
+- C# / .NET 10 + .NET Worker host, shared SeedWork domain, tshark CLI, Confluent.Kafka, Schema Registry Avro serdes (003-device-discovery)
+- Apache Kafka reference stack (3 brokers, KRaft) + Schema Registry for emitted `DeviceDetected` events (003-device-discovery)
 
 ## Project Structure
 
@@ -30,6 +32,7 @@ tests/
 C# / .NET 10: Follow standard conventions
 
 ## Recent Changes
+- 003-device-discovery: Added probe-side Kafka publication planning for `DeviceDetected` events
 - 002-session-indexing: Elasticsearch + Kafka Connect session indexing (ADR 0009)
 - 001-session-detection: Session capture visibility and Kafka event publication
 

@@ -16,10 +16,10 @@ namespace NetworkMonitoring.Probe.IntegrationTests;
 /// End-to-end produce + consume against a running stack. Skipped unless
 /// <c>RUN_KAFKA_INTEGRATION=1</c> and brokers + Schema Registry are reachable (see quickstart).
 /// </summary>
-public sealed class KafkaSessionPublishIntegrationTests
+public sealed class KafkaDeviceEventPublishIntegrationTests
 {
     [SkippableFact]
-    public async Task PublishSessionDetected_ProducesConsumableAvroValue()
+    public async Task PublishDeviceDetected_ProducesConsumableAvroValueWithNormalizedMacKey()
     {
         Skip.If(
             Environment.GetEnvironmentVariable("RUN_KAFKA_INTEGRATION") != "1",
@@ -29,34 +29,34 @@ public sealed class KafkaSessionPublishIntegrationTests
             ?? "localhost:9092,localhost:9093,localhost:9094";
         var registryUrl = Environment.GetEnvironmentVariable("SCHEMA_REGISTRY_URL")
             ?? "http://localhost:8081";
-        var topic = Environment.GetEnvironmentVariable("KAFKA_SESSION_TOPIC") ?? "sessions.detected";
+        var topic = Environment.GetEnvironmentVariable("KAFKA_DEVICE_TOPIC") ?? "devices.detected";
 
-        var marker = Random.Shared.NextInt64(1_000_000_000_000, long.MaxValue);
+        var marker = $"device-{Guid.NewGuid():N}";
         var t = DateTimeOffset.UtcNow;
-        var session = Session.Create(
+        var device = Device.Create(
             null,
-            new IpAddress("203.0.113.10"),
-            new IpAddress("203.0.113.20"),
-            new Port(40_000),
-            new Port(40_001),
-            ProtocolType.FromRaw("6"),
+            new MacAddress("02-42-ac-11-00-03"),
+            new IpAddress("203.0.113.30"),
+            marker,
+            [new IpAddress("203.0.113.30")],
             t,
             t,
-            marker);
+            DiscoverySource.FromRaw("traffic"));
 
         var options = Options.Create(
             new ProbeOptions
             {
+                EnableConsole = false,
                 EnableKafka = true,
                 KafkaBootstrapServers = bootstrap,
                 SchemaRegistryUrl = registryUrl,
-                KafkaSessionTopic = topic,
+                KafkaDeviceTopic = topic,
                 KafkaSecurityProtocol = "Plaintext",
             });
 
-        using (var publisher = new KafkaSessionPublisher(options, NullLogger<KafkaSessionPublisher>.Instance))
+        using (var publisher = new KafkaProbeEventPublisher(options, NullLogger<KafkaProbeEventPublisher>.Instance))
         {
-            await publisher.PublishSessionDetected(session, CancellationToken.None);
+            await publisher.PublishDeviceDetected(device, CancellationToken.None);
         }
 
         var srConfig = new SchemaRegistryConfig { Url = registryUrl };
@@ -65,7 +65,7 @@ public sealed class KafkaSessionPublishIntegrationTests
         var consumerConfig = new ConsumerConfig
         {
             BootstrapServers = bootstrap,
-            GroupId = $"probe-kafka-integration-{Guid.NewGuid():N}",
+            GroupId = $"probe-kafka-device-integration-{Guid.NewGuid():N}",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false,
         };
@@ -77,7 +77,7 @@ public sealed class KafkaSessionPublishIntegrationTests
         consumer.Subscribe(topic);
 
         var deadline = DateTime.UtcNow.AddSeconds(60);
-        GenericRecord? found = null;
+        ConsumeResult<string, GenericRecord>? found = null;
         while (found is null && DateTime.UtcNow < deadline)
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
@@ -89,9 +89,9 @@ public sealed class KafkaSessionPublishIntegrationTests
                     continue;
                 }
 
-                if (result.Message.Value["bytesObserved"] is long l && l == marker)
+                if (Equals(result.Message.Value["hostname"], marker))
                 {
-                    found = result.Message.Value;
+                    found = result;
                 }
             }
             catch (OperationCanceledException)
@@ -101,11 +101,11 @@ public sealed class KafkaSessionPublishIntegrationTests
         }
 
         Assert.NotNull(found);
-        Assert.Equal("SessionDetected", found["eventType"]);
-        Assert.Equal("203.0.113.10", found["sourceIp"]);
-        Assert.Equal("203.0.113.20", found["destinationIp"]);
-        Assert.Equal(40_000, found["sourcePort"]);
-        Assert.Equal(40_001, found["destinationPort"]);
-        Assert.Equal("TCP", found["protocol"]);
+        Assert.Equal("02:42:AC:11:00:03", found.Message.Key);
+        Assert.Equal("DeviceDetected", found.Message.Value["eventType"]);
+        Assert.Equal("02:42:AC:11:00:03", found.Message.Value["macAddress"]);
+        Assert.Equal("203.0.113.30", found.Message.Value["primaryIp"]);
+        Assert.Equal(marker, found.Message.Value["hostname"]);
+        Assert.Equal("TRAFFIC", found.Message.Value["discoverySource"]);
     }
 }

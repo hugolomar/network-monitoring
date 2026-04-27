@@ -1,0 +1,71 @@
+{
+  "type": "record",
+  "name": "DeviceDetected",
+  "namespace": "net.networkmonitoring.events",
+  "doc": "Kafka value for DeviceDetected; aligns with specs/003-device-discovery/contracts/device-detected-schema.md",
+  "fields": [
+    {
+      "name": "eventType",
+      "type": "string",
+      "doc": "Constant DeviceDetected for this subject."
+    },
+    {
+      "name": "occurredAtUtc",
+      "type": "string",
+      "doc": "ISO-8601 instant when the record was emitted (probe clock, UTC)."
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "doc": "Event producer identifier, e.g. probe."
+    },
+    {
+      "name": "schemaVersion",
+      "type": "int",
+      "doc": "Contract version for this payload shape; starts at 1."
+    },
+    {
+      "name": "deviceId",
+      "type": ["null", "int"],
+      "default": null,
+      "doc": "Persistent id when assigned by infrastructure; null until then."
+    },
+    {
+      "name": "macAddress",
+      "type": "string",
+      "doc": "Normalized MAC address and Kafka key source."
+    },
+    {
+      "name": "primaryIp",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "hostname",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "observedIps",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "default": []
+    },
+    {
+      "name": "firstSeenUtc",
+      "type": "string",
+      "doc": "ISO-8601 first observed timestamp (UTC)."
+    },
+    {
+      "name": "lastSeenUtc",
+      "type": "string",
+      "doc": "ISO-8601 latest observed timestamp (UTC)."
+    },
+    {
+      "name": "discoverySource",
+      "type": "string"
+    }
+  ]
+}

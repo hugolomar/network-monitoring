@@ -24,6 +24,9 @@
     <EmbeddedResource Include="Infrastructure\Publishing\Schemas\session-detected-value.avsc">
       <LogicalName>session-detected-value.avsc</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Infrastructure\Publishing\Schemas\device-detected-value.avsc">
+      <LogicalName>device-detected-value.avsc</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

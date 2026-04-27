@@ -67,6 +67,15 @@ Represents one emitted, validated discovery output for downstream consumers.
 - `hostname`
 - `observedIps`
 
+### Event Stream Semantics
+- Default Kafka topic: `devices.detected`.
+- Default Schema Registry subject: `devices.detected-value`.
+- Kafka message key: normalized `macAddress`.
+- Kafka value: Avro record defined by `contracts/device-detected-value.avsc`.
+- Console JSONL and Kafka Avro payloads must preserve the same field meaning.
+- Publication follows the same validation, consolidation, and `DeviceDeduplicationWindowMinutes`
+  emission-suppression rules as console output.
+
 ## Application Model: DiscoveryValidationResult
 
 ### Purpose
