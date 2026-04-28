@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace NetworkMonitoring.Backend.Infrastructure.Persistence.Migrations;
 
+[DbContext(typeof(DeviceInventoryDbContext))]
+[Migration("20260427160000_InitialDeviceInventory")]
 public partial class InitialDeviceInventory : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)

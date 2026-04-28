@@ -252,3 +252,23 @@ services:
       ASPNETCORE_URLS: http://+:8080
       Backend__ConnectionString: Host=postgres;Port=5432;Database=network_monitoring;Username=network_monitoring;Password=network_monitoring
       Backend__ApplyMigrationsOnStartup: "true"
+
+  network-monitoring-integration-console:
+    build:
+      context: .
+      dockerfile: src/NetworkMonitoring.IntegrationConsole/Dockerfile
+    hostname: network-monitoring-integration-console
+    networks:
+      - kafka-net
+    depends_on:
+      schema-registry:
+        condition: service_healthy
+      network-monitoring-backend:
+        condition: service_started
+    environment:
+      IntegrationConsole__KafkaBootstrapServers: kafka-1:29092,kafka-2:29092,kafka-3:29092
+      IntegrationConsole__SchemaRegistryUrl: http://schema-registry:8081
+      IntegrationConsole__KafkaDeviceTopic: devices.detected
+      IntegrationConsole__KafkaConsumerGroupId: device-ingestion-local
+      IntegrationConsole__BackendBaseUrl: http://network-monitoring-backend:8080
+      IntegrationConsole__KafkaSecurityProtocol: Plaintext
