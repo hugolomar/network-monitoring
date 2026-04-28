@@ -272,3 +272,16 @@ services:
       IntegrationConsole__KafkaConsumerGroupId: device-ingestion-local
       IntegrationConsole__BackendBaseUrl: http://network-monitoring-backend:8080
       IntegrationConsole__KafkaSecurityProtocol: Plaintext
+
+  network-monitoring-device-management-ui:
+    build:
+      context: ./src/NetworkMonitoring.Frontend
+      dockerfile: Dockerfile
+    hostname: network-monitoring-device-management-ui
+    networks:
+      - kafka-net
+    ports:
+      - "3000:80"
+    depends_on:
+      network-monitoring-backend:
+        condition: service_started

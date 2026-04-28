@@ -6,7 +6,7 @@ alwaysApply: true
 
 # network-monitoring Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-27
+Auto-generated from all feature plans. Last updated: 2026-04-28
 
 ## Active Technologies
 - C# / .NET 10 + .NET Worker runtime, shared domain SeedWork abstractions, tshark capture adapter, console serialization pipeline (Kafka-ready contracts) (003-device-discovery)
@@ -19,6 +19,8 @@ Auto-generated from all feature plans. Last updated: 2026-04-27
 - N/A in this increment; no database or durable ingestion store is implemented (004-device-ingestion)
 - C# / .NET 10 + ASP.NET Core hosting, shared `NetworkMonitoring.Domain`, EF Core PostgreSQL provider (005-device-inventory)
 - PostgreSQL for authoritative device inventory persistence (005-device-inventory)
+- TypeScript on current Node.js LTS, browser runtime JavaScript + React, Vite, TypeScript, browser Fetch API, lightweight runtime configuration, container static file serving (006-device-management)
+- N/A for UI persistence; backend remains authoritative for device inventory (006-device-management)
 
 ## Project Structure
 
@@ -36,9 +38,9 @@ tests/
 C# / .NET 10: Follow standard conventions
 
 ## Recent Changes
+- 006-device-management: Added TypeScript on current Node.js LTS, browser runtime JavaScript + React, Vite, TypeScript, browser Fetch API, lightweight runtime configuration, container static file serving
 - 005-device-inventory: Added device inventory backend/API planning with PostgreSQL persistence
 - 004-device-ingestion: Added Integration Console ingestion planning for `DeviceDetected` forwarding
-- 003-device-discovery: Added probe-side Kafka publication planning for `DeviceDetected` events
 
 
 <!-- MANUAL ADDITIONS START -->
