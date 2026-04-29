@@ -10,8 +10,8 @@ describe("devicesApi", () => {
   it("listDevices parses items on 200", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () =>
-        Promise.resolve({
+      vi.fn(async (): Promise<Response> => {
+        const partial = {
           ok: true,
           status: 200,
           text: async () =>
@@ -29,8 +29,9 @@ describe("devicesApi", () => {
                 },
               ],
             }),
-        }) as Response
-      )
+        };
+        return partial as unknown as Response;
+      })
     );
 
     const r = await listDevices();
@@ -41,13 +42,14 @@ describe("devicesApi", () => {
   it("listDevices maps 503 to unavailable", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () =>
-        Promise.resolve({
+      vi.fn(async (): Promise<Response> => {
+        const partial = {
           ok: false,
           status: 503,
           text: async () => "",
-        }) as Response
-      )
+        };
+        return partial as unknown as Response;
+      })
     );
 
     const r = await listDevices();
@@ -58,8 +60,8 @@ describe("devicesApi", () => {
   it("createDevice maps 201 Created", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () =>
-        Promise.resolve({
+      vi.fn(async (): Promise<Response> => {
+        const partial = {
           ok: true,
           status: 201,
           text: async () =>
@@ -77,8 +79,9 @@ describe("devicesApi", () => {
                 discoverySource: "MANUAL",
               },
             }),
-        }) as Response
-      )
+        };
+        return partial as unknown as Response;
+      })
     );
 
     const r = await createDevice(

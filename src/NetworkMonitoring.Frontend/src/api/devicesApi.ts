@@ -29,7 +29,7 @@ export type CreateDeviceSuccess = {
 
 export type CreateDeviceFailure = {
   ok: false;
-  kind: "rejected" | "unavailable" | "network" | "parse";
+  kind: "rejected" | "unavailable" | "network" | "parse" | "http";
   status?: number;
   reason?: string;
   message: string;
