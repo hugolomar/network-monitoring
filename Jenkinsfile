@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         SONAR_HOST_URL = 'http://sonarqube:9000'
-        // For demonstration purposes, we assume tools are available in the environment
-        // In a real Jenkins, these would be configured via 'tools' or Docker agents
+        SONAR_TOKEN = 'sqa_c71a2aeb53e618e0c6f4e246dd3e66ded09c6be0'
     }
 
     stages {
@@ -14,23 +13,20 @@ pipeline {
             }
         }
 
-        stage('Backend - Restore') {
+        stage('Backend - Prepare Analysis') {
             steps {
-                echo 'Restoring .NET dependencies...'
+                echo 'Preparing SonarQube Analysis for .NET...'
+                // Install sonarscanner if not present (simplified for this environment)
+                sh 'dotnet tool install --global dotnet-sonarscanner --version 9.0.2 || true'
+                sh 'export PATH="$PATH:$HOME/.dotnet/tools" && dotnet sonarscanner begin /k:"network-monitoring" /d:sonar.host.url="${SONAR_HOST_URL}" /d:sonar.token="${SONAR_TOKEN}" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml'
+            }
+        }
+
+        stage('Backend - Build & Test') {
+            steps {
+                echo 'Building and Testing Backend...'
                 sh 'dotnet restore src/NetworkMonitoring.sln'
-            }
-        }
-
-        stage('Backend - Build') {
-            steps {
-                echo 'Building Backend...'
                 sh 'dotnet build src/NetworkMonitoring.sln --no-restore -c Release'
-            }
-        }
-
-        stage('Backend - Test') {
-            steps {
-                echo 'Running Backend Tests...'
                 sh 'dotnet test src/NetworkMonitoring.sln --no-build -c Release'
             }
         }
@@ -46,14 +42,10 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('SonarQube - End Analysis') {
             steps {
-                echo 'Simulating SonarQube scan...'
-                // In a configured environment, we would use the SonarScanner here:
-                // sh 'dotnet sonarscanner begin /k:"network-monitoring" /d:sonar.host.url="${SONAR_HOST_URL}"'
-                // sh 'dotnet build src/NetworkMonitoring.sln'
-                // sh 'dotnet sonarscanner end'
-                echo 'Analysis report would be sent to http://localhost:9000'
+                echo 'Completing SonarQube Analysis...'
+                sh 'export PATH="$PATH:$HOME/.dotnet/tools" && dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"'
             }
         }
     }
