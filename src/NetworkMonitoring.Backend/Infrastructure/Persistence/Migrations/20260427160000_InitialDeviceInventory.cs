@@ -6,10 +6,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace NetworkMonitoring.Backend.Infrastructure.Persistence.Migrations;
 
+/// <summary>
+/// Initial migration to create the device inventory schema.
+/// </summary>
 [DbContext(typeof(DeviceInventoryDbContext))]
 [Migration("20260427160000_InitialDeviceInventory")]
 public partial class InitialDeviceInventory : Migration
 {
+    /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.CreateTable(
@@ -40,6 +44,7 @@ public partial class InitialDeviceInventory : Migration
             unique: true);
     }
 
+    /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropTable(name: "devices");

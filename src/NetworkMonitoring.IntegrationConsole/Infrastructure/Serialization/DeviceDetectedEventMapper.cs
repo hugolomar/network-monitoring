@@ -4,8 +4,17 @@ using System.Globalization;
 
 namespace NetworkMonitoring.IntegrationConsole.Infrastructure.Serialization;
 
+/// <summary>
+/// Mapper to convert Avro GenericRecords into DeviceDetectedEvent domain models.
+/// </summary>
 public static class DeviceDetectedEventMapper
 {
+    /// <summary>
+    /// Maps a Kafka/Avro generic record to a <see cref="DeviceDetectedEvent"/>.
+    /// </summary>
+    /// <param name="record">The Avro record to map.</param>
+    /// <returns>A new instance of <see cref="DeviceDetectedEvent"/>.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when required fields are missing or have invalid types.</exception>
     public static DeviceDetectedEvent FromGenericRecord(GenericRecord record)
     {
         return new DeviceDetectedEvent(

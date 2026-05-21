@@ -10,8 +10,17 @@ using NetworkMonitoring.IntegrationConsole.Infrastructure.Ingestion;
 
 namespace NetworkMonitoring.IntegrationConsole.Host.DependencyInjection;
 
+/// <summary>
+/// Extension methods for registering Integration Console services in the DI container.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds all necessary services for the Integration Console application.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>the updated service collection.</returns>
     public static IServiceCollection AddIntegrationConsole(
         this IServiceCollection services,
         IConfiguration configuration)

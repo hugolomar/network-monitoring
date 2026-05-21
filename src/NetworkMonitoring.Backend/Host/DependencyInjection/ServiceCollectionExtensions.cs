@@ -8,8 +8,17 @@ using NetworkMonitoring.Backend.Infrastructure.Persistence;
 
 namespace NetworkMonitoring.Backend.Host.DependencyInjection;
 
+/// <summary>
+/// Extension methods for setting up backend services in an <see cref="IServiceCollection"/>.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Adds the device inventory backend services, including persistence and use cases.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
+    /// <param name="configuration">The configuration to bind settings from.</param>
+    /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
     public static IServiceCollection AddDeviceInventoryBackend(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -20,6 +29,7 @@ public static class ServiceCollectionExtensions
             .Validate(options => !string.IsNullOrWhiteSpace(options.ConnectionString), "Backend connection string is required.")
             .ValidateOnStart();
 
+        // Configure Entity Framework Core with PostgreSQL using the connection string from configuration
         services.AddDbContext<DeviceInventoryDbContext>((sp, options) =>
         {
             var backendOptions = sp.GetRequiredService<IOptions<BackendOptions>>().Value;

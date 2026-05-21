@@ -8,9 +8,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace NetworkMonitoring.Backend.Infrastructure.Persistence.Migrations;
 
+/// <summary>
+/// Snapshot of the current state of the database model for device inventory.
+/// </summary>
 [DbContext(typeof(DeviceInventoryDbContext))]
 public partial class DeviceInventoryDbContextModelSnapshot : ModelSnapshot
 {
+    /// <inheritdoc />
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
         modelBuilder
