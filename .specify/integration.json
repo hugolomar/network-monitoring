@@ -13,4 +13,5 @@
   },
   "integration": "cursor-agent",
   "default_integration": "cursor-agent"
+  "default_integration": "cursor-agent"
 }
