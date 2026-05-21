@@ -34,7 +34,9 @@ services:
       - sonarqube-logs:/opt/sonarqube/logs
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     privileged: true
     user: root
     networks:
@@ -45,6 +47,7 @@ services:
     volumes:
       - jenkins-home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace:ro # Mount project as read-only for Jenkins
     environment:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false # Skip wizard for automated setups
 
