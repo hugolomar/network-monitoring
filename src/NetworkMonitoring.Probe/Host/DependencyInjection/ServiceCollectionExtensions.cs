@@ -8,13 +8,23 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 using NetworkMonitoring.Probe.Infrastructure.Traffic;
 
 namespace NetworkMonitoring.Probe.Host.DependencyInjection;
-
+/// <summary>
+/// Provides extension methods for registering probe-specific services in the dependency injection container.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers all application and infrastructure services required for the probe to operate.
+    /// Includes configuration binding, traffic providers, and messaging publishers.
+    /// </summary>
+    /// <param name="services">The service collection to populate.</param>
+    /// <param name="configuration">The application configuration root.</param>
+    /// <returns>The same service collection for chaining.</returns>
     public static IServiceCollection AddProbeServices(this IServiceCollection services, IConfiguration configuration)
     {
         services
             .AddOptions<ProbeOptions>()
+...
             .Bind(configuration.GetSection(ProbeOptions.SectionName))
             .Validate(
                 options => !options.EnableKafka || !string.IsNullOrWhiteSpace(options.KafkaBootstrapServers),

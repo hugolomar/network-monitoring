@@ -8,6 +8,11 @@ using NetworkMonitoring.Probe.Application.Ports;
 
 namespace NetworkMonitoring.Probe.Application.UseCases;
 
+/// <summary>
+/// Coordinates the processing of raw traffic observations.
+/// Handles validation, deduplication, and transformation of raw data into domain entities
+/// before publishing them to the messaging infrastructure.
+/// </summary>
 public sealed class ProcessObservationsUseCase(
     ITrafficProvider trafficProvider,
     IMessagePublisher messagePublisher,
@@ -20,6 +25,12 @@ public sealed class ProcessObservationsUseCase(
     private readonly TimeSpan _sessionDeduplicationWindow = ResolveSessionDeduplicationWindow(options.Value);
     private readonly TimeSpan _deviceDeduplicationWindow = ResolveDeviceDeduplicationWindow(options.Value);
 
+    /// <summary>
+    /// Executes the observation processing loop. 
+    /// Consumes observations from the provider and orchestrates validation, deduplication, and publication.
+    /// </summary>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>A task representing the long-running processing operation.</returns>
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         await foreach (var observation in trafficProvider.ReadObservations(cancellationToken))
@@ -38,6 +49,10 @@ public sealed class ProcessObservationsUseCase(
             try
             {
                 var session = BuildSession(observation, sourceIp, destinationIp);
+
+                // Rationale: High-volume network traffic often generates many identical observations 
+                // in a short time. We deduplicate sessions and devices to avoid overwhelming 
+                // the downstream Kafka topics and consumers with redundant information.
                 if (ShouldPublishSession(session, observation.ObservedAtUtc))
                 {
                     await messagePublisher.PublishSessionDetected(session, cancellationToken);

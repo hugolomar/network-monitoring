@@ -23,6 +23,12 @@ public static class DeviceDetectedAvroMapper
         return (RecordSchema)Schema.Parse(reader.ReadToEnd());
     }
 
+    /// <summary>
+    /// Transforms a domain <see cref="Device"/> into an Avro-compatible <see cref="GenericRecord"/>.
+    /// </summary>
+    /// <param name="device">The device entity to map.</param>
+    /// <param name="occurredAtUtc">The timestamp of the detection event.</param>
+    /// <returns>A <see cref="GenericRecord"/> aligned with the device-detected schema.</returns>
     public static GenericRecord ToGenericRecord(Device device, DateTimeOffset occurredAtUtc)
     {
         var record = new GenericRecord(DeviceValueSchema);
@@ -41,5 +47,8 @@ public static class DeviceDetectedAvroMapper
         return record;
     }
 
+    /// <summary>
+    /// Provides access to the parsed Avro schema for device detection events.
+    /// </summary>
     public static RecordSchema SchemaInstance => DeviceValueSchema;
 }

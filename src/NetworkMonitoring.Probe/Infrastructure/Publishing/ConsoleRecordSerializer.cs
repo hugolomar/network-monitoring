@@ -3,8 +3,17 @@ using NetworkMonitoring.Domain.Entities;
 
 namespace NetworkMonitoring.Probe.Infrastructure.Publishing;
 
+/// <summary>
+/// Provides JSON serialization for domain entities intended for console output.
+/// This serializer ensures a consistent JSON format for terminal-based observability.
+/// </summary>
 public sealed class ConsoleRecordSerializer
 {
+    /// <summary>
+    /// Serializes a <see cref="Session"/> into a JSON string.
+    /// </summary>
+    /// <param name="session">The session to serialize.</param>
+    /// <returns>A JSON string representation of the session detection event.</returns>
     public string SerializeSession(Session session)
     {
         var payload = new
@@ -27,6 +36,11 @@ public sealed class ConsoleRecordSerializer
         return JsonSerializer.Serialize(payload);
     }
 
+    /// <summary>
+    /// Serializes a <see cref="Device"/> into a JSON string.
+    /// </summary>
+    /// <param name="device">The device to serialize.</param>
+    /// <returns>A JSON string representation of the device detection event.</returns>
     public string SerializeDevice(Device device)
     {
         var payload = new
