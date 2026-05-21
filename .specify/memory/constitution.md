@@ -140,4 +140,30 @@ repository. In case of conflict, this document takes precedence over local conve
 - Each implementation review MUST record pass/fail against relevant principles.
 - Non-compliance MUST be resolved before merge or explicitly waived with rationale.
 
-**Version**: 1.3.0 | **Ratified**: 2026-04-03 | **Last Amended**: 2026-04-06
+### VI. Code Documentation Standards
+**Article 29 — Boundary and API Documentation.** Every public class, interface, method, and
+property in the backend (excluding `SeedWork`) and every exported component, hook, or function in
+the frontend MUST be documented using industry-standard formats (XML comments for .NET, TSDoc for
+TypeScript). This documentation MUST explicitly detail:
+- The core purpose of the element (Summary).
+- The meaning and constraints of all input parameters (Params).
+- The behavior and significance of return values (Returns).
+- Any exceptions or specific error states that may be triggered.
+
+**Article 30 — Documentation Accuracy and Evolution.** Documentation MUST be kept in perfect
+synchronization with the implementation. Outdated or misleading documentation is considered a
+violation of the "Objective Verification" principle (Article 11). Any change that alters a
+contract or behavior MUST be reflected in the documentation within the same commit or Pull
+Request.
+
+**Article 31 — Internal Complexity and Rationale Commentary.** While Article 29 covers public
+contracts ("The What"), internal logic MUST avoid redundant commentary. However, non-trivial
+internal logic, complex algorithms, or infrastructure workarounds (e.g., tshark parsing) MUST
+include comments explaining the "Why" (the intent or architectural decision) to aid long-term
+maintainability.
+
+Rationale: Clear documentation of interfaces, inputs, and outputs is critical for system
+auditability, reducing integration errors, and ensuring the network monitoring domain remains
+maintainable as it evolves.
+
+**Version**: 1.6.0 | **Ratified**: 2026-05-21 | **Last Amended**: 2026-05-21
