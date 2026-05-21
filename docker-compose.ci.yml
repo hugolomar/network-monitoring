@@ -49,7 +49,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/workspace:ro # Mount project as read-only for Jenkins
     environment:
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false # Skip wizard for automated setups
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true # Skip wizard and allow local checkout
 
 networks:
   ci-net:
