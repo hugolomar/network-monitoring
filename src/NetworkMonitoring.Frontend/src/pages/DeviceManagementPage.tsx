@@ -6,6 +6,12 @@ import { getBackendBaseUrl } from "../config/runtimeConfig";
 import type { DeviceIntakeRequestDto, DeviceInventoryItem } from "../models/deviceDtos";
 import type { InventoryLoadPhase, RefreshPhase } from "../models/deviceManagementState";
 
+/**
+ * Page component for managing the device inventory.
+ * Provides functionality to view discovered devices and manually add new ones.
+ * 
+ * @returns The rendered device management page.
+ */
 export default function DeviceManagementPage() {
   const [items, setItems] = useState<DeviceInventoryItem[]>([]);
   const [inventoryPhase, setInventoryPhase] = useState<InventoryLoadPhase>("initial");
