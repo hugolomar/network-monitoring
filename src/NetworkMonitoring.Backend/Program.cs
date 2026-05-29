@@ -4,11 +4,24 @@ using NetworkMonitoring.Backend.Application.Configuration;
 using NetworkMonitoring.Backend.Host.DependencyInjection;
 using NetworkMonitoring.Backend.Host.Endpoints;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
 builder.Services.AddDeviceInventoryBackend(builder.Configuration);
 
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
 
 // Skip database migrations during integration tests
 if (!app.Environment.IsEnvironment("Testing"))

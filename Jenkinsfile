@@ -48,6 +48,18 @@ pipeline {
                 sh 'export PATH="$PATH:$HOME/.dotnet/tools" && dotnet sonarscanner end /d:sonar.token="${SONAR_TOKEN}"'
             }
         }
+
+        stage('Generate & Publish Docs') {
+            steps {
+                echo 'Generating Technical Wiki with DocFX...'
+                sh 'dotnet tool restore'
+                sh 'dotnet docfx metadata'
+                sh 'dotnet docfx build'
+                echo 'Publishing to documentation server...'
+                // Copy the generated site to the shared volume defined in docker-compose
+                sh 'cp -R _site/* /var/jenkins_home/docs-site/'
+            }
+        }
     }
 
     post {
