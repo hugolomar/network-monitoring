@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "presets": {
+    "arch-governance": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:30d0ed6c9d2712be490e4c510b3287cb5fdd7ab1f022ef1d97e93d3bd1c00a8d",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "cursor-agent": [
+          "speckit.plan"
+        ],
+        "gemini": [
+          "speckit.plan"
+        ]
+      },
+      "registered_skills": [
+        "speckit-plan"
+      ],
+      "installed_at": "2026-05-21T17:28:31.608640+00:00"
+    }
+  }
+}
