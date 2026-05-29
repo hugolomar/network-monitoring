@@ -4,7 +4,9 @@ using NetworkMonitoring.Backend.Application.Configuration;
 using NetworkMonitoring.Backend.Application.Ports;
 using NetworkMonitoring.Backend.Application.UseCases;
 using NetworkMonitoring.Backend.Infrastructure;
+using NetworkMonitoring.Backend.Infrastructure.Graph;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
+using NetworkMonitoring.Backend.Host.Services;
 
 namespace NetworkMonitoring.Backend.Host.DependencyInjection;
 
@@ -42,6 +44,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInventoryUnitOfWork>(sp => sp.GetRequiredService<EfDeviceInventoryRepository>());
         services.AddScoped<AcceptDeviceIntakeUseCase>();
         services.AddScoped<ListDevicesUseCase>();
+        services.AddSingleton<InMemoryGraphStore>();
+        services.AddSingleton<IGraphTelemetry, NullGraphTelemetry>();
+        services.AddScoped<IGraphProjectionRepository, Neo4jGraphProjectionRepository>();
+        services.AddScoped<IGraphQueryRepository, Neo4jGraphQueryRepository>();
+        services.AddScoped<IGraphRetentionRepository, Neo4jGraphRetentionRepository>();
+        services.AddScoped<ProjectCommunicationGraphUseCase>();
+        services.AddScoped<GetDeviceGraphUseCase>();
+        services.AddScoped<RunGraphRetentionSweepUseCase>();
+        services.AddHostedService<GraphRetentionHostedService>();
 
         return services;
     }

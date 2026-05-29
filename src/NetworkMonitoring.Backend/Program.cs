@@ -17,6 +17,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 }
 
 app.MapDeviceEndpoints();
+app.MapGraphEndpoints();
 
 app.Run();
 
