@@ -51,7 +51,6 @@ public sealed class KafkaGenericRecordProducerFactory : IKafkaGenericRecordProdu
     /// <returns>A fully initialized <see cref="IKafkaGenericRecordProducer"/>.</returns>
     /// <exception cref="InvalidOperationException">Thrown if required Kafka or Schema Registry settings are missing.</exception>
     public IKafkaGenericRecordProducer Create(ProbeOptions options)
-...
     {
         if (string.IsNullOrWhiteSpace(options.KafkaBootstrapServers))
         {

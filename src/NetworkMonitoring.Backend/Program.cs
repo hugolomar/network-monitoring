@@ -21,10 +21,13 @@ app.MapGraphEndpoints();
 
 app.Run();
 
-/// <summary>
-/// Entry point for the Network Monitoring Backend application.
-/// </summary>
-public partial class Program;
+namespace NetworkMonitoring.Backend
+{
+    /// <summary>
+    /// Entry point for the Network Monitoring Backend application.
+    /// </summary>
+    public partial class Program { }
+}
 
 /// <summary>
 /// Extension methods for database migration on startup.

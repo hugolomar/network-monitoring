@@ -24,7 +24,6 @@ public static class ServiceCollectionExtensions
     {
         services
             .AddOptions<ProbeOptions>()
-...
             .Bind(configuration.GetSection(ProbeOptions.SectionName))
             .Validate(
                 options => !options.EnableKafka || !string.IsNullOrWhiteSpace(options.KafkaBootstrapServers),
