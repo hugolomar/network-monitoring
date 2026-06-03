@@ -249,6 +249,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Uncomment the following line to enable Scalar API Documentation (Development mode only)
+      # ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       Backend__ConnectionString: Host=postgres;Port=5432;Database=network_monitoring;Username=network_monitoring;Password=network_monitoring
       Backend__ApplyMigrationsOnStartup: "true"
