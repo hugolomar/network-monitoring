@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Apply sessions-detected index template to local Elasticsearch (reference stack).
-# Run from repo root. Usage: ./scripts/bootstrap/elasticsearch/apply-index-template.sh
+# Run from repo root. Usage: ./infrastructure/stack/bootstrap/elasticsearch/apply-index-template.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 ES_URL="${ES_URL:-http://localhost:9200}"
 TEMPLATE_NAME="${ES_INDEX_TEMPLATE_NAME:-sessions-detected}"
-TEMPLATE_FILE="${ES_INDEX_TEMPLATE_FILE:-$ROOT/scripts/bootstrap/elasticsearch/index-template-sessions-detected.json}"
+TEMPLATE_FILE="${ES_INDEX_TEMPLATE_FILE:-$ROOT/infrastructure/stack/bootstrap/elasticsearch/index-template-sessions-detected.json}"
 
 if [[ ! -f "$TEMPLATE_FILE" ]]; then
   echo "error: missing template $TEMPLATE_FILE" >&2

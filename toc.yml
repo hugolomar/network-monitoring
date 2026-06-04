@@ -1,0 +1,8 @@
+- name: Home
+  href: index.md
+- name: API Reference
+  href: artifacts/docs/api/toc.yml
+- name: Architecture Decisions
+  href: docs/adr/index.md
+- name: Constitution
+  href: .specify/memory/constitution.md

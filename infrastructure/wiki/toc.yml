@@ -1,10 +1,10 @@
 - name: Documentation
   href: index.md
 - name: API Reference
-  href: ../../api/index.yml
+  href: ../../artifacts/docs/api/toc.yml
 - name: Constitution
-  href: ../../constitution.md
+  href: ../../.specify/memory/constitution.md
 - name: Architecture Decisions (ADR)
-  href: ../adr/0000-technology-stack-choice.md
+  href: ../../docs/adr/0000-technology-stack-choice.md
 - name: GitHub
   href: https://github.com/tu-usuario/network-monitoring

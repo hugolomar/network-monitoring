@@ -57,7 +57,7 @@ pipeline {
                 sh 'dotnet docfx build'
                 echo 'Publishing to documentation server...'
                 // Copy the generated site to the shared volume defined in docker-compose
-                sh 'cp -R _site/* /var/jenkins_home/docs-site/'
+                sh 'cp -R artifacts/docs/site/* /var/jenkins_home/docs-site/'
             }
         }
     }

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Smoke-check Elasticsearch and Kafka Connect in the reference stack.
 # Run from repo root after: docker compose -f docker-compose.reference-stack.yml up -d
-# Usage: ./scripts/stack/verify-elasticsearch-stack.sh
+# Usage: ./infrastructure/stack/health/verify-elasticsearch-stack.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 cd "$ROOT"
 
 ES_URL="${ES_URL:-http://localhost:9200}"

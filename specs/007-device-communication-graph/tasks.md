@@ -18,7 +18,7 @@
 
 - [X] T001 Create graph feature scaffolding placeholders in `src/NetworkMonitoring.Backend/Host/Endpoints/.gitkeep`, `src/NetworkMonitoring.Backend/Host/Services/.gitkeep`, `src/NetworkMonitoring.Backend/Application/UseCases/.gitkeep`, `src/NetworkMonitoring.Backend/Application/Ports/.gitkeep`, and `src/NetworkMonitoring.Backend/Infrastructure/Graph/.gitkeep`
 - [X] T002 Add graph option defaults/caps/retry/retention flags in `src/NetworkMonitoring.Backend/Application/Configuration/BackendOptions.cs` and `src/NetworkMonitoring.Backend/appsettings.json`
-- [X] T003 [P] Add connector baseline for `sessions.enriched` projection in `connectors/neo4j-sink-sessions-enriched.json`
+- [X] T003 [P] Add connector baseline for `sessions.enriched` projection in `infrastructure/connectors/configs/neo4j-sink-sessions-enriched.json`
 - [ ] T004 [P] Align quickstart + contract with defaults/error payload/auth clarifications in `specs/007-device-communication-graph/quickstart.md` and `specs/007-device-communication-graph/contracts/graph-api.md`
 
 ---
@@ -237,7 +237,7 @@ Task: "T017 [US1] ...NullGraphTelemetry.cs / GraphProjectionDiagnostics.cs"
 
 - [ ] T001 Create graph feature scaffolding placeholders in `src/NetworkMonitoring.Backend/Host/Endpoints/.gitkeep`, `src/NetworkMonitoring.Backend/Host/Services/.gitkeep`, `src/NetworkMonitoring.Backend/Application/UseCases/.gitkeep`, `src/NetworkMonitoring.Backend/Application/Ports/.gitkeep`, and `src/NetworkMonitoring.Backend/Infrastructure/Graph/.gitkeep`
 - [ ] T002 Add graph option defaults/caps/retry/retention flags in `src/NetworkMonitoring.Backend/Application/Configuration/BackendOptions.cs` and `src/NetworkMonitoring.Backend/appsettings.json`
-- [ ] T003 [P] Add connector baseline for `sessions.enriched` projection in `connectors/neo4j-sink-sessions-enriched.json`
+- [ ] T003 [P] Add connector baseline for `sessions.enriched` projection in `infrastructure/connectors/configs/neo4j-sink-sessions-enriched.json`
 - [ ] T004 [P] Align quickstart + contract with defaults/error payload/auth clarifications in `specs/007-device-communication-graph/quickstart.md` and `specs/007-device-communication-graph/contracts/graph-api.md`
 
 ---
@@ -457,7 +457,7 @@ Task: "T017 [US1] ...NullGraphTelemetry.cs / GraphProjectionDiagnostics.cs"
 
 - [ ] T001 Create graph feature scaffolding by adding `.gitkeep` placeholders in `src/NetworkMonitoring.Backend/Host/Endpoints/.gitkeep`, `src/NetworkMonitoring.Backend/Host/Services/.gitkeep`, `src/NetworkMonitoring.Backend/Application/UseCases/.gitkeep`, `src/NetworkMonitoring.Backend/Application/Ports/.gitkeep`, and `src/NetworkMonitoring.Backend/Infrastructure/Graph/.gitkeep`
 - [ ] T002 Add graph options (depth cap, limit defaults, retention window/cadence, retry bounds, observability toggles) in `src/NetworkMonitoring.Backend/Application/Configuration/BackendOptions.cs` and `src/NetworkMonitoring.Backend/appsettings.json`
-- [ ] T003 [P] Add connector projection config baseline in `connectors/neo4j-sink-sessions-enriched.json`
+- [ ] T003 [P] Add connector projection config baseline in `infrastructure/connectors/configs/neo4j-sink-sessions-enriched.json`
 - [ ] T004 [P] Align graph contract and quickstart docs with latest clarifications in `specs/007-device-communication-graph/contracts/graph-api.md` and `specs/007-device-communication-graph/quickstart.md`
 
 ---

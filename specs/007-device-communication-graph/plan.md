@@ -116,7 +116,7 @@ src/
 │   └── Infrastructure/Graph/
 └── ...
 
-connectors/
+infrastructure/connectors/configs/
 └── neo4j-sink-sessions-enriched.json
 
 tests/

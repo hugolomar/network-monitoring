@@ -3,12 +3,12 @@
 # on 404, PUT config when the connector name already exists.
 # Prerequisites: connect healthy; sessions.detected topic; registry; elasticsearch.
 # Needs: jq **or** python3 to read the connector JSON.
-# Usage: ./scripts/connectors/register-elasticsearch-sink-connector.sh
+# Usage: ./infrastructure/connectors/register/register-elasticsearch-sink-connector.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 CONNECT_URL="${CONNECT_URL:-http://localhost:8083}"
-CFILE="${ELASTICSEARCH_SINK_CONNECTOR_JSON:-$ROOT/scripts/connectors/elasticsearch-sink-sessions-detected.json}"
+CFILE="${ELASTICSEARCH_SINK_CONNECTOR_JSON:-$ROOT/infrastructure/connectors/configs/elasticsearch-sink-sessions-detected.json}"
 
 if ! command -v jq >/dev/null 2>&1 && ! command -v python3 >/dev/null 2>&1; then
   echo "error: need jq or python3 to parse $CFILE" >&2

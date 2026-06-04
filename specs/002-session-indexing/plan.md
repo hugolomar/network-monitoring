@@ -53,10 +53,10 @@ specs/002-session-indexing/
 Reference implementation artifacts live under:
 
 ```text
-scripts/bootstrap/elasticsearch/
-scripts/connectors/
-scripts/stack/verify-elasticsearch-stack.sh
-scripts/acceptance/verify-session-indexing-sampling.sh
+infrastructure/stack/bootstrap/elasticsearch/
+infrastructure/connectors/
+infrastructure/stack/health/verify-elasticsearch-stack.sh
+infrastructure/acceptance/contract/verify-session-indexing-sampling.sh
 docker-compose.reference-stack.yml
 ```
 

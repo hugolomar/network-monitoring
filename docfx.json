@@ -13,7 +13,7 @@
           ]
         }
       ],
-      "dest": "api",
+      "dest": "artifacts/docs/api",
       "disableGitFeatures": false,
       "disableDefaultFilter": false
     }
@@ -22,15 +22,18 @@
     "content": [
       {
         "files": [
-          "api/**.yml",
-          "api/index.md"
+          "artifacts/docs/api/**.yml",
+          "artifacts/docs/api/index.md"
         ]
       },
       {
         "files": [
           "docs/**/*.md",
-          "constitution.md",
-          "README.md"
+          "specs/**/*.md",
+          ".specify/memory/constitution.md",
+          "README.md",
+          "index.md",
+          "toc.yml"
         ],
         "exclude": [
           "**/obj/**",
@@ -39,21 +42,22 @@
       },
       {
         "files": [
-          "docs/web/toc.yml",
-          "docs/web/index.md",
-          "docs/web/articles/**.md",
-          "docs/web/articles/toc.yml"
+          "infrastructure/wiki/toc.yml",
+          "infrastructure/wiki/index.md",
+          "infrastructure/wiki/articles/**.md",
+          "infrastructure/wiki/articles/toc.yml"
         ]
       }
     ],
     "resource": [
       {
         "files": [
-          "docs/images/**"
+          "docs/images/**",
+          "specs/**/*.avsc"
         ]
       }
     ],
-    "output": "_site",
+    "output": "artifacts/docs/site",
     "template": [
       "default",
       "modern"

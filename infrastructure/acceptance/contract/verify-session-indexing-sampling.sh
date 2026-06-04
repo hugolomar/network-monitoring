@@ -2,7 +2,7 @@
 # Session indexing: sample returned Elasticsearch documents and fail if _source drifts from
 # session-detected-value.avsc field semantics (presence of required business fields).
 # Opt-in: set RUN_ES_INTEGRATION=1 to execute checks (default: skip to avoid false failures in CI without ES).
-# Usage: RUN_ES_INTEGRATION=1 ./scripts/acceptance/verify-session-indexing-sampling.sh
+# Usage: RUN_ES_INTEGRATION=1 ./infrastructure/acceptance/contract/verify-session-indexing-sampling.sh
 # Needs: python3 to parse _search JSON.
 set -euo pipefail
 

@@ -49,7 +49,7 @@ only. Integration, staging, and production should use TLS/mTLS for Kafka and Reg
 1. From repo root, start the Kafka services:
    - `docker compose -f docker-compose.reference-stack.yml up -d kafka-1 kafka-2 kafka-3 schema-registry`
 2. Wait until brokers report healthy, then create required topics:
-   - `./scripts/bootstrap/kafka-topics-init.sh`
+   - `./infrastructure/stack/bootstrap/kafka-topics-init.sh`
    Defaults: 3 partitions, replication factor 3. The device topic default is `devices.detected`.
 3. Confirm the device topic exists:
    - `docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --describe --topic devices.detected`

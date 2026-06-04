@@ -1,6 +1,6 @@
 # Network monitoring
 
-Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repository also includes session indexing with Elasticsearch + Kafka Connect as a query projection, feature specs, ADRs, reference Docker Compose, and **shell helpers** under `scripts/` grouped by role — see **Repository layout** below.
+Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repository also includes session indexing with Elasticsearch + Kafka Connect as a query projection, feature specs, ADRs, reference Docker Compose, and **shell helpers** under `infrastructure/scripts/` grouped by role — see **Repository layout** below.
 
 ## Prerequisites
 
@@ -61,8 +61,8 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 
 ```bash
 docker compose -f docker-compose.reference-stack.yml up -d
-./scripts/bootstrap/kafka-topics-init.sh
-./scripts/stack/verify-kafka-stack.sh
+./infrastructure/stack/bootstrap/kafka-topics-init.sh
+./infrastructure/stack/health/verify-kafka-stack.sh
 ```
 
 The session Kafka publication path is documented in the session detection quickstart. Device stream
@@ -77,7 +77,7 @@ quickstart.
 - Device discovery flow and operator steps: [`specs/003-device-discovery/quickstart.md`](specs/003-device-discovery/quickstart.md)
 - Device ingestion flow and operator steps: [`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md)
 - Device Inventory backend flow and operator steps: [`specs/005-device-inventory/quickstart.md`](specs/005-device-inventory/quickstart.md)
-- Architecture decisions: [`docs/adr/`](docs/adr/)
+- Architecture decisions: [`docs/adr/index.md`](docs/adr/index.md)
 
 ## Repository layout
 
@@ -89,7 +89,7 @@ quickstart.
 | `src/NetworkMonitoring.Domain/` | Shared domain (SeedWork + entities/value objects) |
 | `tests/` | Unit and integration tests |
 | `specs/` | Feature specifications and contracts |
-| `scripts/stack/` | Smoke checks: Kafka/Registry; Elasticsearch/Connect |
-| `scripts/bootstrap/` | Idempotent init: topics, index templates |
-| `scripts/connectors/` | Kafka Connect JSON + `register-*.sh` |
-| `scripts/acceptance/` | Spec checks (e.g. session indexing sampling, `RUN_ES_INTEGRATION=1`) |
+| `infrastructure/stack/health/` | Smoke checks: Kafka/Registry; Elasticsearch/Connect |
+| `infrastructure/stack/bootstrap/` | Idempotent init: topics, index templates |
+| `infrastructure/connectors/` | Kafka Connect JSON + `register-*.sh` |
+| `infrastructure/acceptance/contract/` | Spec checks (e.g. session indexing sampling, `RUN_ES_INTEGRATION=1`) |

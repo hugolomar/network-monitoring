@@ -52,4 +52,7 @@ docs/local/
 
 # Docker / herramientas locales (añade si aparecen)
 # .terraform/
-_site/
+# Artifacts (build outputs, generated docs, etc.)
+artifacts/docs/api/
+artifacts/docs/site/
+
