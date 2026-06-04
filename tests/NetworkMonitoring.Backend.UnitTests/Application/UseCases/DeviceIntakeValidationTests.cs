@@ -5,8 +5,14 @@ using NetworkMonitoring.Backend.UnitTests.Support;
 
 namespace NetworkMonitoring.Backend.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for DeviceIntakeValidation.
+/// </summary>
 public sealed class DeviceIntakeValidationTests
 {
+    /// <summary>
+    /// Verifies that execute rejects missing idempotency key.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_missing_idempotency_key()
     {
@@ -17,6 +23,9 @@ public sealed class DeviceIntakeValidationTests
         Assert.Equal(DeviceIntakeOutcomeKind.Rejected, outcome.Kind);
     }
 
+    /// <summary>
+    /// Verifies that execute rejects mac identity mismatch.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_mac_identity_mismatch()
     {
@@ -27,6 +36,9 @@ public sealed class DeviceIntakeValidationTests
         Assert.Equal(DeviceIntakeOutcomeKind.Rejected, outcome.Kind);
     }
 
+    /// <summary>
+    /// Verifies that execute rejects invalid ip values.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_invalid_ip_values()
     {
@@ -37,6 +49,9 @@ public sealed class DeviceIntakeValidationTests
         Assert.Equal(DeviceIntakeOutcomeKind.Rejected, outcome.Kind);
     }
 
+    /// <summary>
+    /// Verifies that execute rejects missing required timestamps.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_missing_required_timestamps()
     {
@@ -57,6 +72,9 @@ public sealed class DeviceIntakeValidationTests
         Assert.Contains("firstSeenUtc", outcome.Reason);
     }
 
+    /// <summary>
+    /// Verifies that execute rejects invalid timestamp ordering.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_invalid_timestamp_ordering()
     {

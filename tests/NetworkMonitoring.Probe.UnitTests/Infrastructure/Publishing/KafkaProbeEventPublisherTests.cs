@@ -9,8 +9,14 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.UnitTests.Infrastructure.Publishing;
 
+/// <summary>
+/// Test suite for KafkaProbeEventPublisher.
+/// </summary>
 public sealed class KafkaProbeEventPublisherTests
 {
+    /// <summary>
+    /// Verifies that publish session detected when kafka disabled does not create producer.
+    /// </summary>
     [Fact]
     public async Task PublishSessionDetected_WhenKafkaDisabled_DoesNotCreateProducer()
     {
@@ -22,6 +28,9 @@ public sealed class KafkaProbeEventPublisherTests
         Assert.False(factory.WasCreated);
     }
 
+    /// <summary>
+    /// Verifies that publish session detected produces to session topic with session key.
+    /// </summary>
     [Fact]
     public async Task PublishSessionDetected_ProducesToSessionTopicWithSessionKey()
     {
@@ -45,6 +54,9 @@ public sealed class KafkaProbeEventPublisherTests
         Assert.Equal("10.0.0.2", produced.Message.Value["destinationIp"]);
     }
 
+    /// <summary>
+    /// Verifies that publish device detected when kafka disabled does not create producer.
+    /// </summary>
     [Fact]
     public async Task PublishDeviceDetected_WhenKafkaDisabled_DoesNotCreateProducer()
     {
@@ -56,6 +68,9 @@ public sealed class KafkaProbeEventPublisherTests
         Assert.False(factory.WasCreated);
     }
 
+    /// <summary>
+    /// Verifies that publish device detected when console disabled produces to device topic with normalized mac key.
+    /// </summary>
     [Fact]
     public async Task PublishDeviceDetected_WhenConsoleDisabled_ProducesToDeviceTopicWithNormalizedMacKey()
     {
@@ -79,6 +94,9 @@ public sealed class KafkaProbeEventPublisherTests
         Assert.Equal("AA:BB:CC:DD:EE:FF", produced.Message.Value["macAddress"]);
     }
 
+    /// <summary>
+    /// Verifies that publish device detected when kafka produce fails logs and does not throw.
+    /// </summary>
     [Fact]
     public async Task PublishDeviceDetected_WhenKafkaProduceFails_LogsAndDoesNotThrow()
     {
@@ -123,6 +141,9 @@ public sealed class KafkaProbeEventPublisherTests
             DiscoverySource.FromRaw("traffic"));
     }
 
+    /// <summary>
+    /// Tests for CapturingProducerFactory.
+    /// </summary>
     private sealed class CapturingProducerFactory(IKafkaGenericRecordProducer producer) : IKafkaGenericRecordProducerFactory
     {
         public bool WasCreated { get; private set; }
@@ -135,6 +156,9 @@ public sealed class KafkaProbeEventPublisherTests
         }
     }
 
+    /// <summary>
+    /// Tests for CapturingProducer.
+    /// </summary>
     private sealed class CapturingProducer : IKafkaGenericRecordProducer
     {
         public List<(string Topic, Message<string, GenericRecord> Message)> Messages { get; } = [];

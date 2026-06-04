@@ -5,8 +5,14 @@ using NetworkMonitoring.Backend.UnitTests.Support;
 
 namespace NetworkMonitoring.Backend.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for DeviceIntakeDiagnostics.
+/// </summary>
 public sealed class DeviceIntakeDiagnosticsTests
 {
+    /// <summary>
+    /// Verifies that execute classifies created updated idempotent rejected and persistence failure outcomes.
+    /// </summary>
     [Fact]
     public async Task Execute_classifies_created_updated_idempotent_rejected_and_persistence_failure_outcomes()
     {

@@ -7,6 +7,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Api;
 
+/// <summary>
+/// Test suite for GraphUnavailableContract.
+/// </summary>
 public sealed class GraphUnavailableContractTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -16,6 +19,9 @@ public sealed class GraphUnavailableContractTests : IClassFixture<GraphTestAppli
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that graph unavailable payload contains required fields.
+    /// </summary>
     [Fact]
     public void Graph_unavailable_payload_contains_required_fields()
     {
@@ -23,6 +29,9 @@ public sealed class GraphUnavailableContractTests : IClassFixture<GraphTestAppli
         Assert.NotNull(payload);
     }
 
+    /// <summary>
+    /// Verifies that graph endpoint returns 503 when use case throws.
+    /// </summary>
     [Fact]
     public async Task Graph_endpoint_returns_503_when_use_case_throws()
     {

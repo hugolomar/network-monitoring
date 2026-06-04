@@ -2,8 +2,14 @@ using NetworkMonitoring.Backend.Application.Models;
 
 namespace NetworkMonitoring.Backend.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for DeviceIntakeIdempotency.
+/// </summary>
 public sealed class DeviceIntakeIdempotencyTests
 {
+    /// <summary>
+    /// Verifies that execute treats exact duplicate as idempotent.
+    /// </summary>
     [Fact]
     public async Task Execute_treats_exact_duplicate_as_idempotent()
     {
@@ -16,6 +22,9 @@ public sealed class DeviceIntakeIdempotencyTests
         Assert.Equal(DeviceIntakeOutcomeKind.Idempotent, duplicate.Kind);
     }
 
+    /// <summary>
+    /// Verifies that execute consolidates timestamps observed ips hostname and primary ip.
+    /// </summary>
     [Fact]
     public async Task Execute_consolidates_timestamps_observed_ips_hostname_and_primary_ip()
     {
@@ -44,6 +53,9 @@ public sealed class DeviceIntakeIdempotencyTests
         Assert.Equal("192.168.1.20", updated.Device.PrimaryIp);
     }
 
+    /// <summary>
+    /// Verifies that execute keeps existing non null hostname and primary ip on timestamp tie.
+    /// </summary>
     [Fact]
     public async Task Execute_keeps_existing_non_null_hostname_and_primary_ip_on_timestamp_tie()
     {

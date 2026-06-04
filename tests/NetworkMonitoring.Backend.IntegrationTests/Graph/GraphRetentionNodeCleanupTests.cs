@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphRetentionNodeCleanup.
+/// </summary>
 public sealed class GraphRetentionNodeCleanupTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphRetentionNodeCleanupTests : IClassFixture<GraphTestAppl
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that retention removes orphan external hosts but not internal devices.
+    /// </summary>
     [Fact]
     public async Task Retention_removes_orphan_external_hosts_but_not_internal_devices()
     {

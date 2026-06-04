@@ -1,16 +1,9 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.1 -> 1.3.0
+- Version change: 1.6.0 -> 1.7.0
 - Modified principles:
-  - Template Principle 1 -> I. Clean/Hexagonal Shared Domain Core
-  - Template Principle 2 -> II. Contract-First Event and API Boundaries
-  - Template Principle 3 -> III. Security-by-Default for Service and User Access
-  - Template Principle 4 -> IV. Verifiable Quality Gates
-  - Template Principle 5 -> V. Evolution Through Explicit Trade-Offs
+  - Article 29 -> Generalizes documentation to include tests.
 - Added sections:
-  - Architecture and Domain Constraints
-  - Delivery Workflow and Review Expectations
-- Removed sections:
   - None
 - Templates requiring updates:
   - ✅ updated: .specify/templates/plan-template.md
@@ -141,10 +134,11 @@ repository. In case of conflict, this document takes precedence over local conve
 - Non-compliance MUST be resolved before merge or explicitly waived with rationale.
 
 ### VI. Code Documentation Standards
-**Article 29 — Boundary and API Documentation.** Every public class, interface, method, and
-property in the backend (excluding `SeedWork`) and every exported component, hook, or function in
-the frontend MUST be documented using industry-standard formats (XML comments for .NET, TSDoc for
-TypeScript). This documentation MUST explicitly detail:
+**Article 29 — Codebase and Verification Documentation.** Every public class, interface, method,
+and property in the backend (excluding `SeedWork`), every exported component, hook, or function in
+the frontend, and ALL test classes and test methods (Unit, Integration, and Contract) MUST be
+documented using industry-standard formats (XML comments for .NET, TSDoc for TypeScript). This
+documentation MUST explicitly detail:
 - The core purpose of the element (Summary).
 - The meaning and constraints of all input parameters (Params).
 - The behavior and significance of return values (Returns).
@@ -164,6 +158,8 @@ maintainability.
 
 Rationale: Clear documentation of interfaces, inputs, and outputs is critical for system
 auditability, reducing integration errors, and ensuring the network monitoring domain remains
-maintainable as it evolves.
+maintainable as it evolves. Inclusion of verification documentation (tests) ensures that the
+system's behavior is as documented and understandable as its production code.
 
-**Version**: 1.6.0 | **Ratified**: 2026-05-21 | **Last Amended**: 2026-05-21
+**Version**: 1.7.0 | **Ratified**: 2026-06-04 | **Last Amended**: 2026-06-04
+

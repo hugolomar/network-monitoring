@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphProjectionRetryPolicy.
+/// </summary>
 public sealed class GraphProjectionRetryPolicyTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphProjectionRetryPolicyTests : IClassFixture<GraphTestApp
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that projection continues after retryable failures.
+    /// </summary>
     [Fact]
     public async Task Projection_ContinuesAfterRetryableFailures()
     {

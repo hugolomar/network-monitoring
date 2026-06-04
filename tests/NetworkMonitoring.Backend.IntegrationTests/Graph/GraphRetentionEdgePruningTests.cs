@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphRetentionEdgePruning.
+/// </summary>
 public sealed class GraphRetentionEdgePruningTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphRetentionEdgePruningTests : IClassFixture<GraphTestAppl
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that retention prunes relationships older than cutoff.
+    /// </summary>
     [Fact]
     public async Task Retention_prunes_relationships_older_than_cutoff()
     {

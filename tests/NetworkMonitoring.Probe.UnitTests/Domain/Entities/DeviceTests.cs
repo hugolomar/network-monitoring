@@ -3,8 +3,16 @@ using NetworkMonitoring.Domain.ValueObjects;
 
 namespace NetworkMonitoring.Probe.UnitTests.Domain.Entities;
 
+/// <summary>
+/// Verifies the domain logic of the Device entity, specifically testing the 
+/// creation and consolidation of device detection data.
+/// </summary>
 public sealed class DeviceTests
 {
+    /// <summary>
+    /// Verifies that creating a device with an initial set of observed IPs correctly 
+    /// stores the collection and initializes other properties.
+    /// </summary>
     [Fact]
     public void Create_WithObservedIps_StoresCollection()
     {
@@ -24,6 +32,10 @@ public sealed class DeviceTests
         Assert.Equal("ARP", device.DiscoverySource.Value);
     }
 
+    /// <summary>
+    /// Verifies that consolidating a detection with a newer timestamp updates the 
+    /// LastSeenUtc, Hostname, and DiscoverySource properties appropriately.
+    /// </summary>
     [Fact]
     public void ConsolidateDetection_WithNewTimestamp_UpdatesLastSeenAndHostname()
     {
@@ -51,6 +63,10 @@ public sealed class DeviceTests
         Assert.Equal("LLDP", device.DiscoverySource.Value);
     }
 
+    /// <summary>
+    /// Verifies that consolidating a detection with an earlier timestamp updates 
+    /// the FirstSeenUtc property while maintaining unique IPs.
+    /// </summary>
     [Fact]
     public void ConsolidateDetection_WithEarlierTimestamp_UpdatesFirstSeenAndKeepsUniqueIps()
     {

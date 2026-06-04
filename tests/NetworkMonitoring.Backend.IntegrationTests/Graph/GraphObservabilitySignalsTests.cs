@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphObservabilitySignals.
+/// </summary>
 public sealed class GraphObservabilitySignalsTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphObservabilitySignalsTests : IClassFixture<GraphTestAppl
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that projection and retention paths execute with telemetry bridge registered.
+    /// </summary>
     [Fact]
     public async Task Projection_and_retention_paths_execute_with_telemetry_bridge_registered()
     {

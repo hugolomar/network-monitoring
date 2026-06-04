@@ -4,8 +4,14 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.UnitTests.Infrastructure.Publishing;
 
+/// <summary>
+/// Test suite for SessionDetectedAvroMapper.
+/// </summary>
 public sealed class SessionDetectedAvroMapperTests
 {
+    /// <summary>
+    /// Verifies that to generic record maps all contract fields.
+    /// </summary>
     [Fact]
     public void ToGenericRecord_MapsAllContractFields()
     {
@@ -41,6 +47,9 @@ public sealed class SessionDetectedAvroMapperTests
         Assert.Equal("2025-03-15T10:32:00.0000000+00:00", record["occurredAtUtc"]);
     }
 
+    /// <summary>
+    /// Verifies that to generic record with null session id serializes union as null.
+    /// </summary>
     [Fact]
     public void ToGenericRecord_WithNullSessionId_SerializesUnionAsNull()
     {
@@ -61,6 +70,9 @@ public sealed class SessionDetectedAvroMapperTests
         Assert.Null(record["sessionId"]);
     }
 
+    /// <summary>
+    /// Verifies that schema instance parses embedded contract.
+    /// </summary>
     [Fact]
     public void SchemaInstance_ParsesEmbeddedContract()
     {

@@ -3,8 +3,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Api;
 
+/// <summary>
+/// Test suite for GraphDevicesAuthorization.
+/// </summary>
 public sealed class GraphDevicesAuthorizationTests(GraphTestApplicationFactory factory) : IClassFixture<GraphTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that get graph devices returns 403 for role outside allowed set.
+    /// </summary>
     [Fact]
     public async Task Get_graph_devices_returns_403_for_role_outside_allowed_set()
     {

@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphQueryBounding.
+/// </summary>
 public sealed class GraphQueryBoundingTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphQueryBoundingTests : IClassFixture<GraphTestApplication
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that query applies depth and limit caps.
+    /// </summary>
     [Fact]
     public async Task Query_applies_depth_and_limit_caps()
     {

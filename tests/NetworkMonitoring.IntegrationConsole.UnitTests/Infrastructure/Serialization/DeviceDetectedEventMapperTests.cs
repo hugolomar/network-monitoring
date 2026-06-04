@@ -4,8 +4,14 @@ using NetworkMonitoring.IntegrationConsole.Infrastructure.Serialization;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Infrastructure.Serialization;
 
+/// <summary>
+/// Test suite for DeviceDetectedEventMapper.
+/// </summary>
 public sealed class DeviceDetectedEventMapperTests
 {
+    /// <summary>
+    /// Verifies that from generic record maps device detected contract fields.
+    /// </summary>
     [Fact]
     public void FromGenericRecord_maps_DeviceDetected_contract_fields()
     {

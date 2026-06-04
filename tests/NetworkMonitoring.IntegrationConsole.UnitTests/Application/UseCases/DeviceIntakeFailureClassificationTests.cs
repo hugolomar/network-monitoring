@@ -4,8 +4,14 @@ using NetworkMonitoring.IntegrationConsole.Infrastructure.Backend;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for DeviceIntakeFailureClassification.
+/// </summary>
 public sealed class DeviceIntakeFailureClassificationTests
 {
+    /// <summary>
+    /// Verifies that classify final treats validation errors as permanent rejections.
+    /// </summary>
     [Theory]
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.UnprocessableEntity)]

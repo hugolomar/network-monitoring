@@ -4,8 +4,14 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.UnitTests.Infrastructure.Publishing;
 
+/// <summary>
+/// Test suite for ConsoleRecordSchema.
+/// </summary>
 public sealed class ConsoleRecordSchemaTests
 {
+    /// <summary>
+    /// Verifies that serialize session contains expected envelope fields.
+    /// </summary>
     [Fact]
     public void SerializeSession_ContainsExpectedEnvelopeFields()
     {
@@ -29,6 +35,9 @@ public sealed class ConsoleRecordSchemaTests
         Assert.Contains("\"sessionId\"", json);
     }
 
+    /// <summary>
+    /// Verifies that serialize device contains expected device detected fields.
+    /// </summary>
     [Fact]
     public void SerializeDevice_ContainsExpectedDeviceDetectedFields()
     {

@@ -3,8 +3,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for DeviceEventValidation.
+/// </summary>
 public sealed class DeviceEventValidationTests
 {
+    /// <summary>
+    /// Verifies that try validate accepts key that normalizes to payload mac.
+    /// </summary>
     [Theory]
     [InlineData("aa-bb-cc-dd-ee-ff")]
     [InlineData("AABBCCDDEEFF")]
@@ -16,6 +22,9 @@ public sealed class DeviceEventValidationTests
         Assert.Equal("AA:BB:CC:DD:EE:FF", detectedEvent.MacAddress);
     }
 
+    /// <summary>
+    /// Verifies that try validate rejects key payload identity mismatch.
+    /// </summary>
     [Fact]
     public void TryValidate_rejects_key_payload_identity_mismatch()
     {
@@ -25,6 +34,9 @@ public sealed class DeviceEventValidationTests
         Assert.Contains("key does not match", reason);
     }
 
+    /// <summary>
+    /// Verifies that try validate rejects missing key.
+    /// </summary>
     [Fact]
     public void TryValidate_rejects_missing_key()
     {

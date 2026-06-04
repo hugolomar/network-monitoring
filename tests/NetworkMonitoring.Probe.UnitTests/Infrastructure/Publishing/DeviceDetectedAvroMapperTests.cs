@@ -4,8 +4,16 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.UnitTests.Infrastructure.Publishing;
 
+/// <summary>
+/// Verifies the mapping of Device domain entities to Avro GenericRecords 
+/// for serialization and publishing as DeviceDetected events.
+/// </summary>
 public sealed class DeviceDetectedAvroMapperTests
 {
+    /// <summary>
+    /// Verifies that all fields specified in the Avro contract are correctly 
+    /// mapped from a fully populated Device entity to the GenericRecord.
+    /// </summary>
     [Fact]
     public void ToGenericRecord_MapsAllContractFields()
     {
@@ -39,6 +47,10 @@ public sealed class DeviceDetectedAvroMapperTests
         Assert.Equal("2025-04-20T09:06:00.0000000+00:00", record["occurredAtUtc"]);
     }
 
+    /// <summary>
+    /// Verifies that when optional values are absent from the Device entity, 
+    /// the corresponding Avro union types are serialized as null.
+    /// </summary>
     [Fact]
     public void ToGenericRecord_WithOptionalValuesAbsent_SerializesUnionsAsNull()
     {
@@ -61,6 +73,10 @@ public sealed class DeviceDetectedAvroMapperTests
         Assert.Empty((string[])record["observedIps"]);
     }
 
+    /// <summary>
+    /// Verifies that the embedded Avro schema instance is parsed correctly 
+    /// and matches the expected schema name and namespace.
+    /// </summary>
     [Fact]
     public void SchemaInstance_ParsesEmbeddedContract()
     {

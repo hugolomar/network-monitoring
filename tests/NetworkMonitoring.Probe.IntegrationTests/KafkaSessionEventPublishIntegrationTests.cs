@@ -18,6 +18,9 @@ namespace NetworkMonitoring.Probe.IntegrationTests;
 /// </summary>
 public sealed class KafkaSessionEventPublishIntegrationTests
 {
+    /// <summary>
+    /// Verifies that publish session detected produces consumable avro value.
+    /// </summary>
     [SkippableFact]
     public async Task PublishSessionDetected_ProducesConsumableAvroValue()
     {

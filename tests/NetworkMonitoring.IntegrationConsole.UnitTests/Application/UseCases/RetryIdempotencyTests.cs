@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for RetryIdempotency.
+/// </summary>
 public sealed class RetryIdempotencyTests
 {
+    /// <summary>
+    /// Verifies that process preserves normalized mac for forwarding identity.
+    /// </summary>
     [Fact]
     public async Task Process_preserves_normalized_mac_for_forwarding_identity()
     {

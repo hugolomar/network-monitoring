@@ -6,8 +6,14 @@ using NetworkMonitoring.Probe.Host.DependencyInjection;
 
 namespace NetworkMonitoring.Probe.UnitTests.Host.DependencyInjection;
 
+/// <summary>
+/// Test suite for ProbeOptionsValidation.
+/// </summary>
 public sealed class ProbeOptionsValidationTests
 {
+    /// <summary>
+    /// Verifies that probe options when kafka enabled require kafka bootstrap servers.
+    /// </summary>
     [Fact]
     public void ProbeOptions_WhenKafkaEnabled_RequireKafkaBootstrapServers()
     {
@@ -22,6 +28,9 @@ public sealed class ProbeOptionsValidationTests
         Assert.Contains("Probe:KafkaBootstrapServers is required", exception.Message);
     }
 
+    /// <summary>
+    /// Verifies that probe options when kafka enabled require schema registry url.
+    /// </summary>
     [Fact]
     public void ProbeOptions_WhenKafkaEnabled_RequireSchemaRegistryUrl()
     {
@@ -36,6 +45,9 @@ public sealed class ProbeOptionsValidationTests
         Assert.Contains("Probe:SchemaRegistryUrl is required", exception.Message);
     }
 
+    /// <summary>
+    /// Verifies that probe options when kafka disabled do not require kafka connection settings.
+    /// </summary>
     [Fact]
     public void ProbeOptions_WhenKafkaDisabled_DoNotRequireKafkaConnectionSettings()
     {

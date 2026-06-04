@@ -4,8 +4,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.IntegrationConsole;
 
+/// <summary>
+/// Test suite for IntegrationConsoleBackendIdempotency.
+/// </summary>
 public sealed class IntegrationConsoleBackendIdempotencyTests(BackendTestApplicationFactory factory) : IClassFixture<BackendTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that backend keeps forwarded retries idempotent.
+    /// </summary>
     [Fact]
     public async Task Backend_keeps_forwarded_retries_idempotent()
     {

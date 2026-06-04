@@ -4,8 +4,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Api;
 
+/// <summary>
+/// Test suite for DeviceInventoryQueryContract.
+/// </summary>
 public sealed class DeviceInventoryQueryContractTests(BackendTestApplicationFactory factory) : IClassFixture<BackendTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that get devices returns empty inventory.
+    /// </summary>
     [Fact]
     public async Task Get_devices_returns_empty_inventory()
     {
@@ -18,6 +24,9 @@ public sealed class DeviceInventoryQueryContractTests(BackendTestApplicationFact
         Assert.Empty(inventory!.Items);
     }
 
+    /// <summary>
+    /// Verifies that get devices returns consolidated inventory.
+    /// </summary>
     [Fact]
     public async Task Get_devices_returns_consolidated_inventory()
     {

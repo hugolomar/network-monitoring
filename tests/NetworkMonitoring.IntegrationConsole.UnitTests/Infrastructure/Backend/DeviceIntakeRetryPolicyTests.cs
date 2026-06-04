@@ -6,8 +6,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Infrastructure.Backend;
 
+/// <summary>
+/// Test suite for DeviceIntakeRetryPolicy.
+/// </summary>
 public sealed class DeviceIntakeRetryPolicyTests
 {
+    /// <summary>
+    /// Verifies that send retries transient status codes.
+    /// </summary>
     [Theory]
     [InlineData(HttpStatusCode.RequestTimeout)]
     [InlineData((HttpStatusCode)429)]
@@ -27,6 +33,9 @@ public sealed class DeviceIntakeRetryPolicyTests
         Assert.Equal(IngestionOutcomeKind.Succeeded, outcome.Kind);
     }
 
+    /// <summary>
+    /// Verifies that send retries network failures until success.
+    /// </summary>
     [Fact]
     public async Task Send_retries_network_failures_until_success()
     {
@@ -47,6 +56,9 @@ public sealed class DeviceIntakeRetryPolicyTests
             new RetryOptions(3, TimeSpan.Zero),
             new DeviceIntakeRetryPolicy());
 
+    /// <summary>
+    /// Tests for SequencedHandler.
+    /// </summary>
     private sealed class SequencedHandler(params object[] responses) : HttpMessageHandler
     {
         private readonly Queue<object> _responses = new(responses);

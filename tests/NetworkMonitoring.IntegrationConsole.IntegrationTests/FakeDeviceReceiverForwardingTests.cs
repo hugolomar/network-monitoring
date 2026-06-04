@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.IntegrationTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.IntegrationTests;
 
+/// <summary>
+/// Test suite for FakeDeviceReceiverForwarding.
+/// </summary>
 public sealed class FakeDeviceReceiverForwardingTests
 {
+    /// <summary>
+    /// Verifies that send forwards valid device to fake receiver.
+    /// </summary>
     [Fact]
     public async Task Send_forwards_valid_device_to_fake_receiver()
     {

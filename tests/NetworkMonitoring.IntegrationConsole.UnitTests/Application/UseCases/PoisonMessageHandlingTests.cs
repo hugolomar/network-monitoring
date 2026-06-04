@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for PoisonMessageHandling.
+/// </summary>
 public sealed class PoisonMessageHandlingTests
 {
+    /// <summary>
+    /// Verifies that run continues after poison event.
+    /// </summary>
     [Fact]
     public async Task Run_continues_after_poison_event()
     {

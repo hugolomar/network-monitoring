@@ -4,8 +4,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Api;
 
+/// <summary>
+/// Test suite for DeviceIntakeContract.
+/// </summary>
 public sealed class DeviceIntakeContractTests(BackendTestApplicationFactory factory) : IClassFixture<BackendTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that post devices accepts valid request.
+    /// </summary>
     [Fact]
     public async Task Post_devices_accepts_valid_request()
     {
@@ -24,6 +30,9 @@ public sealed class DeviceIntakeContractTests(BackendTestApplicationFactory fact
         Assert.Equal("AA:BB:CC:DD:EE:FF", inventory.Items[0].MacAddress);
     }
 
+    /// <summary>
+    /// Verifies that post devices treats duplicate as success without duplicate inventory item.
+    /// </summary>
     [Fact]
     public async Task Post_devices_treats_duplicate_as_success_without_duplicate_inventory_item()
     {

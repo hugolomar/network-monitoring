@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphProjectionIdempotency.
+/// </summary>
 public sealed class GraphProjectionIdempotencyTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphProjectionIdempotencyTests : IClassFixture<GraphTestApp
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that projection replay does not duplicate structure.
+    /// </summary>
     [Fact]
     public async Task Projection_ReplayDoesNotDuplicateStructure()
     {

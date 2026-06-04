@@ -5,6 +5,9 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Graph;
 
+/// <summary>
+/// Test suite for GraphProjectionIdentity.
+/// </summary>
 public sealed class GraphProjectionIdentityTests : IClassFixture<GraphTestApplicationFactory>
 {
     private readonly GraphTestApplicationFactory _factory;
@@ -14,6 +17,9 @@ public sealed class GraphProjectionIdentityTests : IClassFixture<GraphTestApplic
         _factory = factory;
     }
 
+    /// <summary>
+    /// Verifies that projection uses source destination protocol as identity.
+    /// </summary>
     [Fact]
     public async Task Projection_UsesSourceDestinationProtocolAsIdentity()
     {

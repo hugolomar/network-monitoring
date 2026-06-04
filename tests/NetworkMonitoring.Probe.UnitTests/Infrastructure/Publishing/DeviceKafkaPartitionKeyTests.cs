@@ -4,8 +4,16 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.UnitTests.Infrastructure.Publishing;
 
+/// <summary>
+/// Verifies the correct generation of Kafka partition keys for device events,
+/// ensuring that events for the same device are routed to the same partition.
+/// </summary>
 public sealed class DeviceKafkaPartitionKeyTests
 {
+    /// <summary>
+    /// Verifies that the partition key is built using the normalized representation 
+    /// of the device's MAC address, regardless of its original input format.
+    /// </summary>
     [Theory]
     [InlineData("aa-bb-cc-dd-ee-ff")]
     [InlineData("aa:bb:cc:dd:ee:ff")]
@@ -17,6 +25,10 @@ public sealed class DeviceKafkaPartitionKeyTests
         Assert.Equal("AA:BB:CC:DD:EE:FF", DeviceKafkaPartitionKey.Build(device));
     }
 
+    /// <summary>
+    /// Verifies that generating the partition key as UTF-8 bytes correctly 
+    /// round-trips with the string representation of the key.
+    /// </summary>
     [Fact]
     public void BuildUtf8Bytes_RoundTripsWithUtf8()
     {

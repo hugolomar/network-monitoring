@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Infrastructure.Backend;
 
+/// <summary>
+/// Test suite for DeviceIntakeIdempotency.
+/// </summary>
 public sealed class DeviceIntakeIdempotencyTests
 {
+    /// <summary>
+    /// Verifies that send uses normalized mac as idempotency key.
+    /// </summary>
     [Fact]
     public async Task Send_uses_normalized_mac_as_idempotency_key()
     {
@@ -21,6 +27,9 @@ public sealed class DeviceIntakeIdempotencyTests
         Assert.Equal("AA:BB:CC:DD:EE:FF", handler.IdempotencyKeys.Single());
     }
 
+    /// <summary>
+    /// Tests for CapturingHandler.
+    /// </summary>
     private sealed class CapturingHandler : HttpMessageHandler
     {
         public List<string> IdempotencyKeys { get; } = [];

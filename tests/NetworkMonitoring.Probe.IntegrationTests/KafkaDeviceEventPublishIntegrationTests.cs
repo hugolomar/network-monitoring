@@ -18,6 +18,9 @@ namespace NetworkMonitoring.Probe.IntegrationTests;
 /// </summary>
 public sealed class KafkaDeviceEventPublishIntegrationTests
 {
+    /// <summary>
+    /// Verifies that publish device detected produces consumable avro value with normalized mac key.
+    /// </summary>
     [SkippableFact]
     public async Task PublishDeviceDetected_ProducesConsumableAvroValueWithNormalizedMacKey()
     {

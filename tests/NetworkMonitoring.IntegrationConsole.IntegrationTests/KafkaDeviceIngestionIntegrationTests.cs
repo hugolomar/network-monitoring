@@ -4,8 +4,14 @@ using Xunit;
 
 namespace NetworkMonitoring.IntegrationConsole.IntegrationTests;
 
+/// <summary>
+/// Test suite for KafkaDeviceIngestionIntegration.
+/// </summary>
 public sealed class KafkaDeviceIngestionIntegrationTests
 {
+    /// <summary>
+    /// Verifies that reference stack exposes devices detected topic and schema registry.
+    /// </summary>
     [SkippableFact]
     public async Task Reference_stack_exposes_devices_detected_topic_and_schema_registry()
     {

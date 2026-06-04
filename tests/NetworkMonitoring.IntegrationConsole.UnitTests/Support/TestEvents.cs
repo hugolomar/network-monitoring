@@ -2,6 +2,9 @@ using NetworkMonitoring.IntegrationConsole.Application.Models;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
+/// <summary>
+/// Tests for TestEvents.
+/// </summary>
 internal static class TestEvents
 {
     public static DeviceDetectedEvent DeviceDetected(string macAddress = "AA:BB:CC:DD:EE:FF") =>
