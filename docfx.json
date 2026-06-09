@@ -52,8 +52,9 @@
         "dest": "."
       },
       {
+        "src": ".specify/memory",
         "files": [
-          ".specify/memory/constitution.md"
+          "constitution.md"
         ],
         "dest": "."
       }
