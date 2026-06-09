@@ -4,12 +4,12 @@
       "src": [
         {
           "files": [
-            "src/**/*.csproj"
+            "src/**/*.csproj",
+            "tests/**/*.csproj"
           ],
           "exclude": [
             "**/bin/**",
-            "**/obj/**",
-            "tests/**"
+            "**/obj/**"
           ]
         }
       ],
@@ -64,7 +64,7 @@
     ],
     "globalMetadata": {
       "_appTitle": "Network Monitoring System",
-      "_appFooter": "© 2026 Network Monitoring Project. Full compliance with Constitution v1.6.0.",
+      "_appFooter": "© 2026 Network Monitoring Project. Full compliance with Constitution v1.7.0.",
       "_enableSearch": true
     }
   }
