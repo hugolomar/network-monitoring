@@ -29,4 +29,4 @@
     - name: CI Pipeline Architecture
       href: ../../docs/notes/002-ci-pipeline-architecture.md
 - name: Constitution
-  href: ../../constitution.md
+  href: ../../.specify/memory/constitution.md

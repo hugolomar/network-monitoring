@@ -1,28 +1,64 @@
 - name: Overview
   href: index.md
-- name: Core Services
+- name: 📂 Core Services
   items:
-    - name: Backend
-      uid: NetworkMonitoring.Backend
-    - name: Probe
-      uid: NetworkMonitoring.Probe
-    - name: Integration Console
-      uid: NetworkMonitoring.IntegrationConsole
-- name: Domain Model
+    - name: 🖥️ Backend
+      items:
+        - name: API Endpoints
+          uid: NetworkMonitoring.Backend.Host.Endpoints
+        - name: Use Cases
+          uid: NetworkMonitoring.Backend.Application.UseCases
+        - name: Infrastructure & Neo4j
+          uid: NetworkMonitoring.Backend.Infrastructure.Graph
+        - name: Persistence & EF
+          uid: NetworkMonitoring.Backend.Infrastructure.Persistence
+        - name: Full Namespace
+          uid: NetworkMonitoring.Backend
+    - name: 📡 Probe
+      items:
+        - name: Traffic Processing
+          uid: NetworkMonitoring.Probe.Application.UseCases
+        - name: Kafka Publishing
+          uid: NetworkMonitoring.Probe.Infrastructure.Publishing
+        - name: Tshark Integration
+          uid: NetworkMonitoring.Probe.Infrastructure.Traffic
+        - name: Full Namespace
+          uid: NetworkMonitoring.Probe
+    - name: 🌉 Integration Console
+      items:
+        - name: Event Ingestion
+          uid: NetworkMonitoring.IntegrationConsole.Application.UseCases
+        - name: Backend Client
+          uid: NetworkMonitoring.IntegrationConsole.Infrastructure.Backend
+        - name: Full Namespace
+          uid: NetworkMonitoring.IntegrationConsole
+- name: 📂 Domain Model
   items:
-    - name: Domain Shared
-      uid: NetworkMonitoring.Domain
-- name: Testing Suite
+    - name: Entities
+      uid: NetworkMonitoring.Domain.Entities
+    - name: Value Objects
+      uid: NetworkMonitoring.Domain.ValueObjects
+    - name: Seedwork
+      uid: NetworkMonitoring.Domain.SeedWork
+- name: 📂 Testing Suite
   items:
-    - name: Backend Integration Tests
-      uid: NetworkMonitoring.Backend.IntegrationTests
-    - name: Backend Unit Tests
-      uid: NetworkMonitoring.Backend.UnitTests
-    - name: Probe Integration Tests
-      uid: NetworkMonitoring.Probe.IntegrationTests
-    - name: Probe Unit Tests
-      uid: NetworkMonitoring.Probe.UnitTests
-    - name: Integration Console Integration Tests
-      uid: NetworkMonitoring.IntegrationConsole.IntegrationTests
-    - name: Integration Console Unit Tests
-      uid: NetworkMonitoring.IntegrationConsole.UnitTests
+    - name: 🧪 Integration Tests
+      items:
+        - name: Backend API Tests
+          uid: NetworkMonitoring.Backend.IntegrationTests.Api
+        - name: Backend Graph Tests
+          uid: NetworkMonitoring.Backend.IntegrationTests.Graph
+        - name: Probe Kafka Tests
+          uid: NetworkMonitoring.Probe.IntegrationTests
+        - name: Console Ingestion Tests
+          uid: NetworkMonitoring.IntegrationConsole.IntegrationTests
+    - name: 🧩 Unit Tests
+      items:
+        - name: Backend Unit Tests
+          uid: NetworkMonitoring.Backend.UnitTests.Application.UseCases
+        - name: Probe Unit Tests
+          uid: NetworkMonitoring.Probe.UnitTests.Application.UseCases
+        - name: Console Unit Tests
+          uid: NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases
+        - name: Domain Unit Tests
+          uid: NetworkMonitoring.Probe.UnitTests.Domain.Entities
