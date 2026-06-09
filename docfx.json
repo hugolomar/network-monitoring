@@ -31,8 +31,7 @@
           "docs/**/*.md",
           "specs/**/*.md",
           "README.md",
-          "index.md",
-          "toc.yml"
+          "index.md"
         ],
         "exclude": [
           "**/obj/**",
@@ -41,16 +40,20 @@
       },
       {
         "files": [
-          "infrastructure/wiki/toc.yml",
-          "infrastructure/wiki/index.md",
-          "infrastructure/wiki/articles/**.md",
-          "infrastructure/wiki/articles/toc.yml"
+          "infrastructure/documentation/**/*.md",
+          "infrastructure/documentation/technical/toc.yml",
+          "infrastructure/documentation/wiki/toc.yml"
         ]
       },
       {
-        "src": ".specify/memory",
         "files": [
-          "constitution.md"
+          "infrastructure/documentation/toc.yml"
+        ],
+        "dest": "."
+      },
+      {
+        "files": [
+          ".specify/memory/constitution.md"
         ],
         "dest": "."
       }
