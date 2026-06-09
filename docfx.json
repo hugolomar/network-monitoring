@@ -30,7 +30,6 @@
         "files": [
           "docs/**/*.md",
           "specs/**/*.md",
-          ".specify/memory/constitution.md",
           "README.md",
           "index.md",
           "toc.yml"
@@ -47,6 +46,13 @@
           "infrastructure/wiki/articles/**.md",
           "infrastructure/wiki/articles/toc.yml"
         ]
+      },
+      {
+        "src": ".specify/memory",
+        "files": [
+          "constitution.md"
+        ],
+        "dest": "."
       }
     ],
     "resource": [
