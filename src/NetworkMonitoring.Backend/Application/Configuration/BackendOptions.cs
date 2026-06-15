@@ -33,6 +33,26 @@ public sealed class BackendOptions
 public sealed class GraphOptions
 {
     /// <summary>
+    /// Gets graph provider kind ("Neo4j" or "InMemory").
+    /// </summary>
+    public string Provider { get; init; } = "Neo4j";
+
+    /// <summary>
+    /// Gets Neo4j bolt URI.
+    /// </summary>
+    public string Neo4jUri { get; init; } = "bolt://localhost:7687";
+
+    /// <summary>
+    /// Gets Neo4j user name.
+    /// </summary>
+    public string Neo4jUsername { get; init; } = "neo4j";
+
+    /// <summary>
+    /// Gets Neo4j password.
+    /// </summary>
+    public string Neo4jPassword { get; init; } = "networkmonitoring123";
+
+    /// <summary>
     /// Gets the default traversal depth used when omitted by callers.
     /// </summary>
     public int DefaultDepth { get; init; } = 1;

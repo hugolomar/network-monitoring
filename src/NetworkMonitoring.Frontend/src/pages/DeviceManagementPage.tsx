@@ -98,7 +98,7 @@ export default function DeviceManagementPage() {
 
   const backendHint =
     getBackendBaseUrl() === ""
-      ? "Same-origin `/devices` (Vite proxy or nginx → backend)."
+      ? "Same-origin `/devices` + `/api/*` (Vite proxy or nginx → backend)."
       : `Backend base: ${getBackendBaseUrl()}`;
 
   const showTable =

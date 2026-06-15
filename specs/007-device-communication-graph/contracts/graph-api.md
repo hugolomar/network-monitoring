@@ -22,6 +22,9 @@ centered on a root device identity.
 - The endpoint requires authenticated access.
 - The endpoint enforces role-based authorization.
 - Allowed graph-read roles in this feature scope: `admin`, `analyst`, `auditor`, `integration`.
+- Runtime header mapping in the current backend implementation:
+  - `Authorization` header is required for authenticated access checks.
+  - `X-Role` header provides the effective caller role for authorization checks.
 
 ## Successful Response
 

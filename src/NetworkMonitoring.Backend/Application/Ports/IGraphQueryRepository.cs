@@ -15,4 +15,11 @@ public interface IGraphQueryRepository
         int depth,
         int limit,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets a bounded full graph snapshot without requiring a root identity.
+    /// </summary>
+    Task<GraphQueryResult> GetGraphSnapshot(
+        int limit,
+        CancellationToken cancellationToken);
 }

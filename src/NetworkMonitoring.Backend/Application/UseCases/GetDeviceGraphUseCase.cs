@@ -52,4 +52,27 @@ public sealed class GetDeviceGraphUseCase(
 
         return graphQueryRepository.GetDeviceGraph(rootDeviceId, effectiveDepth, effectiveLimit, cancellationToken);
     }
+
+    /// <summary>
+    /// Executes bounded full-graph retrieval with configured default/cap semantics.
+    /// </summary>
+    public Task<GraphQueryResult> ExecuteSnapshot(
+        int? limit,
+        CancellationToken cancellationToken)
+    {
+        var graph = options.Value.Graph;
+        var effectiveLimit = limit ?? graph.DefaultLimit;
+
+        if (effectiveLimit < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(limit), "limit must be >= 1.");
+        }
+
+        if (effectiveLimit > graph.MaxLimit)
+        {
+            effectiveLimit = graph.MaxLimit;
+        }
+
+        return graphQueryRepository.GetGraphSnapshot(effectiveLimit, cancellationToken);
+    }
 }

@@ -101,6 +101,29 @@ public sealed class InMemoryGraphStore
     }
 
     /// <summary>
+    /// Returns a bounded graph snapshot without neighborhood filtering.
+    /// </summary>
+    /// <param name="limit">Maximum number of nodes to include.</param>
+    /// <returns>Graph snapshot result.</returns>
+    public GraphQueryResult QuerySnapshot(int limit)
+    {
+        var nodes = _nodes.Values
+            .Take(limit)
+            .ToArray();
+
+        var nodeSet = nodes
+            .Select(node => node.Id)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var edges = _edges.Values
+            .Where(edge => nodeSet.Contains(edge.SourceId) && nodeSet.Contains(edge.DestinationId))
+            .ToArray();
+
+        var truncated = _nodes.Count > nodes.Length;
+        return new GraphQueryResult(nodes, edges, truncated);
+    }
+
+    /// <summary>
     /// Executes stale-edge and orphan-external-host cleanup.
     /// </summary>
     /// <param name="cutoffUtc">Stale-edge cutoff timestamp.</param>

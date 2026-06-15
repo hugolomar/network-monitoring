@@ -17,9 +17,22 @@ Validate end-to-end communication graph behavior:
 
 ## Start required services
 
-1. Start backend and required dependencies via the local reference stack used by existing backend features.
-2. Ensure graph-store connection settings are configured for the backend.
-3. Ensure enriched session facts are available to the projection path.
+1. Start Neo4j + backend dependencies:
+
+   ```bash
+   docker compose -f docker-compose.reference-stack.yml up -d postgres neo4j network-monitoring-backend
+   ```
+
+2. Validate Neo4j Browser is reachable at `http://localhost:7474` and Bolt at `localhost:7687`.
+3. Ensure backend graph configuration points to Neo4j (`Provider=Neo4j`).
+4. Ensure enriched session facts are available to the projection path.
+
+### Neo4j credentials (local reference stack)
+
+- Username: `neo4j`
+- Password: `networkmonitoring123`
+- Browser URL: `http://localhost:7474`
+- Bolt URI: `bolt://localhost:7687`
 
 ## Validate projection behavior
 
@@ -40,6 +53,13 @@ Validate end-to-end communication graph behavior:
 4. Call with low limit and confirm `truncated=true` when cap is reached.
 5. Call without `depth`/`limit` and confirm defaults (`depth=1`, `limit=200`) are applied.
 6. Call with `depth=0` and confirm `400 Bad Request` + `GRAPH_INVALID_REQUEST`.
+
+Reference curl:
+
+```bash
+curl -sS -H "Authorization: Bearer test" -H "X-Role: analyst" \
+  "http://localhost:5090/api/graph/devices?rootDeviceId=api-root&depth=1&limit=50"
+```
 
 ## Validate retention behavior
 
@@ -72,6 +92,14 @@ Validate end-to-end communication graph behavior:
 
 - Graph-focused automated checks: `dotnet test tests/NetworkMonitoring.Backend.IntegrationTests/NetworkMonitoring.Backend.IntegrationTests.csproj /p:BuildProjectReferences=false --filter "Graph"` -> `Passed: 14, Failed: 0`.
 - Local development note: full-solution graph test command with reference builds is currently blocked by a pre-existing compilation issue in `src/NetworkMonitoring.IntegrationConsole/Program.cs`; backend graph slice itself builds and graph tests pass under the scoped command above.
+
+## Recorded validation evidence (2026-06-15)
+
+- Backend runtime provider switched to Neo4j in non-testing environments.
+- Reference stack includes Neo4j service (`neo4j:5.22`) with Browser/Bolt ports published.
+- Smoke validation:
+  - Seeded `api-root -> api-peer` relationship in Neo4j.
+  - `GET /api/graph/devices?rootDeviceId=api-root&depth=1&limit=50` returned nodes/edges from Neo4j.
 
 ## Suggested automated checks
 

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-device-communication-graph`  
 **Created**: 2026-05-21  
-**Status**: Draft (retroactive baseline aligned to historical design decisions)  
+**Status**: In progress (expanded baseline includes graph visualization UI)  
 **Input**: User description: "007-device-communication-graph"
 
 ## Clarifications
@@ -111,6 +111,30 @@ service-unavailable error while non-graph device/session operations remain healt
 3. **Given** graph storage recovers after a transient outage, **When** graph data is requested again,
    **Then** the endpoint returns normal successful responses without requiring service restart.
 
+---
+
+### User Story 5 - Visualize Graph Results in the UI (Priority: P1)
+
+As an operator, I want a dedicated UI view for communication graph exploration so I can inspect nodes,
+edges, and truncation outcomes without manually calling backend endpoints.
+
+**Why this priority**: The endpoint by itself is not sufficient for day-to-day operational use; users
+need a first-class visualization workflow in the existing frontend.
+
+**Independent Test**: Open the graph UI, submit valid/invalid queries, and verify bounded graph results,
+error states, and retry behavior are rendered according to the backend contract.
+
+**Acceptance Scenarios**:
+
+1. **Given** a valid root identity and defaults, **When** the user loads the graph view, **Then** the UI
+   requests graph data and renders returned nodes and edges.
+2. **Given** caller-provided `depth` and `limit` values, **When** the user runs a query, **Then** the UI
+   displays the applied request values and the `truncated` signal from the response.
+3. **Given** the backend returns `400`, `401`, `403`, or `503`, **When** the UI handles the response,
+   **Then** the page shows clear error messaging with actionable retry guidance and does not crash.
+4. **Given** the backend is temporarily unavailable and later recovers, **When** the user retries from the
+   UI, **Then** normal graph results render without requiring a full page restart.
+
 ### Edge Cases
 
 - Self-communication (same source and destination identity) is valid and represented as a self-link.
@@ -167,6 +191,16 @@ service-unavailable error while non-graph device/session operations remain healt
   MUST emit operational diagnostics and continue processing subsequent events.
 - **FR-017**: The feature MUST emit structured logs and metrics (counters and latency) for projection
   and retention execution paths to support operational monitoring and incident diagnosis.
+- **FR-018**: The frontend MUST provide a graph exploration view that queries the graph retrieval
+  capability using root identity plus optional depth/limit inputs.
+- **FR-019**: The graph UI MUST render returned nodes, edges, and truncation state in a way that allows
+  operators to inspect communication neighborhoods without reading raw JSON.
+- **FR-020**: The graph UI MUST provide explicit handling for `400`, `401`, `403`, and `503` responses
+  with user-facing messages and a retry path.
+- **FR-021**: The graph UI MUST preserve currently displayed results when a subsequent refresh fails and
+  surface the refresh failure as non-destructive feedback.
+- **FR-022**: The graph UI MUST remain isolated from device inventory management behavior so failures in
+  graph retrieval do not degrade existing inventory workflows.
 
 ### Operational Parameters & Contracts
 
@@ -223,6 +257,8 @@ service-unavailable error while non-graph device/session operations remain healt
   while sampled non-graph device/session operations maintain successful responses.
 - **SC-006**: In validation runs, projection and retention flows emit structured logs plus metrics for
   processed events, retries, failures, and execution latency in 100% of sampled scenarios.
+- **SC-007**: In validation runs, operators can complete a graph lookup workflow (enter root, run query,
+  inspect nodes/edges, interpret truncation/error state) in under 60 seconds for 95% of sampled attempts.
 
 ### Measurement Protocol
 
@@ -246,6 +282,7 @@ service-unavailable error while non-graph device/session operations remain healt
 | FR-009, FR-010, FR-011, FR-015 | SC-003, SC-004 |
 | FR-012, FR-013 | SC-005 |
 | FR-016, FR-017 | SC-006 |
+| FR-018, FR-019, FR-020, FR-021, FR-022 | SC-007, SC-005 |
 
 ## Assumptions
 
@@ -254,8 +291,8 @@ service-unavailable error while non-graph device/session operations remain healt
 - Graph projection consumes enriched session events already produced by prior session-processing
   capabilities.
 - Device inventory remains the authoritative source for internal device identity existence and lifecycle.
-- Communication graph visualization UI evolution is outside this feature scope; this feature provides the
-  graph retrieval data contract only.
+- The communication graph UI consumes the backend retrieval contract and remains additive to existing
+  inventory management capabilities.
 - Backfilling communication links older than event-retention windows is outside current scope and would
   require a separate replay/backfill capability.
 

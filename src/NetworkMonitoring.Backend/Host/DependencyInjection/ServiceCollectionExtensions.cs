@@ -44,11 +44,53 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInventoryUnitOfWork>(sp => sp.GetRequiredService<EfDeviceInventoryRepository>());
         services.AddScoped<AcceptDeviceIntakeUseCase>();
         services.AddScoped<ListDevicesUseCase>();
-        services.AddSingleton<InMemoryGraphStore>();
         services.AddSingleton<IGraphTelemetry, NullGraphTelemetry>();
-        services.AddScoped<IGraphProjectionRepository, Neo4jGraphProjectionRepository>();
-        services.AddScoped<IGraphQueryRepository, Neo4jGraphQueryRepository>();
-        services.AddScoped<IGraphRetentionRepository, Neo4jGraphRetentionRepository>();
+        services.AddSingleton<InMemoryGraphStore>();
+        services.AddSingleton(sp =>
+        {
+            var options = sp.GetRequiredService<IOptions<BackendOptions>>().Value.Graph;
+            return new Neo4jDriverAccessor(options);
+        });
+
+        services.AddScoped<Neo4jGraphProjectionRepository>();
+        services.AddScoped<Neo4jGraphQueryRepository>();
+        services.AddScoped<Neo4jGraphRetentionRepository>();
+
+        services.AddScoped<IGraphProjectionRepository>(sp =>
+        {
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            var provider = sp.GetRequiredService<IOptions<BackendOptions>>().Value.Graph.Provider;
+            if (env.IsEnvironment("Testing") || provider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+            {
+                return new InMemoryGraphProjectionRepository(sp.GetRequiredService<InMemoryGraphStore>());
+            }
+
+            return sp.GetRequiredService<Neo4jGraphProjectionRepository>();
+        });
+
+        services.AddScoped<IGraphQueryRepository>(sp =>
+        {
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            var provider = sp.GetRequiredService<IOptions<BackendOptions>>().Value.Graph.Provider;
+            if (env.IsEnvironment("Testing") || provider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+            {
+                return new InMemoryGraphQueryRepository(sp.GetRequiredService<InMemoryGraphStore>());
+            }
+
+            return sp.GetRequiredService<Neo4jGraphQueryRepository>();
+        });
+
+        services.AddScoped<IGraphRetentionRepository>(sp =>
+        {
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            var provider = sp.GetRequiredService<IOptions<BackendOptions>>().Value.Graph.Provider;
+            if (env.IsEnvironment("Testing") || provider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+            {
+                return new InMemoryGraphRetentionRepository(sp.GetRequiredService<InMemoryGraphStore>());
+            }
+
+            return sp.GetRequiredService<Neo4jGraphRetentionRepository>();
+        });
         services.AddScoped<ProjectCommunicationGraphUseCase>();
         services.AddScoped<GetDeviceGraphUseCase>();
         services.AddScoped<RunGraphRetentionSweepUseCase>();

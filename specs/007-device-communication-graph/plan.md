@@ -6,8 +6,9 @@
 ## Summary
 
 Deliver a bounded, authenticated communication-graph capability that projects enriched session facts
-into graph relationships, exposes `GET /api/graph/devices` for neighborhood traversal, and executes
-scheduled retention cleanup without impacting existing non-graph backend behavior.
+into graph relationships, exposes `GET /api/graph/devices` for neighborhood traversal, executes
+scheduled retention cleanup without impacting existing non-graph backend behavior, and adds a
+frontend graph exploration view for operators.
 
 ## Architecture Grounding
 
@@ -52,10 +53,17 @@ scheduled retention cleanup without impacting existing non-graph backend behavio
 **Storage**: Graph database for communication projection; existing inventory store remains authoritative for internal devices  
 **Testing**: xUnit integration tests with backend test host and graph-focused API/integration coverage  
 **Target Platform**: Linux containerized runtime in local/CI environments  
-**Project Type**: Backend web-service extension plus connector/config contract artifacts  
+**Project Type**: Backend web-service extension plus frontend UI extension plus connector/config contract artifacts  
 **Performance Goals**: SC-001 median projection latency <= 2s; bounded retrieval responsive within configured depth/limit caps  
 **Constraints**: Auth required for graph endpoint; scheduled-only 24h retention; bounded projection retries; structured logs + counters/latency metrics; graph outage isolation from existing endpoint families  
-**Scale/Scope**: One graph endpoint, projection + retention lifecycle, connector baseline, and validation artifacts for FR-001..FR-017 / SC-001..SC-006
+**Scale/Scope**: One graph endpoint, projection + retention lifecycle, graph UI exploration page, connector baseline, and validation artifacts for FR-001..FR-022 / SC-001..SC-007
+
+### Runtime implementation note (2026-06-15)
+
+- Maintainer confirmed migration of graph runtime behavior from in-memory projection to Neo4j-backed
+  persistence for non-testing environments.
+- `InMemoryGraphStore` remains available for `Testing` and optional explicit `Provider=InMemory` runs.
+- Neo4j is now part of the local reference stack and the backend defaults to `Provider=Neo4j`.
 
 ## Constitution Check
 
