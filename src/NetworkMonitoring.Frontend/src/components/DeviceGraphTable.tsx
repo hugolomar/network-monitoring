@@ -1,5 +1,6 @@
 import { formatIsoDateTime } from "./deviceFormat";
 import type { GraphEdgeDto, GraphNodeDto } from "../models/graphDtos";
+import type { DeviceInventoryItem } from "../models/deviceDtos";
 
 /**
  * Props for rendering graph tabular details.
@@ -7,6 +8,7 @@ import type { GraphEdgeDto, GraphNodeDto } from "../models/graphDtos";
 export interface DeviceGraphTableProps {
   nodes: GraphNodeDto[];
   edges: GraphEdgeDto[];
+  inventoryMatchesByNodeId?: Record<string, DeviceInventoryItem | null>;
 }
 
 /**
@@ -16,7 +18,7 @@ export interface DeviceGraphTableProps {
  * @returns Table-based graph details.
  */
 export default function DeviceGraphTable(props: DeviceGraphTableProps) {
-  const { nodes, edges } = props;
+  const { nodes, edges, inventoryMatchesByNodeId } = props;
 
   return (
     <>
@@ -28,15 +30,30 @@ export default function DeviceGraphTable(props: DeviceGraphTableProps) {
               <tr>
                 <th>ID</th>
                 <th>Kind</th>
+                <th>Inventory match</th>
               </tr>
             </thead>
             <tbody>
-              {nodes.map((node) => (
-                <tr key={node.id}>
-                  <td className="mono">{node.id}</td>
-                  <td>{node.kind}</td>
-                </tr>
-              ))}
+              {nodes.map((node) => {
+                const match = inventoryMatchesByNodeId?.[node.id] ?? null;
+                return (
+                  <tr key={node.id}>
+                    <td className="mono">{node.id}</td>
+                    <td>{node.kind}</td>
+                    <td>
+                      {match ? (
+                        <>
+                          inv:{match.id} · {match.macAddress}
+                          {match.primaryIp ? ` · ${match.primaryIp}` : ""}
+                          {match.hostname ? ` · ${match.hostname}` : ""}
+                        </>
+                      ) : (
+                        <span className="placeholder-cell">No match</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

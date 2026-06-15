@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { GraphEdgeDto, GraphNodeDto } from "../models/graphDtos";
+import type { DeviceInventoryItem } from "../models/deviceDtos";
 
 /**
  * Props for the graph visualization component.
@@ -8,6 +9,7 @@ export interface DeviceGraphVisualizationProps {
   nodes: GraphNodeDto[];
   edges: GraphEdgeDto[];
   rootNodeId: string;
+  inventoryMatchesByNodeId?: Record<string, DeviceInventoryItem | null>;
 }
 
 interface PositionedNode extends GraphNodeDto {
@@ -22,7 +24,7 @@ interface PositionedNode extends GraphNodeDto {
  * @returns SVG-based graph rendering.
  */
 export default function DeviceGraphVisualization(props: DeviceGraphVisualizationProps) {
-  const { nodes, edges, rootNodeId } = props;
+  const { nodes, edges, rootNodeId, inventoryMatchesByNodeId } = props;
   const width = 860;
   const height = 480;
   const cx = width / 2;
@@ -112,7 +114,19 @@ export default function DeviceGraphVisualization(props: DeviceGraphVisualization
                 <text x={node.x} y={node.y + radius + 14} textAnchor="middle" className="graph-node-label">
                   {node.id}
                 </text>
-                <title>{`${node.id} (${node.kind})`}</title>
+                <title>
+                  {`${node.id} (${node.kind})${
+                    inventoryMatchesByNodeId?.[node.id]
+                      ? ` | inventory id: ${inventoryMatchesByNodeId[node.id]!.id} | mac: ${
+                          inventoryMatchesByNodeId[node.id]!.macAddress
+                        }${
+                          inventoryMatchesByNodeId[node.id]!.primaryIp
+                            ? ` | ip: ${inventoryMatchesByNodeId[node.id]!.primaryIp}`
+                            : ""
+                        }`
+                      : ""
+                  }`}
+                </title>
               </g>
             );
           })}

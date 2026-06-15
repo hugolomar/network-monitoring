@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getDeviceGraph, getDeviceGraphSnapshot } from "../api/graphApi";
+import { listDevices } from "../api/devicesApi";
+import type { DeviceInventoryItem } from "../models/deviceDtos";
 import type { DeviceGraphResponseDto } from "../models/graphDtos";
 import DeviceGraphVisualization from "../components/DeviceGraphVisualization";
 import DeviceGraphTable from "../components/DeviceGraphTable";
@@ -17,6 +19,7 @@ export default function DeviceGraphPage() {
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DeviceGraphResponseDto | null>(null);
+  const [inventoryItems, setInventoryItems] = useState<DeviceInventoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
@@ -24,6 +27,29 @@ export default function DeviceGraphPage() {
     if (!result) return null;
     return `${result.nodes.length} nodes · ${result.edges.length} edges`;
   }, [result]);
+
+  const inventoryMatchesByNodeId = useMemo(() => {
+    const map: Record<string, DeviceInventoryItem | null> = {};
+    if (!result) return map;
+
+    for (const node of result.nodes) {
+      const normalized = node.id.trim().toLowerCase();
+      const graphNumericIdMatch = /^device-(\d+)$/.exec(normalized);
+      const inventoryIdFromGraph = graphNumericIdMatch ? Number(graphNumericIdMatch[1]) : null;
+      const mapped =
+        (inventoryIdFromGraph !== null
+          ? inventoryItems.find((item) => item.id === inventoryIdFromGraph)
+          : undefined) ??
+        inventoryItems.find((item) => item.macAddress.toLowerCase() === normalized) ??
+        inventoryItems.find((item) => item.primaryIp?.toLowerCase() === normalized) ??
+        inventoryItems.find((item) => item.observedIps.some((ip) => ip.toLowerCase() === normalized)) ??
+        inventoryItems.find((item) => item.hostname?.trim().toLowerCase() === normalized) ??
+        null;
+      map[node.id] = mapped;
+    }
+
+    return map;
+  }, [inventoryItems, result]);
 
   async function runQuery(mode: "initial" | "refresh") {
     const parsedDepth = Number(depth);
@@ -56,6 +82,11 @@ export default function DeviceGraphPage() {
           setRefreshError(outcome.message);
         }
         return;
+      }
+
+      const inventoryOutcome = await listDevices();
+      if (inventoryOutcome.ok) {
+        setInventoryItems(inventoryOutcome.data.items);
       }
 
       setResult(outcome.data);
@@ -152,8 +183,17 @@ export default function DeviceGraphPage() {
               </div>
             </section>
           ) : null}
-          <DeviceGraphVisualization nodes={result.nodes} edges={result.edges} rootNodeId={rootDeviceId.trim()} />
-          <DeviceGraphTable nodes={result.nodes} edges={result.edges} />
+          <DeviceGraphVisualization
+            nodes={result.nodes}
+            edges={result.edges}
+            rootNodeId={rootDeviceId.trim()}
+            inventoryMatchesByNodeId={inventoryMatchesByNodeId}
+          />
+          <DeviceGraphTable
+            nodes={result.nodes}
+            edges={result.edges}
+            inventoryMatchesByNodeId={inventoryMatchesByNodeId}
+          />
         </>
       ) : null}
     </>
