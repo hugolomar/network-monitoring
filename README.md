@@ -1,6 +1,6 @@
 # Network monitoring
 
-Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repository also includes session indexing with Elasticsearch + Kafka Connect as a query projection, feature specs, ADRs, reference Docker Compose, and **shell helpers** under `infrastructure/scripts/` grouped by role — see **Repository layout** below.
+Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repository also includes session indexing with Elasticsearch + Kafka Connect as a query projection, feature specs, ADRs, reference Docker Compose, and **shell helpers** under `infrastructure/` grouped by role — see **Repository layout** below.
 
 ## Prerequisites
 

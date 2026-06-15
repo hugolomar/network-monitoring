@@ -18,8 +18,8 @@ queryable with bounded filters.
 `contracts/elasticsearch-session-detected-mapping.md`. **Image / plugin pins (reference)**:
 `research.md` (Decision 2).
 
-**Scripts layout**: infrastructure/stack/health/` = health smokes; infrastructure/stack/bootstrap/` = topic + index template init;
-infrastructure/connectors/` = Connect JSON + `register-*.sh`; infrastructure/acceptance/contract/` = sampling (opt-in).
+**Scripts layout**: `infrastructure/stack/health/` = health smokes; `infrastructure/stack/bootstrap/` = topic + index template init;
+`infrastructure/connectors/configs/` + `infrastructure/connectors/register/` = Connect JSON + `register-*.sh`; `infrastructure/acceptance/contract/` = sampling (opt-in).
 
 ### Host ports / URLs
 
@@ -43,8 +43,8 @@ infrastructure/connectors/` = Connect JSON + `register-*.sh`; infrastructure/acc
 4. Apply index template **and** ensure the concrete index exists: `./infrastructure/stack/bootstrap/elasticsearch/apply-index-template.sh`  
    (installs the composable template for `sessions-detected*` and creates `sessions-detected` if missing; Kafka Connect
    validates that this index exists before accepting `topic.to.external.resource.mapping`).
-5. Register connector: `./infrastructure/connectors/register-elasticsearch-sink-connector.sh`  
-   Config: infrastructure/connectors/elasticsearch-sink-sessions-detected.json` (topic `sessions.detected` ->
+5. Register connector: `./infrastructure/connectors/register/register-elasticsearch-sink-connector.sh`  
+   Config: `infrastructure/connectors/configs/elasticsearch-sink-sessions-detected.json` (topic `sessions.detected` ->
    index `sessions-detected` via `topic.to.external.resource.mapping` in Connect).
 6. Publish events (e.g. run the probe with `EnableKafka: true` so Avro values flow through Registry).
 7. **Bounded search (FR-003)**: use small page sizes; prefer `search_after` or a stable sort for pagination.
