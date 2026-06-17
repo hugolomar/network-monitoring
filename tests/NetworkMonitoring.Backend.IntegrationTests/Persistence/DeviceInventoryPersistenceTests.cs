@@ -5,8 +5,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Persistence;
 
+/// <summary>
+/// Test suite for DeviceInventoryPersistence.
+/// </summary>
 public sealed class DeviceInventoryPersistenceTests(BackendTestApplicationFactory factory) : IClassFixture<BackendTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that db context model defines unique mac index.
+    /// </summary>
     [Fact]
     public async Task DbContext_model_defines_unique_mac_index()
     {

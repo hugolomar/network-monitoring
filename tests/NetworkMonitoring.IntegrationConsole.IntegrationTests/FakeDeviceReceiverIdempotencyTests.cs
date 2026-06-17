@@ -2,8 +2,14 @@ using NetworkMonitoring.IntegrationConsole.IntegrationTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.IntegrationTests;
 
+/// <summary>
+/// Test suite for FakeDeviceReceiverIdempotency.
+/// </summary>
 public sealed class FakeDeviceReceiverIdempotencyTests
 {
+    /// <summary>
+    /// Verifies that send duplicate events preserve single fake receiver effect.
+    /// </summary>
     [Fact]
     public async Task Send_duplicate_events_preserve_single_fake_receiver_effect()
     {

@@ -4,8 +4,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Api;
 
+/// <summary>
+/// Test suite for DeviceIntakeConcurrency.
+/// </summary>
 public sealed class DeviceIntakeConcurrencyTests(BackendTestApplicationFactory factory) : IClassFixture<BackendTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that concurrent duplicate intake keeps single inventory item.
+    /// </summary>
     [Fact]
     public async Task Concurrent_duplicate_intake_keeps_single_inventory_item()
     {

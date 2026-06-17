@@ -4,8 +4,14 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.UnitTests.Infrastructure.Publishing;
 
+/// <summary>
+/// Test suite for SessionKafkaPartitionKey.
+/// </summary>
 public sealed class SessionKafkaPartitionKeyTests
 {
+    /// <summary>
+    /// Verifies that build uses same field order as session deduplication identity.
+    /// </summary>
     [Fact]
     public void Build_UsesSameFieldOrderAsSessionDeduplicationIdentity()
     {
@@ -23,6 +29,9 @@ public sealed class SessionKafkaPartitionKeyTests
         Assert.Equal("10.0.0.1|10.0.0.2|1200|443|TCP", SessionKafkaPartitionKey.Build(session));
     }
 
+    /// <summary>
+    /// Verifies that build with null ports uses empty segments between delimiters.
+    /// </summary>
     [Fact]
     public void Build_WithNullPorts_UsesEmptySegmentsBetweenDelimiters()
     {
@@ -40,6 +49,9 @@ public sealed class SessionKafkaPartitionKeyTests
         Assert.Equal("192.168.1.1|192.168.1.2|||UDP", SessionKafkaPartitionKey.Build(session));
     }
 
+    /// <summary>
+    /// Verifies that build utf8bytes round trips with utf8.
+    /// </summary>
     [Fact]
     public void BuildUtf8Bytes_RoundTripsWithUtf8()
     {

@@ -23,6 +23,12 @@ body {
   padding: 1.25rem 1rem 2rem;
 }
 
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
 .panel {
   background: #1a1d23;
   border: 1px solid #2d323c;
@@ -150,4 +156,37 @@ table.inventory th {
 
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.graph-canvas-wrap {
+  background: #121821;
+  border: 1px solid #2f3a4a;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.graph-canvas {
+  width: 100%;
+  min-height: 380px;
+  display: block;
+}
+
+.graph-node-label {
+  font-size: 11px;
+  fill: #d5dfec;
+}
+
+.graph-edge-label {
+  font-size: 10px;
+  fill: #9eb2cc;
+}
+
+.graph-truncated-badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #503711;
+  border: 1px solid #7b5720;
+  color: #f1d7a4;
+  font-size: 0.8rem;
 }

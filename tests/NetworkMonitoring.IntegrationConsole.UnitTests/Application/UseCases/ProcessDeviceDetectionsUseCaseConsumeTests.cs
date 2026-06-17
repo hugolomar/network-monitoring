@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for ProcessDeviceDetectionsUseCaseConsume.
+/// </summary>
 public sealed class ProcessDeviceDetectionsUseCaseConsumeTests
 {
+    /// <summary>
+    /// Verifies that run forwards valid event and acknowledges processing position.
+    /// </summary>
     [Fact]
     public async Task Run_forwards_valid_event_and_acknowledges_processing_position()
     {

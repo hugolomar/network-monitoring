@@ -4,8 +4,14 @@ using NetworkMonitoring.Backend.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Api;
 
+/// <summary>
+/// Test suite for DeviceIntakeValidation.
+/// </summary>
 public sealed class DeviceIntakeValidationTests(BackendTestApplicationFactory factory) : IClassFixture<BackendTestApplicationFactory>
 {
+    /// <summary>
+    /// Verifies that post devices rejects missing idempotency key.
+    /// </summary>
     [Fact]
     public async Task Post_devices_rejects_missing_idempotency_key()
     {
@@ -16,6 +22,9 @@ public sealed class DeviceIntakeValidationTests(BackendTestApplicationFactory fa
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    /// <summary>
+    /// Verifies that post devices rejects mismatched mac identity.
+    /// </summary>
     [Fact]
     public async Task Post_devices_rejects_mismatched_mac_identity()
     {
@@ -31,6 +40,9 @@ public sealed class DeviceIntakeValidationTests(BackendTestApplicationFactory fa
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    /// <summary>
+    /// Verifies that post devices rejects unsupported content type.
+    /// </summary>
     [Fact]
     public async Task Post_devices_rejects_unsupported_content_type()
     {
@@ -45,6 +57,9 @@ public sealed class DeviceIntakeValidationTests(BackendTestApplicationFactory fa
         Assert.Equal(HttpStatusCode.UnsupportedMediaType, response.StatusCode);
     }
 
+    /// <summary>
+    /// Verifies that post devices rejects invalid timestamp ordering.
+    /// </summary>
     [Fact]
     public async Task Post_devices_rejects_invalid_timestamp_ordering()
     {

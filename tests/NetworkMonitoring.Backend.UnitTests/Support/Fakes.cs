@@ -3,6 +3,9 @@ using NetworkMonitoring.Domain.Entities;
 
 namespace NetworkMonitoring.Backend.UnitTests.Support;
 
+/// <summary>
+/// Tests for InMemoryDeviceInventoryRepository.
+/// </summary>
 internal sealed class InMemoryDeviceInventoryRepository : IDeviceInventoryRepository, IInventoryUnitOfWork
 {
     private readonly Dictionary<string, Device> _devices = new(StringComparer.Ordinal);

@@ -13,6 +13,7 @@ volumes:
   elasticsearch-data: {}
   connect-plugins: {}
   postgres-data: {}
+  neo4j-data: {}
 
 services:
   kafka-1:
@@ -236,6 +237,28 @@ services:
       retries: 10
       start_period: 20s
 
+  neo4j:
+    image: neo4j:5.22
+    hostname: neo4j
+    networks:
+      - kafka-net
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/networkmonitoring123
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    volumes:
+      - neo4j-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 40s
+
   network-monitoring-backend:
     build:
       context: .
@@ -249,9 +272,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      # Uncomment the following line to enable Scalar API Documentation (Development mode only)
+      # ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       Backend__ConnectionString: Host=postgres;Port=5432;Database=network_monitoring;Username=network_monitoring;Password=network_monitoring
       Backend__ApplyMigrationsOnStartup: "true"
+      Backend__Graph__Provider: Neo4j
+      Backend__Graph__Neo4jUri: bolt://neo4j:7687
+      Backend__Graph__Neo4jUsername: neo4j
+      Backend__Graph__Neo4jPassword: networkmonitoring123
 
   network-monitoring-integration-console:
     build:

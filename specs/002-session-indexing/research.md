@@ -19,7 +19,7 @@
   - **Kafka Connect**: `confluentinc/cp-kafka-connect:7.6.1` (aligns with the broker line used by the session event stream).
   - **Elasticsearch Sink plugin**: `confluentinc/kafka-connect-elasticsearch:14.1.6` (installed on first `connect` container start via `confluent-hub`, cached in `connect-plugins` volume; version must exist on Confluent Hub — see hub API).
 - **Rationale**: Same single-manifest `up` for full stack; reproduces sampling with scripts in
-  `scripts/` (see `stack/`, `bootstrap/`, `connectors/`, `acceptance/`). Kafka-only subset documented in the session detection quickstart.
+  infrastructure/stack/` (see `stack/`, `bootstrap/`, `infrastructure/connectors/configs/`, `acceptance/`). Kafka-only subset documented in the session detection quickstart.
 - **Alternatives considered**: Pre-baked Connect image with baked-in plugin — deferred; hub install +
   named volume keeps compose file readable.
 
@@ -28,7 +28,7 @@
 - **Intent**: With the indexing stack up, connector running, and documents in **`sessions-detected`**
   (from topic **`sessions.detected`**), sample `_search` hits and verify **required** business fields
   present and consistent with **`session-detected-value.avsc`** / `elasticsearch-session-detected-mapping.md`.
-- **Automation (opt-in)**: `RUN_ES_INTEGRATION=1 ./scripts/acceptance/verify-session-indexing-sampling.sh` (see
+- **Automation (opt-in)**: `RUN_ES_INTEGRATION=1 ./infrastructure/acceptance/contract/verify-session-indexing-sampling.sh` (see
   `quickstart.md`). Skips when unset so CI without ES does not fail.
 - **Recorded outcome (manual)**: Operators run the script (or equivalent bounded queries) after traffic
   + probe publication; attach evidence to release notes when required. **Emission-to-query latency** is

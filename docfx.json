@@ -1,0 +1,81 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [
+            "src/**/*.csproj",
+            "tests/**/*.csproj"
+          ],
+          "exclude": [
+            "**/bin/**",
+            "**/obj/**"
+          ]
+        }
+      ],
+      "dest": "artifacts/docs/api",
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "artifacts/docs/api/**.yml",
+          "artifacts/docs/api/index.md"
+        ]
+      },
+      {
+        "files": [
+          "docs/**/*.md",
+          "specs/**/*.md",
+          "README.md",
+          "index.md"
+        ],
+        "exclude": [
+          "**/obj/**",
+          "**/bin/**"
+        ]
+      },
+      {
+        "files": [
+          "infrastructure/documentation/**/*.md",
+          "infrastructure/documentation/technical/toc.yml",
+          "infrastructure/documentation/wiki/toc.yml"
+        ]
+      },
+      {
+        "files": [
+          "infrastructure/documentation/toc.yml"
+        ],
+        "dest": "."
+      },
+      {
+        "src": ".specify/memory",
+        "files": [
+          "constitution.md"
+        ],
+        "dest": "."
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "docs/images/**",
+          "specs/**/*.avsc"
+        ]
+      }
+    ],
+    "output": "artifacts/docs/site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appTitle": "Network Monitoring System",
+      "_appFooter": "© 2026 Network Monitoring Project. Full compliance with Constitution v1.7.0.",
+      "_enableSearch": true
+    }
+  }
+}

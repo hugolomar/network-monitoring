@@ -47,6 +47,12 @@ async function readJson<T>(response: Response): Promise<T | undefined> {
   }
 }
 
+/**
+ * Retrieves the list of discovered devices from the backend.
+ * 
+ * @param signal - Optional AbortSignal to cancel the request.
+ * @returns A result object containing the list of devices or error details.
+ */
 export async function listDevices(signal?: AbortSignal): Promise<ListDevicesResult> {
   let response: Response;
   try {
@@ -94,6 +100,14 @@ export async function listDevices(signal?: AbortSignal): Promise<ListDevicesResu
   return { ok: true, data };
 }
 
+/**
+ * Submits a new device detection or manual entry to the inventory.
+ * 
+ * @param body - The device data to ingest.
+ * @param idempotencyKey - A unique key to prevent duplicate processing.
+ * @param signal - Optional AbortSignal to cancel the request.
+ * @returns A result object containing the creation outcome or error details.
+ */
 export async function createDevice(
   body: DeviceIntakeRequestDto,
   idempotencyKey: string,

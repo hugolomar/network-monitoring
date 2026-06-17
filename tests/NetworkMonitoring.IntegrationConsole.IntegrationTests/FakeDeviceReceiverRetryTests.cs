@@ -4,8 +4,14 @@ using NetworkMonitoring.IntegrationConsole.IntegrationTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.IntegrationTests;
 
+/// <summary>
+/// Test suite for FakeDeviceReceiverRetry.
+/// </summary>
 public sealed class FakeDeviceReceiverRetryTests
 {
+    /// <summary>
+    /// Verifies that send retries transient failure before success.
+    /// </summary>
     [Fact]
     public async Task Send_retries_transient_failure_before_success()
     {
@@ -20,6 +26,9 @@ public sealed class FakeDeviceReceiverRetryTests
         Assert.Equal(2, receiver.Requests.Count);
     }
 
+    /// <summary>
+    /// Verifies that send records retry exhaustion.
+    /// </summary>
     [Fact]
     public async Task Send_records_retry_exhaustion()
     {

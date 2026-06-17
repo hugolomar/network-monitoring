@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Infrastructure.Backend;
 
+/// <summary>
+/// Test suite for HttpDeviceIntakeClient.
+/// </summary>
 public sealed class HttpDeviceIntakeClientTests
 {
+    /// <summary>
+    /// Verifies that send posts to devices with json body and idempotency key.
+    /// </summary>
     [Fact]
     public async Task Send_posts_to_devices_with_json_body_and_idempotency_key()
     {
@@ -27,6 +33,9 @@ public sealed class HttpDeviceIntakeClientTests
             new RetryOptions(3, TimeSpan.Zero),
             new DeviceIntakeRetryPolicy());
 
+    /// <summary>
+    /// Tests for CapturingHandler.
+    /// </summary>
     private sealed class CapturingHandler(HttpResponseMessage response) : HttpMessageHandler
     {
         public List<HttpRequestMessage> Requests { get; } = [];

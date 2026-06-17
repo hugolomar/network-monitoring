@@ -18,12 +18,15 @@ namespace NetworkMonitoring.Probe.IntegrationTests;
 /// </summary>
 public sealed class KafkaDeviceEventPublishIntegrationTests
 {
+    /// <summary>
+    /// Verifies that publish device detected produces consumable avro value with normalized mac key.
+    /// </summary>
     [SkippableFact]
     public async Task PublishDeviceDetected_ProducesConsumableAvroValueWithNormalizedMacKey()
     {
         Skip.If(
             Environment.GetEnvironmentVariable("RUN_KAFKA_INTEGRATION") != "1",
-            "Set RUN_KAFKA_INTEGRATION=1 with docker compose -f docker-compose.reference-stack.yml up and ./scripts/bootstrap/kafka-topics-init.sh.");
+            "Set RUN_KAFKA_INTEGRATION=1 with docker compose -f docker-compose.reference-stack.yml up and ./infrastructure/stack/bootstrap/kafka-topics-init.sh.");
 
         var bootstrap = Environment.GetEnvironmentVariable("KAFKA_BOOTSTRAP_SERVERS")
             ?? "localhost:9092,localhost:9093,localhost:9094";

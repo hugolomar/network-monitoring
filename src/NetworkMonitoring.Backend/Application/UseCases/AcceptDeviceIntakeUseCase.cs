@@ -7,13 +7,27 @@ using NetworkMonitoring.Domain.ValueObjects;
 
 namespace NetworkMonitoring.Backend.Application.UseCases;
 
+/// <summary>
+/// Use case for processing and accepting device intake requests.
+/// </summary>
+/// <param name="repository">The repository for accessing and storing device data.</param>
+/// <param name="unitOfWork">The unit of work for managing persistence transactions.</param>
+/// <param name="logger">The logger for recording operation details.</param>
 public sealed class AcceptDeviceIntakeUseCase(
     IDeviceInventoryRepository repository,
     IInventoryUnitOfWork unitOfWork,
     ILogger<AcceptDeviceIntakeUseCase> logger)
 {
+    // A dictionary of semaphores used to serialize processing of intake requests for the same MAC address.
+    // This prevents race conditions when multiple discovery sources report the same device simultaneously.
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> MacLocks = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Executes the device intake use case.
+    /// </summary>
+    /// <param name="command">The command containing device intake data.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the outcome of the intake.</returns>
     public async Task<DeviceIntakeOutcome> Execute(DeviceIntakeCommand command, CancellationToken cancellationToken)
     {
         if (!TryBuildIncomingDevice(command, out var incoming, out var rejectionReason))
@@ -22,6 +36,9 @@ public sealed class AcceptDeviceIntakeUseCase(
             return DeviceIntakeOutcome.Rejected(rejectionReason);
         }
 
+        // Article 31: We use a per-MAC lock to ensure that concurrent updates for the same device
+        // are processed sequentially, maintaining data integrity and preventing "lost updates" 
+        // in a non-distributed environment.
         var macLock = MacLocks.GetOrAdd(incoming.MacAddress.Value, _ => new SemaphoreSlim(1, 1));
         await macLock.WaitAsync(cancellationToken);
 
@@ -37,6 +54,7 @@ public sealed class AcceptDeviceIntakeUseCase(
                 return DeviceIntakeOutcome.Created(ToItem(incoming));
             }
 
+            // If the device already exists, we consolidate the new information with the existing record.
             var consolidated = Consolidate(existing, incoming);
             await repository.Update(consolidated.Device, cancellationToken);
             await unitOfWork.SaveChanges(cancellationToken);

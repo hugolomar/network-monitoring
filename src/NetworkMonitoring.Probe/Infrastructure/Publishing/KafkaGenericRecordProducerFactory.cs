@@ -5,21 +5,51 @@ using Confluent.SchemaRegistry.Serdes;
 using NetworkMonitoring.Probe.Application.Configuration;
 
 namespace NetworkMonitoring.Probe.Infrastructure.Publishing;
-
+/// <summary>
+/// Defines a contract for a Kafka producer that handles Avro <see cref="GenericRecord"/> values.
+/// </summary>
 public interface IKafkaGenericRecordProducer : IDisposable
 {
+    /// <summary>
+    /// Asynchronously sends a message to a Kafka topic.
+    /// </summary>
+    /// <param name="topic">The target Kafka topic.</param>
+    /// <param name="message">The message to produce.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>A task representing the production result.</returns>
     Task ProduceAsync(string topic, Message<string, GenericRecord> message, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Flushes all pending messages to the Kafka broker.
+    /// </summary>
+    /// <param name="timeout">The maximum time to wait for the flush to complete.</param>
     void Flush(TimeSpan timeout);
 }
 
+/// <summary>
+/// Factory for creating <see cref="IKafkaGenericRecordProducer"/> instances.
+/// </summary>
 public interface IKafkaGenericRecordProducerFactory
 {
+    /// <summary>
+    /// Creates a new configured Kafka producer.
+    /// </summary>
+    /// <param name="options">Configuration options for servers, security, and schema registry.</param>
+    /// <returns>A configured <see cref="IKafkaGenericRecordProducer"/>.</returns>
     IKafkaGenericRecordProducer Create(ProbeOptions options);
 }
 
+/// <summary>
+/// Standard implementation of the producer factory, integrating Confluent's Schema Registry and Avro serializers.
+/// </summary>
 public sealed class KafkaGenericRecordProducerFactory : IKafkaGenericRecordProducerFactory
 {
+    /// <summary>
+    /// Configures and builds a Kafka producer with Avro serialization and Schema Registry integration.
+    /// </summary>
+    /// <param name="options">The probe configuration options.</param>
+    /// <returns>A fully initialized <see cref="IKafkaGenericRecordProducer"/>.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if required Kafka or Schema Registry settings are missing.</exception>
     public IKafkaGenericRecordProducer Create(ProbeOptions options)
     {
         if (string.IsNullOrWhiteSpace(options.KafkaBootstrapServers))

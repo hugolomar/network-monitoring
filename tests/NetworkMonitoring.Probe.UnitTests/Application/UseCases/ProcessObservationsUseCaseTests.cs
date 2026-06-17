@@ -8,8 +8,14 @@ using NetworkMonitoring.Probe.Application.UseCases;
 
 namespace NetworkMonitoring.Probe.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for ProcessObservationsUseCase.
+/// </summary>
 public sealed class ProcessObservationsUseCaseTests
 {
+    /// <summary>
+    /// Verifies that execute async with invalid then valid observation skips invalid and continues.
+    /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithInvalidThenValidObservation_SkipsInvalidAndContinues()
     {
@@ -50,6 +56,9 @@ public sealed class ProcessObservationsUseCaseTests
         Assert.Equal(2, publisher.DeviceDetectedCount);
     }
 
+    /// <summary>
+    /// Verifies that execute async with invalid mac evidence rejects invalid discovery and continues.
+    /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithInvalidMacEvidence_RejectsInvalidDiscoveryAndContinues()
     {
@@ -79,6 +88,9 @@ public sealed class ProcessObservationsUseCaseTests
         Assert.Equal("11:22:33:44:55:66", publisher.Devices[0].MacAddress.Value);
     }
 
+    /// <summary>
+    /// Verifies that execute async with repeated device detection consolidates lifecycle timestamps.
+    /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithRepeatedDeviceDetection_ConsolidatesLifecycleTimestamps()
     {
@@ -127,6 +139,9 @@ public sealed class ProcessObservationsUseCaseTests
         Assert.Contains(secondEmission.ObservedIps, ip => ip.Value == "10.0.0.1");
     }
 
+    /// <summary>
+    /// Verifies that execute async with repeated device within dedup window suppresses extra device emission.
+    /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithRepeatedDeviceWithinDedupWindow_SuppressesExtraDeviceEmission()
     {
@@ -197,6 +212,9 @@ public sealed class ProcessObservationsUseCaseTests
             NullLogger<ProcessObservationsUseCase>.Instance);
     }
 
+    /// <summary>
+    /// Tests for FakeTrafficProvider.
+    /// </summary>
     private sealed class FakeTrafficProvider(IReadOnlyList<TrafficObservation> observations) : ITrafficProvider
     {
         public async IAsyncEnumerable<TrafficObservation> ReadObservations(
@@ -211,6 +229,9 @@ public sealed class ProcessObservationsUseCaseTests
         }
     }
 
+    /// <summary>
+    /// Tests for RecordingPublisher.
+    /// </summary>
     private sealed class RecordingPublisher : IMessagePublisher
     {
         public int SessionDetectedCount { get; private set; }

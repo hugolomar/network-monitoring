@@ -6,7 +6,10 @@ using NetworkMonitoring.Backend.Infrastructure.Persistence;
 
 namespace NetworkMonitoring.Backend.IntegrationTests.Support;
 
-public sealed class BackendTestApplicationFactory : WebApplicationFactory<Program>
+/// <summary>
+/// Custom WebApplicationFactory for bootstrapping the backend in an integration test environment.
+/// </summary>
+public sealed class BackendTestApplicationFactory : WebApplicationFactory<NetworkMonitoring.Backend.Program>
 {
     private readonly string _databaseName = $"device-inventory-{Guid.NewGuid()}";
 

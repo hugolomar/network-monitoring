@@ -3,8 +3,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Infrastructure.Backend;
 
+/// <summary>
+/// Test suite for DeviceIntakeRequestMapper.
+/// </summary>
 public sealed class DeviceIntakeRequestMapperTests
 {
+    /// <summary>
+    /// Verifies that map preserves http contract body fields.
+    /// </summary>
     [Fact]
     public void Map_preserves_http_contract_body_fields()
     {

@@ -55,7 +55,7 @@ via `Probe` options (`KafkaSecurityProtocol`, `KafkaSslCaLocation`, `KafkaSslCer
 1. From repo root, start the Kafka services:
    - `docker compose -f docker-compose.reference-stack.yml up -d kafka-1 kafka-2 kafka-3 schema-registry`
 2. Wait until all three Kafka brokers report healthy, then explicitly create the topic:
-   - `./scripts/bootstrap/kafka-topics-init.sh`
+   - `./infrastructure/stack/bootstrap/kafka-topics-init.sh`
    Defaults: 3 partitions, replication factor 3.
 3. Confirm topic exists:
    - `docker compose -f docker-compose.reference-stack.yml exec -T kafka-1 kafka-topics --bootstrap-server kafka-1:29092 --describe --topic sessions.detected`
@@ -64,7 +64,7 @@ via `Probe` options (`KafkaSecurityProtocol`, `KafkaSslCaLocation`, `KafkaSslCer
    `contracts/session-detected-value.avsc` through approved tooling and disable auto-register when policy requires it.
 
 ### Verify the stack
-- Run from repo root: `./scripts/stack/verify-kafka-stack.sh`
+- Run from repo root: `./infrastructure/stack/health/verify-kafka-stack.sh`
 - After changing Kafka data paths in compose, if brokers fail with permission or corrupt KRaft state,
   reset dev volumes once: `docker compose -f docker-compose.reference-stack.yml down -v`.
 
@@ -94,7 +94,7 @@ Example: run with Kafka enabled:
   `session-detected-value.avsc` (SC-005).
 
 ### Troubleshooting
-- Unknown topic or errors on produce: run `./scripts/bootstrap/kafka-topics-init.sh` and re-check the topic.
+- Unknown topic or errors on produce: run `./infrastructure/stack/bootstrap/kafka-topics-init.sh` and re-check the topic.
 - Schema / deserialization errors: ensure Registry is up and the subject `sessions.detected-value` matches the Avro contract.
 - Connection refused to `localhost:9092`: confirm compose is running and ports are not used by another stack.
 

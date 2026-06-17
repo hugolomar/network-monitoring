@@ -24,7 +24,7 @@ description: "Task list for 002-session-indexing"
 **Purpose**: Provide Elasticsearch + Kafka Connect infrastructure for local indexing validation.
 
 - [X] T001 Extend **`docker-compose.reference-stack.yml`** at repository root with **Elasticsearch** and **Kafka Connect** worker service(s) on the existing **`kafka-net`** network so one `up` can run the full reference stack; document the **Kafka-only** variant via explicit service list
-- [X] T002 Add `scripts/stack/verify-elasticsearch-stack.sh` that checks Elasticsearch and Kafka Connect HTTP health (mirror conventions in `scripts/stack/verify-kafka-stack.sh`) and prints actionable failures
+- [X] T002 Add `infrastructure/stack/health/verify-elasticsearch-stack.sh` that checks Elasticsearch and Kafka Connect HTTP health (mirror conventions in `infrastructure/stack/health/verify-kafka-stack.sh`) and prints actionable failures
 
 ---
 
@@ -33,7 +33,7 @@ description: "Task list for 002-session-indexing"
 **Purpose**: Define how session events become queryable documents.
 
 - [X] T003 [P] Add `specs/002-session-indexing/contracts/elasticsearch-session-detected-mapping.md` documenting Avro -> Elasticsearch field mapping from `specs/001-session-detection/contracts/session-detected-value.avsc` (normalization and semantic parity)
-- [X] T004 [P] Add Elasticsearch index template JSON under `scripts/bootstrap/elasticsearch/index-template-sessions-detected.json` plus `scripts/bootstrap/elasticsearch/apply-index-template.sh` to apply mappings in dev
+- [X] T004 [P] Add Elasticsearch index template JSON under `infrastructure/stack/bootstrap/elasticsearch/index-template-sessions-detected.json` plus `infrastructure/stack/bootstrap/elasticsearch/apply-index-template.sh` to apply mappings in dev
 
 ---
 
@@ -41,8 +41,8 @@ description: "Task list for 002-session-indexing"
 
 **Purpose**: Feed Elasticsearch from the session event stream.
 
-- [X] T005 Add connector config `scripts/connectors/elasticsearch-sink-sessions-detected.json` for the Elasticsearch Sink: consume **`sessions.detected`**, target index/data stream name, key/id strategy documented to control duplicates
-- [X] T006 Add `scripts/connectors/register-elasticsearch-sink-connector.sh` that registers the connector via Connect REST API with idempotent behavior where the API allows
+- [X] T005 Add connector config `infrastructure/connectors/configs/elasticsearch-sink-sessions-detected.json` for the Elasticsearch Sink: consume **`sessions.detected`**, target index/data stream name, key/id strategy documented to control duplicates
+- [X] T006 Add `infrastructure/connectors/register/register-elasticsearch-sink-connector.sh` that registers the connector via Connect REST API with idempotent behavior where the API allows
 
 ---
 
@@ -53,7 +53,7 @@ description: "Task list for 002-session-indexing"
 - [X] T007 Extend `specs/002-session-indexing/quickstart.md` with end-to-end steps: unified compose **full stack** -> topic -> ES/Connect healthy -> index template -> register connector -> probe publish -> **Elasticsearch `_search`** examples using **`size`**, sort, and `search_after` or explicit limits
 - [X] T008 [P] Document **emission-to-query** latency and **eventual consistency** expectations for operators in `specs/002-session-indexing/quickstart.md` and add a short measured-note placeholder in `specs/002-session-indexing/research.md`
 - [X] T009 [P] Document **TLS** and **authentication** for Elasticsearch and Connect in non-dev vs documented dev relaxation (`specs/002-session-indexing/quickstart.md`) consistent with **ADR 0009** and constitution Article 8
-- [X] T010 Add `scripts/acceptance/verify-session-indexing-sampling.sh` that runs a **bounded** query, samples hits, and fails if required fields/semantics diverge from `session-detected-value.avsc` (gated with `RUN_ES_INTEGRATION=1`)
+- [X] T010 Add `infrastructure/acceptance/contract/verify-session-indexing-sampling.sh` that runs a **bounded** query, samples hits, and fails if required fields/semantics diverge from `session-detected-value.avsc` (gated with `RUN_ES_INTEGRATION=1`)
 - [X] T011 [P] Pin **Elasticsearch** and **Kafka Connect** image versions and connector plugin strategy in `specs/002-session-indexing/research.md` and cross-reference in `specs/002-session-indexing/quickstart.md`
 
 **Checkpoint**: Operators can bring up the **unified** reference compose (Kafka + Registry + ES + Connect), index session detections, and reproduce **SC-001** using the documented query + script path; **Kafka-only** remains documented for lighter stream runs.

@@ -1,0 +1,188 @@
+---
+description: Wrap the core planning workflow with architecture SSOT grounding.
+scripts:
+  sh: scripts/bash/setup-plan.sh --json
+  ps: scripts/powershell/setup-plan.ps1 -Json
+---
+
+
+## Architecture SSOT Injection
+
+Before running the core planning workflow, inspect these project-level architecture files if they exist:
+
+- `.specify/memory/architecture.md`
+- `.specify/memory/architecture-scenario-view.md`
+- `.specify/memory/architecture-logical-view.md`
+- `.specify/memory/architecture-process-view.md`
+- `.specify/memory/architecture-development-view.md`
+- `.specify/memory/architecture-physical-view.md`
+
+This wrapper is a non-invasive context injection. The core planning workflow remains responsible for setup, feature analysis, technical research, design artifacts, contracts, agent-context updates, and plan reporting.
+
+Do not change the core planning phases, required artifacts, scripts, constitution checks, research process, or output paths. Do not introduce new `ERROR` gates beyond the core planning gates.
+
+If none of these files exist, continue with the core planning workflow without adding an architecture grounding section solely for the missing files.
+
+If one or more files exist:
+
+- Treat them as the architecture grounding for this planning pass: the plan must reason within the SSOT's architecture intent, boundaries, constraints, anti-patterns, and unresolved gaps.
+- Extract only architecture-level conclusions: intent, stable boundaries, forbidden crossings, change axes, anti-patterns, invariants, open risks, and review triggers.
+- Do not invent architecture facts when files still contain `NEEDS ARCH UPDATE`; carry the unresolved item into the plan.
+- If the feature direction conflicts with the architecture SSOT, make the conflict explicit in the plan and identify the resolution path: refresh the architecture SSOT or adjust the feature plan.
+- Do not run `/speckit.arch.generate` automatically.
+
+The plan output MUST include an `Architecture Grounding` section when architecture files are present. That section is not an audit report; it records how the plan reasoning is bounded by the architecture SSOT:
+
+- Architecture files read
+- Applicable stable boundaries and forbidden crossings
+- Architecture constraints or unresolved gaps that bound the plan
+- Conflicts, if any, that prevent valid planning inside the current architecture SSOT, plus the required resolution path
+- Architecture drift risks to watch during implementation
+
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Pre-Execution Checks
+
+**Check for extension hooks (before planning)**:
+- Check if `.specify/extensions.yml` exists in the project root.
+- If it exists, read it and look for entries under the `hooks.before_plan` key
+- If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
+- Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
+- For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
+  - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+  - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+- For each executable hook, output the following based on its `optional` flag:
+  - **Optional hook** (`optional: true`):
+    ```
+    ## Extension Hooks
+
+    **Optional Pre-Hook**: {extension}
+    Command: `/{command}`
+    Description: {description}
+
+    Prompt: {prompt}
+    To execute: `/{command}`
+    ```
+  - **Mandatory hook** (`optional: false`):
+    ```
+    ## Extension Hooks
+
+    **Automatic Pre-Hook**: {extension}
+    Executing: `/{command}`
+    EXECUTE_COMMAND: {command}
+
+    Wait for the result of the hook command before proceeding to the Outline.
+    ```
+- If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
+
+## Outline
+
+1. **Setup**: Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+
+2. **Load context**: Read FEATURE_SPEC and `/memory/constitution.md`. Load IMPL_PLAN template (already copied).
+
+3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
+   - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")
+   - Fill Constitution Check section from constitution
+   - Evaluate gates (ERROR if violations unjustified)
+   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
+   - Phase 1: Generate data-model.md, contracts/, quickstart.md
+   - Phase 1: Update agent context by running the agent script
+   - Re-evaluate Constitution Check post-design
+
+4. **Stop and report**: Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generated artifacts.
+
+5. **Check for extension hooks**: After reporting, check if `.specify/extensions.yml` exists in the project root.
+   - If it exists, read it and look for entries under the `hooks.after_plan` key
+   - If the YAML cannot be parsed or is invalid, skip hook checking silently and continue normally
+   - Filter out hooks where `enabled` is explicitly `false`. Treat hooks without an `enabled` field as enabled by default.
+   - For each remaining hook, do **not** attempt to interpret or evaluate hook `condition` expressions:
+     - If the hook has no `condition` field, or it is null/empty, treat the hook as executable
+     - If the hook defines a non-empty `condition`, skip the hook and leave condition evaluation to the HookExecutor implementation
+   - For each executable hook, output the following based on its `optional` flag:
+     - **Optional hook** (`optional: true`):
+       ```
+       ## Extension Hooks
+
+       **Optional Hook**: {extension}
+       Command: `/{command}`
+       Description: {description}
+
+       Prompt: {prompt}
+       To execute: `/{command}`
+       ```
+     - **Mandatory hook** (`optional: false`):
+       ```
+       ## Extension Hooks
+
+       **Automatic Hook**: {extension}
+       Executing: `/{command}`
+       EXECUTE_COMMAND: {command}
+       ```
+   - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
+
+## Phases
+
+### Phase 0: Outline & Research
+
+1. **Extract unknowns from Technical Context** above:
+   - For each NEEDS CLARIFICATION → research task
+   - For each dependency → best practices task
+   - For each integration → patterns task
+
+2. **Generate and dispatch research agents**:
+
+   ```text
+   For each unknown in Technical Context:
+     Task: "Research {unknown} for {feature context}"
+   For each technology choice:
+     Task: "Find best practices for {tech} in {domain}"
+   ```
+
+3. **Consolidate findings** in `research.md` using format:
+   - Decision: [what was chosen]
+   - Rationale: [why chosen]
+   - Alternatives considered: [what else evaluated]
+
+**Output**: research.md with all NEEDS CLARIFICATION resolved
+
+### Phase 1: Design & Contracts
+
+**Prerequisites:** `research.md` complete
+
+1. **Extract entities from feature spec** → `data-model.md`:
+   - Entity name, fields, relationships
+   - Validation rules from requirements
+   - State transitions if applicable
+
+2. **Define interface contracts** (if project has external interfaces) → `/contracts/`:
+   - Identify what interfaces the project exposes to users or other systems
+   - Document the contract format appropriate for the project type
+   - Examples: public APIs for libraries, command schemas for CLI tools, endpoints for web services, grammars for parsers, UI contracts for applications
+   - Skip if project is purely internal (build scripts, one-off tools, etc.)
+
+3. **Agent context update**:
+   - Update the plan reference between the `<!-- SPECKIT START -->` and `<!-- SPECKIT END -->` markers in `__CONTEXT_FILE__` to point to the plan file created in step 1 (the IMPL_PLAN path)
+
+**Output**: data-model.md, /contracts/*, quickstart.md, updated agent context file
+
+## Key rules
+
+- Use absolute paths for filesystem operations; use project-relative paths for references in documentation and agent context files
+- ERROR on gate failures or unresolved clarifications
+
+
+## Architecture Grounding Summary
+
+Before finishing, summarize how architecture SSOT grounded the generated plan:
+
+- If no architecture files were present, state that the core plan continued without architecture SSOT input.
+- If architecture files were present, summarize the boundaries, forbidden crossings, unresolved architecture gaps, conflicts, and drift risks that bounded the plan reasoning.
+- Do not modify architecture files from this command.

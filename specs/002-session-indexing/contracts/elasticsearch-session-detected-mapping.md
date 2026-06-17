@@ -23,10 +23,10 @@
 
 ## Index identity & duplicates
 
-- **Kafka key**: String partition key (same identity as stream duplicate suppression) — the Elasticsearch Sink may use it as **document `_id`** when `key.ignore` is `false` (see `scripts/connectors/elasticsearch-sink-sessions-detected.json`), aligning **query-side** idempotency with stream semantics where the connector allows.
+- **Kafka key**: String partition key (same identity as stream duplicate suppression) — the Elasticsearch Sink may use it as **document `_id`** when `key.ignore` is `false` (see `infrastructure/connectors/configs/elasticsearch-sink-sessions-detected.json`), aligning **query-side** idempotency with stream semantics where the connector allows.
 - **Overlap in query results** (replays, reindexes): still governed by the session indexing edge cases and by stream emission semantics from `001-session-detection`: projection docs must not contradict the **declared contract**; any deduplication for analysts is **documented** in `quickstart.md` and connector notes.
 
 ## Index naming
 
-- Reference index (via connector `topic.to.external.resource.mapping`): `sessions-detected` (see `scripts/connectors/elasticsearch-sink-sessions-detected.json`).  
-- Template: `scripts/bootstrap/elasticsearch/index-template-sessions-detected.json` applies to `sessions-detected*`.
+- Reference index (via connector `topic.to.external.resource.mapping`): `sessions-detected` (see `infrastructure/connectors/configs/elasticsearch-sink-sessions-detected.json`).  
+- Template: `infrastructure/stack/bootstrap/elasticsearch/index-template-sessions-detected.json` applies to `sessions-detected*`.

@@ -1,11 +1,22 @@
 import type { DeviceInventoryItem } from "../models/deviceDtos";
 import { formatIsoDateTime, formatOptional } from "./deviceFormat";
 
+/**
+ * Props for the {@link DeviceInventoryTable} component.
+ */
 export interface DeviceInventoryTableProps {
+  /** The list of devices to display in the table. */
   items: DeviceInventoryItem[];
 }
 
-export default function DeviceInventoryTable({ items }: DeviceInventoryTableProps) {
+/**
+ * Component that renders a table of discovered network devices.
+ * 
+ * @param props - The component props.
+ * @returns The rendered inventory table.
+ */
+export default function DeviceInventoryTable(props: DeviceInventoryTableProps) {
+  const { items } = props;
   return (
     <div className="inventory-table-wrap">
       <table className="inventory">

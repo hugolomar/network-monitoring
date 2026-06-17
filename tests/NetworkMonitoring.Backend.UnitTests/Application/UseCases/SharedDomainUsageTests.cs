@@ -4,8 +4,14 @@ using NetworkMonitoring.Domain.ValueObjects;
 
 namespace NetworkMonitoring.Backend.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for SharedDomainUsage.
+/// </summary>
 public sealed class SharedDomainUsageTests
 {
+    /// <summary>
+    /// Verifies that backend references shared device domain types in business use case.
+    /// </summary>
     [Fact]
     public void Backend_references_shared_device_domain_types_in_business_use_case()
     {

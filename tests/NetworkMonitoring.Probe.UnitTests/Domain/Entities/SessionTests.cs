@@ -3,8 +3,14 @@ using NetworkMonitoring.Domain.ValueObjects;
 
 namespace NetworkMonitoring.Probe.UnitTests.Domain.Entities;
 
+/// <summary>
+/// Test suite for Session.
+/// </summary>
 public sealed class SessionTests
 {
+    /// <summary>
+    /// Verifies that create with valid values returns session.
+    /// </summary>
     [Fact]
     public void Create_WithValidValues_ReturnsSession()
     {

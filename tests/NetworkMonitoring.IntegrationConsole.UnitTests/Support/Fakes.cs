@@ -3,6 +3,9 @@ using NetworkMonitoring.IntegrationConsole.Application.Ports;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
+/// <summary>
+/// Tests for FakeDeviceEventConsumer.
+/// </summary>
 internal sealed class FakeDeviceEventConsumer(params ConsumedDeviceEvent[] events) : IDeviceEventConsumer
 {
     public List<ConsumedDeviceEvent> Acknowledged { get; } = [];
@@ -26,6 +29,9 @@ internal sealed class FakeDeviceEventConsumer(params ConsumedDeviceEvent[] event
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
+/// <summary>
+/// Tests for FakeDeviceIntakeClient.
+/// </summary>
 internal sealed class FakeDeviceIntakeClient(params IngestionOutcome[] outcomes) : IDeviceIntakeClient
 {
     private readonly Queue<IngestionOutcome> _outcomes = new(outcomes);

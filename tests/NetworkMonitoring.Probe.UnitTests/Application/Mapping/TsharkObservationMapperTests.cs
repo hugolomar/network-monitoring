@@ -2,8 +2,14 @@ using NetworkMonitoring.Probe.Infrastructure.Traffic;
 
 namespace NetworkMonitoring.Probe.UnitTests.Application.Mapping;
 
+/// <summary>
+/// Test suite for TsharkObservationMapper.
+/// </summary>
 public sealed class TsharkObservationMapperTests
 {
+    /// <summary>
+    /// Verifies that try map with valid line returns observation.
+    /// </summary>
     [Fact]
     public void TryMap_WithValidLine_ReturnsObservation()
     {
@@ -20,6 +26,9 @@ public sealed class TsharkObservationMapperTests
         Assert.Equal("TRAFFIC", observation.DiscoverySource);
     }
 
+    /// <summary>
+    /// Verifies that try map with malformed line returns false.
+    /// </summary>
     [Fact]
     public void TryMap_WithMalformedLine_ReturnsFalse()
     {

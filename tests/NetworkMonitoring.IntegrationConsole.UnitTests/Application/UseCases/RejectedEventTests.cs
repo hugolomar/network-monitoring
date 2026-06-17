@@ -5,8 +5,14 @@ using NetworkMonitoring.IntegrationConsole.UnitTests.Support;
 
 namespace NetworkMonitoring.IntegrationConsole.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for RejectedEvent.
+/// </summary>
 public sealed class RejectedEventTests
 {
+    /// <summary>
+    /// Verifies that process acknowledges malformed event without forwarding.
+    /// </summary>
     [Fact]
     public async Task Process_acknowledges_malformed_event_without_forwarding()
     {

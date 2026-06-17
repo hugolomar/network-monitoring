@@ -15,7 +15,7 @@ Run the Integration Console against the reference Kafka stack and a fake HTTP re
 
 ```bash
 docker compose -f docker-compose.reference-stack.yml up -d
-./scripts/bootstrap/kafka-topics-init.sh
+./infrastructure/stack/bootstrap/kafka-topics-init.sh
 ```
 
 Verify the device topic:

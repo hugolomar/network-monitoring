@@ -4,29 +4,59 @@ using NetworkMonitoring.Backend.Application.Configuration;
 using NetworkMonitoring.Backend.Host.DependencyInjection;
 using NetworkMonitoring.Backend.Host.Endpoints;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
 builder.Services.AddDeviceInventoryBackend(builder.Configuration);
+
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+
+// Skip database migrations during integration tests
 if (!app.Environment.IsEnvironment("Testing"))
 {
     await app.ApplyDeviceInventoryMigrations();
 }
 
 app.MapDeviceEndpoints();
+app.MapGraphEndpoints();
 
 app.Run();
 
-public partial class Program;
+namespace NetworkMonitoring.Backend
+{
+    /// <summary>
+    /// Entry point for the Network Monitoring Backend application.
+    /// </summary>
+    public partial class Program { }
+}
 
+/// <summary>
+/// Extension methods for database migration on startup.
+/// </summary>
 internal static class DeviceInventoryMigrationExtensions
 {
+    /// <summary>
+    /// Applies pending EF Core migrations to the device inventory database.
+    /// </summary>
+    /// <param name="app">The web application host.</param>
     public static async Task ApplyDeviceInventoryMigrations(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
         var options = scope.ServiceProvider.GetRequiredService<IOptions<BackendOptions>>().Value;
+        
+        // Only apply migrations if explicitly configured in appsettings
         if (!options.ApplyMigrationsOnStartup)
         {
             return;

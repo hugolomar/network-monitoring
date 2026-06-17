@@ -8,8 +8,14 @@ using NetworkMonitoring.Probe.Infrastructure.Publishing;
 
 namespace NetworkMonitoring.Probe.IntegrationTests;
 
+/// <summary>
+/// Test suite for ProbeCaptureToConsole.
+/// </summary>
 public sealed class ProbeCaptureToConsoleTests
 {
+    /// <summary>
+    /// Verifies that execute async with valid observation writes session and device events.
+    /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithValidObservation_WritesSessionAndDeviceEvents()
     {
@@ -60,6 +66,9 @@ public sealed class ProbeCaptureToConsoleTests
         Assert.Contains("DeviceDetected", output);
     }
 
+    /// <summary>
+    /// Verifies that execute async with repeated device evidence emits consolidated device timeline.
+    /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithRepeatedDeviceEvidence_EmitsConsolidatedDeviceTimeline()
     {
@@ -125,6 +134,9 @@ public sealed class ProbeCaptureToConsoleTests
         Assert.Contains("\"lastSeenUtc\":\"2026-04-10T10:01:00+00:00\"", output);
     }
 
+    /// <summary>
+    /// Tests for FakeTrafficProvider.
+    /// </summary>
     private sealed class FakeTrafficProvider(IReadOnlyList<TrafficObservation> observations) : ITrafficProvider
     {
         public async IAsyncEnumerable<TrafficObservation> ReadObservations(

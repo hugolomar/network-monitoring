@@ -2,8 +2,14 @@ using NetworkMonitoring.Domain.ValueObjects;
 
 namespace NetworkMonitoring.Probe.UnitTests.Domain.ValueObjects;
 
+/// <summary>
+/// Test suite for Port.
+/// </summary>
 public sealed class PortTests
 {
+    /// <summary>
+    /// Verifies that constructor with valid port creates value object.
+    /// </summary>
     [Fact]
     public void Constructor_WithValidPort_CreatesValueObject()
     {
@@ -11,6 +17,9 @@ public sealed class PortTests
         Assert.Equal(443, value.Value);
     }
 
+    /// <summary>
+    /// Verifies that constructor with out of range port throws.
+    /// </summary>
     [Fact]
     public void Constructor_WithOutOfRangePort_Throws()
     {

@@ -3,8 +3,16 @@ using NetworkMonitoring.Backend.Application.UseCases;
 
 namespace NetworkMonitoring.Backend.Host.Endpoints;
 
+/// <summary>
+/// Defines the HTTP endpoints for device management.
+/// </summary>
 public static class DeviceEndpoints
 {
+    /// <summary>
+    /// Maps the device management endpoints to the specified <see cref="IEndpointRouteBuilder"/>.
+    /// </summary>
+    /// <param name="endpoints">The <see cref="IEndpointRouteBuilder"/> to map the endpoints to.</param>
+    /// <returns>The <see cref="IEndpointRouteBuilder"/> so that additional calls can be chained.</returns>
     public static IEndpointRouteBuilder MapDeviceEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapPost("/devices", AcceptDevice)
@@ -27,6 +35,7 @@ public static class DeviceEndpoints
             AcceptDeviceIntakeUseCase useCase,
             CancellationToken cancellationToken)
     {
+        // Validate that the request uses the correct media type
         if (!httpRequest.HasJsonContentType())
         {
             return Results.Json(
@@ -39,10 +48,12 @@ public static class DeviceEndpoints
             return TypedResults.BadRequest(new DeviceIntakeResponseDto("rejected", "Request body is required.", null));
         }
 
+        // Map the request to a command, extracting the idempotency key if provided
         var command = DeviceIntakeRequestMapper.ToCommand(request, httpRequest.Headers["Idempotency-Key"].FirstOrDefault());
         var outcome = await useCase.Execute(command, cancellationToken);
         var response = new DeviceIntakeResponseDto(outcome.Kind.ToString(), outcome.Reason, outcome.Device);
 
+        // Map the use case outcome to the appropriate HTTP response
         return outcome.Kind switch
         {
             DeviceIntakeOutcomeKind.Created => Results.Created($"/devices/{outcome.Device!.Id}", response),

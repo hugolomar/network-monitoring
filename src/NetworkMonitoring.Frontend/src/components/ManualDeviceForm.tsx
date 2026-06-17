@@ -1,8 +1,18 @@
 import { useMemo, useState, type FormEvent } from "react";
 import type { DeviceIntakeRequestDto } from "../models/deviceDtos";
 
+/**
+ * Props for the {@link ManualDeviceForm} component.
+ */
 export interface ManualDeviceFormProps {
+  /** Whether the form is currently disabled (e.g., during submission). */
   disabled?: boolean;
+  /**
+   * Callback invoked when the form is submitted.
+   * 
+   * @param payload - The device data to ingest.
+   * @param idempotencyKey - A unique key (MAC address) for the request.
+   */
   onSubmit: (payload: DeviceIntakeRequestDto, idempotencyKey: string) => Promise<void>;
 }
 
@@ -22,7 +32,14 @@ function emptyDraft(): Record<string, string> {
   };
 }
 
-export default function ManualDeviceForm({ disabled, onSubmit }: ManualDeviceFormProps) {
+/**
+ * Component providing a form for manual device data intake.
+ * 
+ * @param props - The component props.
+ * @returns The rendered manual intake form.
+ */
+export default function ManualDeviceForm(props: ManualDeviceFormProps) {
+  const { disabled, onSubmit } = props;
   const [draft, setDraft] = useState(emptyDraft);
   const [localError, setLocalError] = useState<string | null>(null);
 

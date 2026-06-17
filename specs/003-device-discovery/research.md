@@ -102,4 +102,4 @@
   `KafkaDeviceEventPublishIntegrationTests.PublishDeviceDetected_ProducesConsumableAvroValueWithNormalizedMacKey`.
   It remains skipped by default because the reference Kafka stack was not run for this validation
   pass; execute it with `RUN_KAFKA_INTEGRATION=1` after starting the reference stack and running
-  `./scripts/bootstrap/kafka-topics-init.sh`.
+  `./infrastructure/stack/bootstrap/kafka-topics-init.sh`.

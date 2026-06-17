@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace NetworkMonitoring.IntegrationConsole.IntegrationTests.Support;
 
+/// <summary>
+/// Tests for FakeDeviceReceiver.
+/// </summary>
 internal sealed class FakeDeviceReceiver
 {
     private readonly ConcurrentDictionary<string, JsonDocument> _devicesByIdempotencyKey = new(StringComparer.Ordinal);
@@ -38,6 +41,9 @@ internal sealed class FakeDeviceReceiver
         return new HttpResponseMessage(statusCode);
     }
 
+    /// <summary>
+    /// Tests for Handler.
+    /// </summary>
     private sealed class Handler(FakeDeviceReceiver receiver) : HttpMessageHandler
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

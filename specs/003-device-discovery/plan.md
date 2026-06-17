@@ -116,7 +116,7 @@ tests/
 ├── NetworkMonitoring.Probe.UnitTests/
 └── NetworkMonitoring.Probe.IntegrationTests/
 
-scripts/
+infrastructure/stack/
 └── bootstrap/kafka-topics-init.sh
 ```
 

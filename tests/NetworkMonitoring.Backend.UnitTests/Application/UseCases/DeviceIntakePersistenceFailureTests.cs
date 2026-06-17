@@ -5,8 +5,14 @@ using NetworkMonitoring.Backend.UnitTests.Support;
 
 namespace NetworkMonitoring.Backend.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Test suite for DeviceIntakePersistenceFailure.
+/// </summary>
 public sealed class DeviceIntakePersistenceFailureTests
 {
+    /// <summary>
+    /// Verifies that execute classifies persistence failure as service unavailable.
+    /// </summary>
     [Fact]
     public async Task Execute_classifies_persistence_failure_as_service_unavailable()
     {

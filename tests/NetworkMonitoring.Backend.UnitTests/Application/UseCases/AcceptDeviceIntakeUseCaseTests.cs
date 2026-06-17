@@ -5,8 +5,16 @@ using NetworkMonitoring.Backend.UnitTests.Support;
 
 namespace NetworkMonitoring.Backend.UnitTests.Application.UseCases;
 
+/// <summary>
+/// Verifies the behavior of the AcceptDeviceIntakeUseCase, which is responsible 
+/// for processing, validating, and accepting incoming device telemetry data.
+/// </summary>
 public sealed class AcceptDeviceIntakeUseCaseTests
 {
+    /// <summary>
+    /// Verifies that a valid intake command is successfully accepted, using the 
+    /// shared domain logic to correctly normalize fields like the MAC address.
+    /// </summary>
     [Fact]
     public async Task Execute_accepts_valid_intake_using_shared_domain_normalization()
     {
@@ -19,6 +27,10 @@ public sealed class AcceptDeviceIntakeUseCaseTests
         Assert.Equal("192.168.1.10", outcome.Device.PrimaryIp);
     }
 
+    /// <summary>
+    /// Verifies that an intake command is rejected if the provided Idempotency-Key 
+    /// does not match the normalized MAC address of the payload.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_mismatched_idempotency_key()
     {
@@ -30,6 +42,10 @@ public sealed class AcceptDeviceIntakeUseCaseTests
         Assert.Contains("Idempotency-Key", outcome.Reason);
     }
 
+    /// <summary>
+    /// Verifies that an intake command is rejected if the primary IP address 
+    /// provided in the evidence is not a valid IP address format.
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_invalid_ip_evidence()
     {
@@ -41,6 +57,10 @@ public sealed class AcceptDeviceIntakeUseCaseTests
         Assert.Contains("primaryIp", outcome.Reason);
     }
 
+    /// <summary>
+    /// Verifies that an intake command is rejected if the chronological ordering 
+    /// of the first seen and last seen timestamps is invalid (e.g., first seen is after last seen).
+    /// </summary>
     [Fact]
     public async Task Execute_rejects_invalid_timestamp_ordering()
     {

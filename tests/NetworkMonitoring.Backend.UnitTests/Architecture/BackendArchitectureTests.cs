@@ -3,8 +3,14 @@ using NetworkMonitoring.Backend.Application.UseCases;
 
 namespace NetworkMonitoring.Backend.UnitTests.Architecture;
 
+/// <summary>
+/// Test suite for BackendArchitecture.
+/// </summary>
 public sealed class BackendArchitectureTests
 {
+    /// <summary>
+    /// Verifies that application layer does not depend on infrastructure or host.
+    /// </summary>
     [Fact]
     public void Application_layer_does_not_depend_on_infrastructure_or_host()
     {

@@ -1,0 +1,34 @@
+FROM jenkins/jenkins:lts
+USER root
+
+# Skip setup wizard
+ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
+
+# Install dependencies for .NET and Node
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    libicu-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install .NET 10 SDK
+RUN curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 10.0 --install-dir /usr/share/dotnet \
+    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+
+# Install Node.js (current LTS)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Fix git security issue for mounted volumes
+RUN git config --global --add safe.directory /workspace
+RUN git config --global --add safe.directory /workspace/.git
+
+# Install Jenkins plugins
+RUN jenkins-plugin-cli --plugins \
+    workflow-aggregator \
+    git \
+    sonar \
+    docker-workflow \
+    pipeline-stage-view
+
+USER root

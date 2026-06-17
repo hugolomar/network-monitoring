@@ -8,6 +8,10 @@ using NetworkMonitoring.Probe.Application.Ports;
 
 namespace NetworkMonitoring.Probe.Infrastructure.Publishing;
 
+/// <summary>
+/// Implementation of <see cref="IMessagePublisher"/> that sends detection events to Apache Kafka using Avro serialization.
+/// Handles connection management and fault tolerance for the underlying Kafka producer.
+/// </summary>
 public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
 {
     private readonly ProbeOptions _options;
@@ -16,6 +20,12 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
     private readonly object _gate = new();
     private IKafkaGenericRecordProducer? _producer;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="KafkaProbeEventPublisher"/> class.
+    /// </summary>
+    /// <param name="options">Configuration options for Kafka topics and servers.</param>
+    /// <param name="logger">Logger for capturing publication errors and status.</param>
+    /// <param name="producerFactory">Optional factory to customize producer creation (useful for testing).</param>
     public KafkaProbeEventPublisher(
         IOptions<ProbeOptions> options,
         ILogger<KafkaProbeEventPublisher> logger,
@@ -26,6 +36,12 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
         _producerFactory = producerFactory ?? new KafkaGenericRecordProducerFactory();
     }
 
+    /// <summary>
+    /// Maps a session entity to an Avro record and publishes it to the configured Kafka topic.
+    /// </summary>
+    /// <param name="session">The session to publish.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous publication.</returns>
     public async Task PublishSessionDetected(Session session, CancellationToken cancellationToken)
     {
         if (!_options.EnableKafka)
@@ -50,6 +66,12 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
         }
     }
 
+    /// <summary>
+    /// Maps a device entity to an Avro record and publishes it to the configured Kafka topic.
+    /// </summary>
+    /// <param name="device">The device to publish.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation requests.</param>
+    /// <returns>A task representing the asynchronous publication.</returns>
     public async Task PublishDeviceDetected(Device device, CancellationToken cancellationToken)
     {
         if (!_options.EnableKafka)
@@ -74,6 +96,13 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
         }
     }
 
+    /// <summary>
+    /// Ensures the underlying Kafka producer is initialized.
+    /// </summary>
+    /// <remarks>
+    /// Uses a Double-Check Locking pattern to ensure the producer is created only once 
+    /// in a thread-safe manner without penalizing performance on subsequent calls.
+    /// </remarks>
     private void EnsureProducer()
     {
         if (_producer is not null)
@@ -92,6 +121,9 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
         }
     }
 
+    /// <summary>
+    /// Flushes any pending messages and releases the underlying producer resources.
+    /// </summary>
     public void Dispose()
     {
         _producer?.Flush(TimeSpan.FromSeconds(10));

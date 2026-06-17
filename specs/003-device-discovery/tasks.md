@@ -146,7 +146,7 @@ consume one `DeviceDetected` event from `devices.detected`; verify Avro fields m
 - [X] T038 [P] [US4] Implement `DeviceKafkaPartitionKey` in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/DeviceKafkaPartitionKey.cs`
 - [X] T039 [US4] Implement Kafka publication for `PublishDeviceDetected` in `src/NetworkMonitoring.Probe/Infrastructure/Publishing/KafkaProbeEventPublisher.cs`
 - [X] T040 [US4] Ensure Kafka device publication remains behind `IMessagePublisher` composition in `src/NetworkMonitoring.Probe/Host/DependencyInjection/ServiceCollectionExtensions.cs`
-- [X] T041 [US4] Update topic bootstrap to create `devices.detected` in `scripts/bootstrap/kafka-topics-init.sh`
+- [X] T041 [US4] Update topic bootstrap to create `devices.detected` in infrastructure/stack/bootstrap/kafka-topics-init.sh`
 
 **Checkpoint**: User Story 4 is independently testable with the reference Kafka stack and does not
 change console discovery behavior or `sessions.detected` publication.
