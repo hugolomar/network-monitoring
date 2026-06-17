@@ -6,9 +6,10 @@
 ## Summary
 
 Deliver a bounded, authenticated communication-graph capability that projects enriched session facts
-into graph relationships, exposes `GET /api/graph/devices` for neighborhood traversal, executes
-scheduled retention cleanup without impacting existing non-graph backend behavior, and adds a
-frontend graph exploration view for operators.
+into graph relationships, exposes `GET /api/graph/devices` for neighborhood traversal plus
+`GET /api/graph/devices/all` for full-snapshot retrieval, executes scheduled retention cleanup without
+impacting existing non-graph backend behavior, and adds a frontend graph exploration view with
+inventory-correlation hints for operators.
 
 ## Architecture Grounding
 
@@ -30,8 +31,8 @@ frontend graph exploration view for operators.
   or transport internals.
 
 **Constraints and unresolved architecture gaps that bound this plan**:
-- Authorization semantics are intentionally broad in this slice (authenticated access) and role-hardening
-  remains deferred.
+- Graph-read authorization is role-scoped in this slice (`admin`, `analyst`, `auditor`, `integration`);
+  fine-grained, per-role data filtering remains deferred.
 - Cross-participant outage escalation policy is still qualitative; this plan enforces explicit closure
   semantics locally (503 + diagnostics) without introducing new global escalation mechanics.
 - Concurrency ordering between manual/automated inventory updates remains outside this feature scope.
@@ -51,12 +52,14 @@ frontend graph exploration view for operators.
 **Language/Version**: C# / .NET 10 for API/hosted services; JSON for connector configuration  
 **Primary Dependencies**: ASP.NET Core minimal APIs, Microsoft DI/options hosting stack, graph database adapter boundary, Kafka Connect Neo4j sink contract  
 **Storage**: Graph database for communication projection; existing inventory store remains authoritative for internal devices  
-**Testing**: xUnit integration tests with backend test host and graph-focused API/integration coverage  
+**Testing**: xUnit backend integration tests plus frontend Vitest coverage for graph API/page behavior  
 **Target Platform**: Linux containerized runtime in local/CI environments  
 **Project Type**: Backend web-service extension plus frontend UI extension plus connector/config contract artifacts  
 **Performance Goals**: SC-001 median projection latency <= 2s; bounded retrieval responsive within configured depth/limit caps  
 **Constraints**: Auth required for graph endpoint; scheduled-only 24h retention; bounded projection retries; structured logs + counters/latency metrics; graph outage isolation from existing endpoint families  
-**Scale/Scope**: One graph endpoint, projection + retention lifecycle, graph UI exploration page, connector baseline, and validation artifacts for FR-001..FR-022 / SC-001..SC-007
+**Scale/Scope**: Neighborhood + snapshot graph endpoints, projection + retention lifecycle, graph UI
+exploration page with inventory-correlation hints, connector baseline, and validation artifacts for
+FR-001..FR-024 / SC-001..SC-007
 
 ### Runtime implementation note (2026-06-15)
 
@@ -64,6 +67,15 @@ frontend graph exploration view for operators.
   persistence for non-testing environments.
 - `InMemoryGraphStore` remains available for `Testing` and optional explicit `Provider=InMemory` runs.
 - Neo4j is now part of the local reference stack and the backend defaults to `Provider=Neo4j`.
+
+### Runtime implementation note (2026-06-17)
+
+- Backend now supports full-graph snapshot retrieval via `GET /api/graph/devices/all` with bounded limit
+  semantics aligned to existing graph caps.
+- Frontend graph page defaults to snapshot mode when root is empty and preserves root-filtered mode when
+  a root identity is provided.
+- Graph UI now surfaces inventory-correlation hints (including `device-<n>` to inventory-id mapping) to
+  help operators identify which graph nodes correspond to inventory records.
 
 ## Constitution Check
 
@@ -122,6 +134,12 @@ src/
 │   ├── Application/UseCases/
 │   ├── Application/Ports/
 │   └── Infrastructure/Graph/
+├── NetworkMonitoring.Frontend/
+│   └── src/
+│       ├── api/
+│       ├── pages/
+│       ├── components/
+│       └── models/
 └── ...
 
 infrastructure/connectors/configs/
@@ -131,9 +149,11 @@ tests/
 └── NetworkMonitoring.Backend.IntegrationTests/
 ```
 
-**Structure Decision**: Extend the existing backend slice using the same clean layering and keep all
-graph concerns isolated under `Infrastructure/Graph` + `Application` + `Host` boundaries. This preserves
-incremental compatibility with existing modules and aligns with architecture SSOT ownership rules.
+**Structure Decision**: Extend the backend slice using the same clean layering and keep graph-domain
+concerns isolated under `Infrastructure/Graph` + `Application` + `Host`, while adding a focused frontend
+graph exploration slice under `NetworkMonitoring.Frontend/src` (`api/pages/components/models`) that
+consumes backend contracts without coupling to capture/transport internals. This preserves incremental
+compatibility and aligns with architecture SSOT ownership rules.
 
 ## Post-Design Constitution Re-check
 

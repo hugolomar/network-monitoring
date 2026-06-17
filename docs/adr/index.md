@@ -12,3 +12,5 @@ This section contains the records of significant architectural decisions made du
 - [ADR-0007: Kafka KRaft Without Zookeeper](0007-kafka-kraft-without-zookeeper.md)
 - [ADR-0008: Mutual TLS for Kafka and Service Clients](0008-mutual-tls-for-kafka-and-service-clients.md)
 - [ADR-0009: Elasticsearch for Session Detection Query](0009-elasticsearch-for-session-detection-query.md)
+- [ADR-0010: Frontend Test Colocation Convention](0010-frontend-testing-convention.md)
+- [ADR-0011: Graph Database for Device Communication Relationships](0011-graph-database-for-device-communications.md)

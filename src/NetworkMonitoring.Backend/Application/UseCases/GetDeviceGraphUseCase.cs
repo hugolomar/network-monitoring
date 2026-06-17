@@ -15,6 +15,15 @@ public sealed class GetDeviceGraphUseCase(
     /// <summary>
     /// Executes bounded graph retrieval with defaults and caps from configuration.
     /// </summary>
+    /// <param name="rootDeviceId">The root graph identity to traverse from.</param>
+    /// <param name="depth">Optional caller-requested traversal depth.</param>
+    /// <param name="limit">Optional caller-requested maximum node count.</param>
+    /// <param name="cancellationToken">The cancellation token used to abort execution.</param>
+    /// <returns>A bounded graph neighborhood result.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="rootDeviceId"/> is empty.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when effective depth or limit is less than one.
+    /// </exception>
     public Task<GraphQueryResult> Execute(
         string rootDeviceId,
         int? depth,
@@ -56,6 +65,10 @@ public sealed class GetDeviceGraphUseCase(
     /// <summary>
     /// Executes bounded full-graph retrieval with configured default/cap semantics.
     /// </summary>
+    /// <param name="limit">Optional caller-requested maximum node count.</param>
+    /// <param name="cancellationToken">The cancellation token used to abort execution.</param>
+    /// <returns>A bounded graph snapshot result.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when effective limit is less than one.</exception>
     public Task<GraphQueryResult> ExecuteSnapshot(
         int? limit,
         CancellationToken cancellationToken)

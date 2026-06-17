@@ -1,12 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getDeviceGraph, getDeviceGraphSnapshot } from "./graphApi";
 
+/**
+ * Verifies graph API client behavior for success and error mapping.
+ */
 describe("graphApi", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
+  /**
+   * Validates successful neighborhood payload parsing.
+   */
   it("returns graph payload on 200", async () => {
     vi.stubGlobal(
       "fetch",
@@ -31,6 +37,9 @@ describe("graphApi", () => {
     }
   });
 
+  /**
+   * Validates mapping of 503 responses to unavailable outcome.
+   */
   it("maps 503 to unavailable", async () => {
     vi.stubGlobal(
       "fetch",
@@ -50,6 +59,9 @@ describe("graphApi", () => {
     }
   });
 
+  /**
+   * Validates successful snapshot payload parsing.
+   */
   it("returns snapshot payload on 200", async () => {
     vi.stubGlobal(
       "fetch",

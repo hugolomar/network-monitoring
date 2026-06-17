@@ -47,18 +47,24 @@ Validate end-to-end communication graph behavior:
 
 ## Validate graph retrieval contract
 
-1. Call `GET /api/graph/devices` with a valid root and `depth=1`.
+1. Call `GET /api/graph/devices/all` with `limit=50`.
 2. Confirm response contains `nodes`, `edges`, and `truncated`.
-3. Call with depth above configured cap and confirm effective traversal is capped.
-4. Call with low limit and confirm `truncated=true` when cap is reached.
-5. Call without `depth`/`limit` and confirm defaults (`depth=1`, `limit=200`) are applied.
-6. Call with `depth=0` and confirm `400 Bad Request` + `GRAPH_INVALID_REQUEST`.
+3. Call `GET /api/graph/devices` with a valid root and `depth=1`.
+4. Call with depth above configured cap and confirm effective traversal is capped.
+5. Call with low limit and confirm `truncated=true` when cap is reached.
+6. Call without `depth`/`limit` and confirm defaults (`depth=1`, `limit=200`) are applied for root queries.
+7. Call with `depth=0` and confirm `400 Bad Request` + `GRAPH_INVALID_REQUEST`.
 
 Reference curl:
 
 ```bash
 curl -sS -H "Authorization: Bearer test" -H "X-Role: analyst" \
-  "http://localhost:5090/api/graph/devices?rootDeviceId=api-root&depth=1&limit=50"
+  "http://localhost:5090/api/graph/devices/all?limit=50"
+```
+
+```bash
+curl -sS -H "Authorization: Bearer test" -H "X-Role: analyst" \
+  "http://localhost:5090/api/graph/devices?rootDeviceId=device-1&depth=1&limit=50"
 ```
 
 ## Validate retention behavior
@@ -82,6 +88,20 @@ curl -sS -H "Authorization: Bearer test" -H "X-Role: analyst" \
 2. Call with authenticated but unauthorized role and confirm `403 Forbidden`.
 3. Call with one allowed role (`admin`, `analyst`, `auditor`, `integration`) and confirm access succeeds.
 
+## Validate UI graph workflow
+
+1. Start frontend service:
+
+   ```bash
+   docker compose -f docker-compose.reference-stack.yml up -d --build network-monitoring-device-management-ui
+   ```
+
+2. Open `http://localhost:3000`, navigate to the `Graph` tab.
+3. Leave `Root device id` empty and click `Load graph`; confirm full-snapshot rendering.
+4. Set `Root device id` to a known identity (for example `device-1`) and click `Load graph`; confirm filtered view.
+5. Confirm node table column `Inventory match` shows inventory details when mappings are available.
+6. Hover nodes in graph visualization and confirm tooltips include inventory metadata when mapped.
+
 ## Validate observability baseline
 
 1. Execute projection and retention scenarios from this quickstart.
@@ -98,8 +118,19 @@ curl -sS -H "Authorization: Bearer test" -H "X-Role: analyst" \
 - Backend runtime provider switched to Neo4j in non-testing environments.
 - Reference stack includes Neo4j service (`neo4j:5.22`) with Browser/Bolt ports published.
 - Smoke validation:
-  - Seeded `api-root -> api-peer` relationship in Neo4j.
-  - `GET /api/graph/devices?rootDeviceId=api-root&depth=1&limit=50` returned nodes/edges from Neo4j.
+  - `GET /api/graph/devices/all?limit=50` returned bounded snapshot data from Neo4j.
+  - `GET /api/graph/devices?rootDeviceId=device-1&depth=1&limit=50` returned neighborhood data from Neo4j.
+
+## Recorded validation evidence (2026-06-17)
+
+- Frontend graph page supports snapshot-first UX:
+  - Empty root calls `/api/graph/devices/all`.
+  - Provided root calls `/api/graph/devices`.
+- UI now displays inventory correlation hints in graph table and node tooltips.
+- End-to-end checks completed:
+  - `npm --prefix src/NetworkMonitoring.Frontend run test -- --run` -> `11 passed`.
+  - `npm --prefix src/NetworkMonitoring.Frontend run build` -> success.
+  - `dotnet build src/NetworkMonitoring.Backend/NetworkMonitoring.Backend.csproj` -> success.
 
 ## Suggested automated checks
 

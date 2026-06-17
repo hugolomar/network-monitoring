@@ -19,6 +19,8 @@ public static class GraphEndpoints
     /// <summary>
     /// Maps graph retrieval endpoints.
     /// </summary>
+    /// <param name="endpoints">The endpoint route builder where graph endpoints are registered.</param>
+    /// <returns>The same route builder instance for chaining.</returns>
     public static IEndpointRouteBuilder MapGraphEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet("/api/graph/devices", GetDevicesGraph)

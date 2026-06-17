@@ -9,7 +9,7 @@
 
 ### Session 2026-05-21
 
-- Q: ¿Qué alcance de autorización aplicamos al endpoint de grafo? → A: Cualquier usuario autenticado puede consultar el grafo.
+- Q: ¿Qué alcance de autorización aplicamos al endpoint de grafo? → A: Acceso autenticado con rol permitido (`admin`, `analyst`, `auditor`, `integration`).
 - Q: ¿Permitimos ejecución manual on-demand además del ciclo diario? → A: No, solo ejecución programada cada 24h.
 - Q: ¿Qué política aplicamos ante fallo temporal de escritura en proyección? → A: Reintentos acotados; si se agotan, registrar fallo operativo y continuar con siguientes eventos.
 - Q: ¿Qué observabilidad mínima hacemos obligatoria en esta feature? → A: Logs estructurados + métricas de contadores/latencia para proyección y retención.
@@ -121,19 +121,22 @@ edges, and truncation outcomes without manually calling backend endpoints.
 **Why this priority**: The endpoint by itself is not sufficient for day-to-day operational use; users
 need a first-class visualization workflow in the existing frontend.
 
-**Independent Test**: Open the graph UI, submit valid/invalid queries, and verify bounded graph results,
-error states, and retry behavior are rendered according to the backend contract.
+**Independent Test**: Open the graph UI, load the full snapshot (without root), run root-filtered queries,
+and verify bounded graph results, inventory-correlation hints, error states, and retry behavior according to
+the backend contract.
 
 **Acceptance Scenarios**:
 
-1. **Given** a valid root identity and defaults, **When** the user loads the graph view, **Then** the UI
-   requests graph data and renders returned nodes and edges.
+1. **Given** no root identity is provided, **When** the user loads the graph view, **Then** the UI requests
+   the full graph snapshot and renders returned nodes and edges.
 2. **Given** caller-provided `depth` and `limit` values, **When** the user runs a query, **Then** the UI
    displays the applied request values and the `truncated` signal from the response.
 3. **Given** the backend returns `400`, `401`, `403`, or `503`, **When** the UI handles the response,
    **Then** the page shows clear error messaging with actionable retry guidance and does not crash.
 4. **Given** the backend is temporarily unavailable and later recovers, **When** the user retries from the
    UI, **Then** normal graph results render without requiring a full page restart.
+5. **Given** graph node identities differ from inventory numeric IDs, **When** graph results are rendered,
+   **Then** the UI shows inventory correlation details when node identities can be matched.
 
 ### Edge Cases
 
@@ -191,8 +194,8 @@ error states, and retry behavior are rendered according to the backend contract.
   MUST emit operational diagnostics and continue processing subsequent events.
 - **FR-017**: The feature MUST emit structured logs and metrics (counters and latency) for projection
   and retention execution paths to support operational monitoring and incident diagnosis.
-- **FR-018**: The frontend MUST provide a graph exploration view that queries the graph retrieval
-  capability using root identity plus optional depth/limit inputs.
+- **FR-018**: The frontend MUST provide a graph exploration view that supports full snapshot retrieval
+  without root identity and root-filtered retrieval with optional depth/limit inputs.
 - **FR-019**: The graph UI MUST render returned nodes, edges, and truncation state in a way that allows
   operators to inspect communication neighborhoods without reading raw JSON.
 - **FR-020**: The graph UI MUST provide explicit handling for `400`, `401`, `403`, and `503` responses
@@ -201,6 +204,10 @@ error states, and retry behavior are rendered according to the backend contract.
   surface the refresh failure as non-destructive feedback.
 - **FR-022**: The graph UI MUST remain isolated from device inventory management behavior so failures in
   graph retrieval do not degrade existing inventory workflows.
+- **FR-023**: The backend MUST expose a bounded full-graph snapshot retrieval capability that does not
+  require `rootDeviceId` and returns nodes, edges, and truncation status.
+- **FR-024**: The graph UI MUST present inventory-correlation hints for graph nodes when identity matching
+  is possible from available inventory data.
 
 ### Operational Parameters & Contracts
 
@@ -221,6 +228,8 @@ error states, and retry behavior are rendered according to the backend contract.
   +/- 10 minutes without violating FR-009/FR-015.
 - **OP-008 (Observability Dimensions)**: Projection and retention metrics/logs include, at minimum:
   operation name, outcome (success/retry/failure), latencyMs, processedCount, and trace/correlation id.
+- **OP-009 (Snapshot Bounds)**: Full-graph snapshot retrieval applies the same node-limit defaults/caps as
+  neighborhood retrieval (`default=200`, `max=500`) and returns `truncated=true` when the cap is reached.
 
 ### Dependency Requirements
 
@@ -257,8 +266,9 @@ error states, and retry behavior are rendered according to the backend contract.
   while sampled non-graph device/session operations maintain successful responses.
 - **SC-006**: In validation runs, projection and retention flows emit structured logs plus metrics for
   processed events, retries, failures, and execution latency in 100% of sampled scenarios.
-- **SC-007**: In validation runs, operators can complete a graph lookup workflow (enter root, run query,
-  inspect nodes/edges, interpret truncation/error state) in under 60 seconds for 95% of sampled attempts.
+- **SC-007**: In validation runs, operators can complete a graph lookup workflow (load full snapshot or
+  enter root, run query, inspect nodes/edges, interpret truncation/error state) in under 60 seconds for
+  95% of sampled attempts.
 
 ### Measurement Protocol
 
@@ -282,7 +292,7 @@ error states, and retry behavior are rendered according to the backend contract.
 | FR-009, FR-010, FR-011, FR-015 | SC-003, SC-004 |
 | FR-012, FR-013 | SC-005 |
 | FR-016, FR-017 | SC-006 |
-| FR-018, FR-019, FR-020, FR-021, FR-022 | SC-007, SC-005 |
+| FR-018, FR-019, FR-020, FR-021, FR-022, FR-023, FR-024 | SC-007, SC-005 |
 
 ## Assumptions
 

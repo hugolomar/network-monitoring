@@ -148,22 +148,22 @@
 
 ## Phase 8: User Story 5 - Visualize Graph Results in the UI (Priority: P1)
 
-**Goal**: Add an operator-facing graph exploration page that consumes `GET /api/graph/devices` and renders nodes/edges/truncation plus resilient error states.
+**Goal**: Add an operator-facing graph exploration page that consumes graph retrieval endpoints and renders nodes/edges/truncation plus resilient error states.
 
 **Independent Test**: Use the UI to load graph data for a valid root identity, verify rendering and truncation, and validate `400`/`401`/`403`/`503` handling without full-page failure.
 
 ### Tests for User Story 5
 
-- [ ] T047 [P] [US5] Add API client tests for graph retrieval success and error mapping in `src/NetworkMonitoring.Frontend/src/api/graphApi.test.ts`
-- [ ] T048 [P] [US5] Add page tests covering load success, refresh failure preserving previous data, and auth/unavailable messages in `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.test.tsx`
+- [X] T047 [P] [US5] Add API client tests for graph retrieval success and error mapping in `src/NetworkMonitoring.Frontend/src/api/graphApi.test.ts`
+- [X] T048 [P] [US5] Add page tests covering load success, refresh failure preserving previous data, and auth/unavailable messages in `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.test.tsx`
 
 ### Implementation for User Story 5
 
-- [ ] T049 [US5] Implement graph API client and response/error models in `src/NetworkMonitoring.Frontend/src/api/graphApi.ts` and `src/NetworkMonitoring.Frontend/src/models/graphDtos.ts`
-- [ ] T050 [US5] Implement graph exploration page with query controls (`rootDeviceId`, `depth`, `limit`) and state machine in `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.tsx`
-- [ ] T051 [US5] Implement visual graph component (nodes/edges interactive rendering) and tabular detail views in `src/NetworkMonitoring.Frontend/src/components/DeviceGraphVisualization.tsx` and `src/NetworkMonitoring.Frontend/src/components/DeviceGraphTable.tsx`
-- [ ] T052 [US5] Wire app-level navigation to expose graph page while preserving existing inventory page in `src/NetworkMonitoring.Frontend/src/App.tsx`
-- [ ] T053 [US5] Add TSDoc and rationale comments for new frontend exported components/functions and tests per constitution Articles 29-31
+- [X] T049 [US5] Implement graph API client and response/error models in `src/NetworkMonitoring.Frontend/src/api/graphApi.ts` and `src/NetworkMonitoring.Frontend/src/models/graphDtos.ts`
+- [X] T050 [US5] Implement graph exploration page with query controls (`rootDeviceId`, `depth`, `limit`) and state machine in `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.tsx`
+- [X] T051 [US5] Implement visual graph component (nodes/edges interactive rendering) and tabular detail views in `src/NetworkMonitoring.Frontend/src/components/DeviceGraphVisualization.tsx` and `src/NetworkMonitoring.Frontend/src/components/DeviceGraphTable.tsx`
+- [X] T052 [US5] Wire app-level navigation to expose graph page while preserving existing inventory page in `src/NetworkMonitoring.Frontend/src/App.tsx`
+- [X] T053 [US5] Add TSDoc and rationale comments for new frontend exported components/functions and tests per constitution Articles 29-31
 
 ---
 
@@ -174,8 +174,21 @@
 - [X] T054 [P] Implement structured logs and counters/latency metrics for projection + retention in `src/NetworkMonitoring.Backend/Application/UseCases/ProjectCommunicationGraphUseCase.cs`, `src/NetworkMonitoring.Backend/Application/UseCases/RunGraphRetentionSweepUseCase.cs`, and `src/NetworkMonitoring.Backend/Host/Services/GraphRetentionHostedService.cs`
 - [X] T055 Add integration test for observability baseline signals in `tests/NetworkMonitoring.Backend.IntegrationTests/Graph/GraphObservabilitySignalsTests.cs`
 - [X] T056 Run graph-focused verification suite (`dotnet test tests/NetworkMonitoring.Backend.IntegrationTests/NetworkMonitoring.Backend.IntegrationTests.csproj --filter "FullyQualifiedName~Graph"`) and record SC-001 latency evidence in `specs/007-device-communication-graph/quickstart.md`
-- [ ] T057 [P] Execute end-to-end UI + backend graph walkthrough and capture evidence in `specs/007-device-communication-graph/quickstart.md`
-- [ ] T058 Verify constitutional compliance in `specs/007-device-communication-graph/plan.md`, including explicit SeedWork immutability check for `src/NetworkMonitoring.Domain/SeedWork/` (Article 21)
+- [X] T057 [P] Execute end-to-end UI + backend graph walkthrough and capture evidence in `specs/007-device-communication-graph/quickstart.md`
+- [X] T058 Verify constitutional compliance in `specs/007-device-communication-graph/plan.md`, including explicit SeedWork immutability check for `src/NetworkMonitoring.Domain/SeedWork/` (Article 21)
+
+---
+
+## Phase 10: Post-US5 alignment - Snapshot-first graph UX and inventory correlation
+
+**Purpose**: Align graph UX with operator expectation to view the full Neo4j-like graph by default and
+help identify which graph nodes correspond to inventory records.
+
+- [X] T059 Add full snapshot retrieval capability (`GET /api/graph/devices/all`) in `src/NetworkMonitoring.Backend/Host/Endpoints/GraphEndpoints.cs`, `src/NetworkMonitoring.Backend/Application/UseCases/GetDeviceGraphUseCase.cs`, `src/NetworkMonitoring.Backend/Application/Ports/IGraphQueryRepository.cs`, `src/NetworkMonitoring.Backend/Infrastructure/Graph/Neo4jGraphQueryRepository.cs`, and `src/NetworkMonitoring.Backend/Infrastructure/Graph/InMemoryGraphRepositories.cs`
+- [X] T060 Add snapshot storage query support in `src/NetworkMonitoring.Backend/Infrastructure/Graph/InMemoryGraphStore.cs` and align endpoint DTO usage in `src/NetworkMonitoring.Backend/Host/Endpoints/GraphDevicesRequestDto.cs`
+- [X] T061 Extend frontend graph API client for snapshot endpoint and test coverage in `src/NetworkMonitoring.Frontend/src/api/graphApi.ts` and `src/NetworkMonitoring.Frontend/src/api/graphApi.test.ts`
+- [X] T062 Update graph page behavior to load snapshot when root is omitted and preserve root-filtered mode when provided in `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.tsx` and `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.test.tsx`
+- [X] T063 Add inventory-correlation hints in graph rendering/table, including `device-<n>` to inventory-id matching fallback, in `src/NetworkMonitoring.Frontend/src/components/DeviceGraphVisualization.tsx`, `src/NetworkMonitoring.Frontend/src/components/DeviceGraphTable.tsx`, and `src/NetworkMonitoring.Frontend/src/pages/DeviceGraphPage.tsx`
 
 ---
 
@@ -192,6 +205,7 @@
 - **Phase 7 (Neo4j runtime hardening)**: Depends on Phase 2 and explicit maintainer confirmation for behavior shift.
 - **Phase 8 (US5 UI)**: Depends on Phase 4 contract stability and Phase 7 runtime-ready graph source.
 - **Phase 9 (Polish)**: Depends on all targeted user stories complete.
+- **Phase 10 (Snapshot UX + correlation)**: Depends on Phase 8 baseline UI and Phase 7 Neo4j runtime path.
 
 ### User Story Dependency Graph
 
@@ -200,4 +214,6 @@
 - **US3 (P2)**: Requires foundational graph abstractions and retention model.
 - **US4 (P2)**: Requires graph endpoint from US2 and error mapping foundation.
 - **US5 (P1)**: Requires graph endpoint contract from US2 and runtime graph source from Phase 7.
+- **Post-US5 alignment**: Requires US5 artifacts and extends retrieval + visualization behavior without
+  breaking previous endpoint compatibility.
 

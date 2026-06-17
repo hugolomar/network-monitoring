@@ -21,11 +21,17 @@ vi.mock("../api/graphApi", () => ({
   })),
 }));
 
+/**
+ * Verifies graph page behavior for neighborhood and snapshot flows.
+ */
 describe("DeviceGraphPage", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
+  /**
+   * Ensures root-filtered graph results render after a successful query.
+   */
   it("renders graph data when query succeeds", async () => {
     render(<DeviceGraphPage />);
 
@@ -37,6 +43,9 @@ describe("DeviceGraphPage", () => {
     expect(await screen.findByText(/1 nodes · 0 edges/i)).toBeInTheDocument();
   });
 
+  /**
+   * Ensures empty root triggers snapshot loading path.
+   */
   it("shows root-id validation before calling backend", async () => {
     render(<DeviceGraphPage />);
 
@@ -49,6 +58,9 @@ describe("DeviceGraphPage", () => {
     });
   });
 
+  /**
+   * Ensures explicit empty-state feedback is shown for unknown roots.
+   */
   it("shows empty-state message when graph query returns no nodes", async () => {
     const { getDeviceGraph } = await import("../api/graphApi");
     vi.mocked(getDeviceGraph).mockResolvedValueOnce({
@@ -66,6 +78,9 @@ describe("DeviceGraphPage", () => {
     expect(await screen.findByText(/0 nodes · 0 edges/i)).toBeInTheDocument();
   });
 
+  /**
+   * Ensures snapshot API is used when no root identity is provided.
+   */
   it("loads full snapshot when root is empty", async () => {
     const { getDeviceGraphSnapshot, getDeviceGraph } = await import("../api/graphApi");
 

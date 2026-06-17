@@ -2,14 +2,17 @@
 
 ## Purpose
 
-Define the retrieval contract used by visualization consumers to fetch a bounded communication subgraph
-centered on a root device identity.
+Define retrieval contracts used by visualization consumers to fetch either a bounded communication
+subgraph centered on a root identity or a bounded full graph snapshot.
 
-## Endpoint
+## Endpoints
 
-`GET /api/graph/devices`
+- `GET /api/graph/devices` (root-centered neighborhood)
+- `GET /api/graph/devices/all` (full graph snapshot)
 
 ## Query Parameters
+
+### `GET /api/graph/devices`
 
 - `rootDeviceId` (required): root internal device identity for traversal.
 - `depth` (optional): requested traversal depth; effective value is capped by configuration.
@@ -17,10 +20,15 @@ centered on a root device identity.
 - If `depth` is omitted, default value is `1`; maximum effective value is `3`.
 - If `limit` is omitted, default value is `200`; maximum effective value is `500`.
 
+### `GET /api/graph/devices/all`
+
+- `limit` (optional): requested maximum number of nodes in response; effective value is bounded by configuration.
+- If `limit` is omitted, default value is `200`; maximum effective value is `500`.
+
 ## Access Policy
 
-- The endpoint requires authenticated access.
-- The endpoint enforces role-based authorization.
+- Endpoints require authenticated access.
+- Endpoints enforce role-based authorization.
 - Allowed graph-read roles in this feature scope: `admin`, `analyst`, `auditor`, `integration`.
 - Runtime header mapping in the current backend implementation:
   - `Authorization` header is required for authenticated access checks.
@@ -58,9 +66,11 @@ centered on a root device identity.
 
 ## Response Rules
 
-- `nodes` includes root and reachable neighbors subject to effective depth and limit.
-- `edges` contains communication relationships between returned nodes.
+- For `/api/graph/devices`, `nodes` includes root and reachable neighbors subject to effective depth and limit.
+- For both endpoints, `edges` contains communication relationships between returned nodes.
 - `truncated = true` when result-size limits are reached before traversal completion.
+- For `/api/graph/devices/all`, `nodes` contains the bounded snapshot subset and `edges` includes only
+  relationships where both endpoints are in the returned node set.
 
 ## Error Responses
 
@@ -76,6 +86,10 @@ centered on a root device identity.
   "timestampUtc": "2026-05-21T18:00:00Z"
 }
 ```
+
+### Unauthorized
+
+`401 Unauthorized` when the caller does not provide authentication.
 
 ### Forbidden
 
@@ -93,6 +107,14 @@ centered on a root device identity.
   "timestampUtc": "2026-05-21T18:00:00Z"
 }
 ```
+
+## UI Consumption Rules
+
+- Graph UI may call `/api/graph/devices/all` when root identity is not provided.
+- Graph UI may call `/api/graph/devices` when root identity is provided.
+- UI must treat `truncated=true` as a partial-view warning for either endpoint.
+- UI inventory-correlation hints are best-effort client-side matching and do not imply canonical identity
+  authority transfer from inventory to graph.
 
 ## Compatibility Rules
 
