@@ -1,0 +1,73 @@
+name: one-hour-realistic
+duration_seconds: 3600
+default_iface: eth0
+
+sources:
+  baseline_http: pcaps/external/http.cap
+  baseline_dns: pcaps/external/dns.cap
+  dhcp_churn: pcaps/external/dhcp.pcap
+  mixed_burst: pcaps/external/SkypeIRC.cap
+  arp_storm: pcaps/external/arp-storm.pcap
+
+tracks:
+  - name: baseline-http
+    source: baseline_http
+    start_second: 0
+    duration_seconds: 3600
+    pps: 320
+
+  - name: baseline-dns
+    source: baseline_dns
+    start_second: 0
+    duration_seconds: 3600
+    pps: 180
+
+  - name: device-discovery-bootstrap-dhcp
+    source: dhcp_churn
+    start_second: 0
+    duration_seconds: 60
+    pps: 420
+
+  - name: device-discovery-bootstrap-arp
+    source: arp_storm
+    start_second: 15
+    duration_seconds: 40
+    pps: 700
+
+  - name: dhcp-periodic-noise
+    source: dhcp_churn
+    start_second: 90
+    duration_seconds: 35
+    pps: 320
+    repeat_every_seconds: 240
+    repeat_count: 12
+
+  - name: arp-periodic-discovery
+    source: arp_storm
+    start_second: 120
+    duration_seconds: 25
+    pps: 850
+    repeat_every_seconds: 300
+    repeat_count: 9
+
+  - name: early-bursts
+    source: mixed_burst
+    start_second: 30
+    duration_seconds: 45
+    pps: 650
+    repeat_every_seconds: 240
+    repeat_count: 4
+
+  - name: late-burst-window
+    source: mixed_burst
+    start_second: 2700
+    duration_seconds: 600
+    pps: 720
+
+  - name: arp-instability-tail
+    source: arp_storm
+    start_second: 3120
+    duration_seconds: 20
+    pps: 1200
+    repeat_every_seconds: 80
+    repeat_count: 6

@@ -1,0 +1,77 @@
+name: one-hour-device-first
+duration_seconds: 3600
+default_iface: eth0
+
+sources:
+  baseline_http: pcaps/external/http.cap
+  baseline_dns: pcaps/external/dns.cap
+  dhcp_churn: pcaps/external/dhcp.pcap
+  mixed_burst: pcaps/external/SkypeIRC.cap
+  arp_storm: pcaps/external/arp-storm.pcap
+
+tracks:
+  - name: warmup-dhcp
+    source: dhcp_churn
+    start_second: 0
+    duration_seconds: 90
+    pps: 480
+
+  - name: warmup-dns
+    source: baseline_dns
+    start_second: 5
+    duration_seconds: 150
+    pps: 380
+
+  - name: warmup-mixed
+    source: mixed_burst
+    start_second: 10
+    duration_seconds: 180
+    pps: 560
+
+  - name: warmup-arp
+    source: arp_storm
+    start_second: 30
+    duration_seconds: 60
+    pps: 720
+
+  - name: baseline-dns
+    source: baseline_dns
+    start_second: 180
+    duration_seconds: 3420
+    pps: 200
+
+  - name: baseline-mixed
+    source: mixed_burst
+    start_second: 180
+    duration_seconds: 3420
+    pps: 280
+
+  - name: periodic-dhcp-refresh
+    source: dhcp_churn
+    start_second: 240
+    duration_seconds: 40
+    pps: 320
+    repeat_every_seconds: 300
+    repeat_count: 10
+
+  - name: periodic-mixed-spike
+    source: mixed_burst
+    start_second: 300
+    duration_seconds: 70
+    pps: 720
+    repeat_every_seconds: 420
+    repeat_count: 7
+
+  - name: periodic-arp-spike
+    source: arp_storm
+    start_second: 360
+    duration_seconds: 25
+    pps: 900
+    repeat_every_seconds: 450
+    repeat_count: 6
+
+  - name: late-http-tail
+    source: baseline_http
+    start_second: 2880
+    duration_seconds: 600
+    pps: 240

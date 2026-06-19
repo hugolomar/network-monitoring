@@ -1,55 +1,107 @@
-# Network monitoring
+# Network Monitoring
 
-Hands-on, event-driven network monitoring: a passive probe captures traffic (via **tshark**), derives **sessions**, and can emit **structured events** to the console and/or **Apache Kafka** (Avro + Schema Registry). The repository also includes session indexing with Elasticsearch + Kafka Connect as a query projection, feature specs, ADRs, reference Docker Compose, and **shell helpers** under `infrastructure/` grouped by role — see **Repository layout** below.
+Event-driven network monitoring platform: a passive probe captures traffic (`tshark`), derives
+`SessionDetected`/`DeviceDetected` events, publishes them to Kafka (Avro + Schema Registry), and feeds
+backend inventory and communication graph projections.
+
+This README is the entrypoint for running the system locally end-to-end.
 
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [`tshark`](https://www.wireshark.org/docs/man-pages/tshark.html) on `PATH` (for live capture)
-- [Docker](https://docs.docker.com/get-docker/) (optional, for the Kafka stack)
+- [`tshark`](https://www.wireshark.org/docs/man-pages/tshark.html) available in `PATH`
+- [Docker](https://docs.docker.com/get-docker/) with Compose plugin
+- `python3` (for traffic composer)
+- `tcpreplay` (required to run replay/composer traffic scenarios)
 
-## Quick start — probe only
+## Quickstart (local E2E)
 
-From the repository root:
-
-```bash
-dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj
-```
-
-Configure the `Probe` section in `src/NetworkMonitoring.Probe/appsettings.json` (interface name, capture filter, `EnableConsole` / `EnableKafka`, etc.).
-
-## Integration Console — device ingestion
-
-`NetworkMonitoring.IntegrationConsole` is a separate worker that consumes `DeviceDetected` events from
-Kafka and forwards valid detections to a configurable fake/test `POST /devices` receiver:
+From repository root:
 
 ```bash
-dotnet run --project src/NetworkMonitoring.IntegrationConsole/NetworkMonitoring.IntegrationConsole.csproj
+cd <repo-root>
 ```
 
-Configuration and validation steps are documented in
-[`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md).
-
-## Device Inventory backend
-
-`NetworkMonitoring.Backend` is the real Device Inventory API. It accepts the Integration Console
-`POST /devices` contract, persists one logical device per normalized MAC in PostgreSQL, and exposes
-`GET /devices` for inventory validation:
+1) Start and initialize the reference stack (Kafka/Schema Registry/Connect/ES/Postgres/Neo4j/backend/UI):
 
 ```bash
-dotnet run --project src/NetworkMonitoring.Backend/NetworkMonitoring.Backend.csproj
+bash ./infrastructure/stack/bootstrap/reference-stack-init.sh
 ```
 
-Local PostgreSQL/backend container validation is documented in
-[`specs/005-device-inventory/quickstart.md`](specs/005-device-inventory/quickstart.md).
+2) Start probe (separate runtime boundary):
 
-## Tests
+```bash
+docker compose -f docker-compose.probe.yml up -d --build
+```
+
+3) Prepare traffic composer dependencies (one-time):
+
+```bash
+python3 -m pip install -r tools/traffic/composer/requirements.txt
+```
+
+4) Validate scenario definition:
+
+```bash
+./tools/traffic/run.sh scenario --file tools/traffic/scenarios/one-hour-realistic.yaml --validate
+```
+
+5) Smoke-check service health:
+
+```bash
+./tools/traffic/validation/smoke-checks.sh
+```
+
+6) Run simulated traffic:
+
+```bash
+./tools/traffic/run.sh scenario --file tools/traffic/scenarios/one-hour-realistic.yaml --run
+```
+
+## Service URLs (local)
+
+- Frontend UI: `http://localhost:3000`
+- Backend API: `http://localhost:5090`
+- Graph snapshot API: `http://localhost:5090/api/graph/devices/all?limit=200`
+- Schema Registry: `http://localhost:8081`
+- Kafka Connect: `http://localhost:8083`
+- Elasticsearch: `http://localhost:9200`
+- Neo4j Browser: `http://localhost:7474`
+
+## Stop / Pause
+
+Pause without removing containers:
+
+```bash
+docker compose -f docker-compose.probe.yml stop
+docker compose -f docker-compose.reference-stack.yml stop
+```
+
+Stop and remove containers/networks (keep volumes):
+
+```bash
+docker compose -f docker-compose.probe.yml down
+docker compose -f docker-compose.reference-stack.yml down
+```
+
+## Common issues
+
+- `Operation not permitted` from `tcpreplay`:
+  - run with elevated permissions or set Linux capabilities on `tcpreplay`.
+- Graph smoke check returns `401`:
+  - default smoke check uses auth headers; override with `GRAPH_AUTH_HEADER` / `GRAPH_ROLE_HEADER` if needed.
+- Elasticsearch connector registration fails because index does not exist:
+  - run `./infrastructure/stack/bootstrap/elasticsearch/apply-index-template.sh`, then retry connector registration.
+
+## Development commands
+
+Run full test suite:
 
 ```bash
 dotnet test src/NetworkMonitoring.sln
 ```
 
-Optional Kafka end-to-end tests (requires the Compose stack and topic init; see **More detail** below):
+Kafka-gated test slices:
 
 ```bash
 RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQualifiedName~KafkaSessionEventPublishIntegrationTests"
@@ -57,39 +109,29 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQualifiedName~KafkaDeviceIngestionIntegrationTests"
 ```
 
-## Kafka (local reference stack)
+## Documentation map
 
-```bash
-docker compose -f docker-compose.reference-stack.yml up -d
-./infrastructure/stack/bootstrap/kafka-topics-init.sh
-./infrastructure/stack/health/verify-kafka-stack.sh
-```
-
-The session Kafka publication path is documented in the session detection quickstart. Device stream
-validation for `devices.detected` is documented in the device discovery quickstart. The full indexing
-path (Elasticsearch + Kafka Connect, connector registration) is documented in the session indexing
-quickstart.
-
-## More detail
-
-- Session detection flow and operator steps: [`specs/001-session-detection/quickstart.md`](specs/001-session-detection/quickstart.md)
-- Session indexing flow and operator steps: [`specs/002-session-indexing/quickstart.md`](specs/002-session-indexing/quickstart.md)
-- Device discovery flow and operator steps: [`specs/003-device-discovery/quickstart.md`](specs/003-device-discovery/quickstart.md)
-- Device ingestion flow and operator steps: [`specs/004-device-ingestion/quickstart.md`](specs/004-device-ingestion/quickstart.md)
-- Device Inventory backend flow and operator steps: [`specs/005-device-inventory/quickstart.md`](specs/005-device-inventory/quickstart.md)
-- Architecture decisions: [`docs/adr/index.md`](docs/adr/index.md)
+- Traffic tooling: `tools/traffic/README.md`
+- Session detection quickstart: `specs/001-session-detection/quickstart.md`
+- Session indexing quickstart: `specs/002-session-indexing/quickstart.md`
+- Device discovery quickstart: `specs/003-device-discovery/quickstart.md`
+- Device ingestion quickstart: `specs/004-device-ingestion/quickstart.md`
+- Device inventory quickstart: `specs/005-device-inventory/quickstart.md`
+- Device management quickstart: `specs/006-device-management/quickstart.md`
+- Communication graph quickstart: `specs/007-device-communication-graph/quickstart.md`
+- ADR index: `docs/adr/index.md`
+- Notes: `docs/notes/`
 
 ## Repository layout
 
 | Path | Purpose |
 |------|--------|
-| `src/NetworkMonitoring.Probe/` | Probe worker (Application / Infrastructure / Host) |
-| `src/NetworkMonitoring.IntegrationConsole/` | Device ingestion worker (Kafka consumer + HTTP forwarding) |
-| `src/NetworkMonitoring.Backend/` | Device Inventory backend API (HTTP + PostgreSQL persistence) |
-| `src/NetworkMonitoring.Domain/` | Shared domain (SeedWork + entities/value objects) |
-| `tests/` | Unit and integration tests |
-| `specs/` | Feature specifications and contracts |
-| `infrastructure/stack/health/` | Smoke checks: Kafka/Registry; Elasticsearch/Connect |
-| `infrastructure/stack/bootstrap/` | Idempotent init: topics, index templates |
-| `infrastructure/connectors/` | Kafka Connect JSON + `register-*.sh` |
-| `infrastructure/acceptance/contract/` | Spec checks (e.g. session indexing sampling, `RUN_ES_INTEGRATION=1`) |
+| `src/NetworkMonitoring.Probe/` | Probe worker (capture + event publication) |
+| `src/NetworkMonitoring.IntegrationConsole/` | Kafka consumer + backend ingestion forwarder |
+| `src/NetworkMonitoring.Backend/` | Device Inventory + graph API |
+| `src/NetworkMonitoring.Domain/` | Shared domain model + SeedWork |
+| `tests/` | Unit/integration/contract tests |
+| `infrastructure/stack/bootstrap/` | Stack init scripts (topics, index templates, connectors) |
+| `infrastructure/stack/health/` | Service health checks |
+| `infrastructure/connectors/` | Kafka Connect configs + registration scripts |
+| `tools/traffic/` | Replay/composer traffic simulation toolkit |

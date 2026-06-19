@@ -34,6 +34,14 @@ queryable with bounded filters.
 
 ### Full stack — order of operations
 
+Shortcut (recommended):
+
+```bash
+bash ./infrastructure/stack/bootstrap/reference-stack-init.sh
+```
+
+Equivalent manual sequence:
+
 1. `docker compose -f docker-compose.reference-stack.yml up -d`  
    First-time **Connect** can take a few minutes while `confluent-hub` installs the Elasticsearch
    sink plugin (persisted in the `connect-plugins` volume).
