@@ -2,7 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Probe.Application.Configuration;
+using NetworkMonitoring.Probe.Application.Ports;
 using NetworkMonitoring.Probe.Host.DependencyInjection;
+using NetworkMonitoring.Probe.Infrastructure.Traffic;
 
 namespace NetworkMonitoring.Probe.UnitTests.Host.DependencyInjection;
 
@@ -63,6 +65,106 @@ public sealed class ProbeOptionsValidationTests
         Assert.Null(options.SchemaRegistryUrl);
     }
 
+    /// <summary>
+    /// Verifies deterministic test mode requires deterministic pcap path.
+    /// </summary>
+    [Fact]
+    public void ProbeOptions_WhenDeterministicModeEnabled_RequirePcapPath()
+    {
+        using var provider = BuildProvider(new Dictionary<string, string?>
+        {
+            ["Probe:InputMode"] = "DeterministicTest",
+        });
+
+        var exception = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<ProbeOptions>>().Value);
+
+        Assert.Contains("Probe:DeterministicTestPcapPath is required", exception.Message);
+    }
+
+    /// <summary>
+    /// Verifies deterministic test mode requires existing pcap file.
+    /// </summary>
+    [Fact]
+    public void ProbeOptions_WhenDeterministicModeEnabled_RequireExistingPcapFile()
+    {
+        using var provider = BuildProvider(new Dictionary<string, string?>
+        {
+            ["Probe:InputMode"] = "DeterministicTest",
+            ["Probe:DeterministicTestPcapPath"] = "does-not-exist.pcap",
+        });
+
+        var exception = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<ProbeOptions>>().Value);
+
+        Assert.Contains("Probe:DeterministicTestPcapPath must point to an existing file", exception.Message);
+    }
+
+    /// <summary>
+    /// Verifies live mode resolves tshark provider.
+    /// </summary>
+    [Fact]
+    public void ProbeOptions_WhenLiveModeConfigured_ResolveTsharkTrafficProvider()
+    {
+        using var provider = BuildProvider(new Dictionary<string, string?>
+        {
+            ["Probe:InputMode"] = "Live",
+        });
+
+        var trafficProvider = provider.GetRequiredService<ITrafficProvider>();
+
+        Assert.IsType<TsharkTrafficProvider>(trafficProvider);
+    }
+
+    /// <summary>
+    /// Verifies deterministic mode resolves pcap provider.
+    /// </summary>
+    [Fact]
+    public void ProbeOptions_WhenDeterministicModeConfigured_ResolvePcapFileTrafficProvider()
+    {
+        var pcapPath = CreateTempPcapFile();
+        try
+        {
+            using var provider = BuildProvider(new Dictionary<string, string?>
+            {
+                ["Probe:InputMode"] = "DeterministicTest",
+                ["Probe:DeterministicTestPcapPath"] = pcapPath,
+            });
+
+            var trafficProvider = provider.GetRequiredService<ITrafficProvider>();
+
+            Assert.IsType<PcapFileTrafficProvider>(trafficProvider);
+        }
+        finally
+        {
+            File.Delete(pcapPath);
+        }
+    }
+
+    /// <summary>
+    /// Verifies negative deterministic playback speed fails validation.
+    /// </summary>
+    [Fact]
+    public void ProbeOptions_WhenDeterministicPlaybackSpeedNegative_FailsValidation()
+    {
+        var pcapPath = CreateTempPcapFile();
+        try
+        {
+            using var provider = BuildProvider(new Dictionary<string, string?>
+            {
+                ["Probe:InputMode"] = "DeterministicTest",
+                ["Probe:DeterministicTestPcapPath"] = pcapPath,
+                ["Probe:DeterministicPlaybackSpeed"] = "-1",
+            });
+
+            var exception = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptions<ProbeOptions>>().Value);
+
+            Assert.Contains("Probe:DeterministicPlaybackSpeed must be zero or greater", exception.Message);
+        }
+        finally
+        {
+            File.Delete(pcapPath);
+        }
+    }
+
     private static ServiceProvider BuildProvider(Dictionary<string, string?> settings)
     {
         var configuration = new ConfigurationBuilder()
@@ -74,5 +176,12 @@ public sealed class ProbeOptionsValidationTests
         services.AddProbeServices(configuration);
 
         return services.BuildServiceProvider(validateScopes: true);
+    }
+
+    private static string CreateTempPcapFile()
+    {
+        var tempPath = Path.Combine(Path.GetTempPath(), $"probe-deterministic-{Guid.NewGuid():N}.pcap");
+        File.WriteAllBytes(tempPath, []);
+        return tempPath;
     }
 }

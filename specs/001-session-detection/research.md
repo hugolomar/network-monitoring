@@ -146,6 +146,20 @@
   `Apache.Avro` / `Put`).
 - **Alternatives considered**: Older Confluent 1.x clients — rejected to stay on maintained 2.x.
 
+## Decision 18: Deterministic probe input mode for validation workflows
+- **Decision**: Extend probe capture configuration with an explicit input mode that keeps `Live`
+  interface capture as default and adds a deterministic test mode backed by a replayable capture source
+  provider implementing `ITrafficProvider`.
+- **Rationale**: Validation environments such as WSL may distort interface-level identity in live
+  capture. Deterministic mode preserves probe use-case, deduplication, metrics, and output contracts
+  while removing dependence on host interface fidelity for observability checks.
+- **Alternatives considered**:
+  - Separate "probe bis" binary under tooling: rejected due to behavior/documentation drift risk.
+  - Publish synthetic session events directly to Kafka: useful for downstream validation, but does not
+    exercise probe capture adapter path.
+  - Live-only capture in WSL: rejected for deterministic observability validation due to virtualization
+    artifacts.
+
 ## Execution Results
 - `dotnet test /home/hugo/network-monitoring/src/NetworkMonitoring.sln` (2026-04-20): **all
   tests green**; unit suite **24** passed; integration suite **2** passed and **1** skipped
@@ -155,6 +169,10 @@
   integration opt-in unchanged).
 - Startup smoke run (`timeout 8 dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`)
   confirmed worker startup and graceful shutdown (US1 path).
+- `dotnet test tests/NetworkMonitoring.Probe.UnitTests/NetworkMonitoring.Probe.UnitTests.csproj`
+  (2026-06-22, US3): **43 passed**, **0 failed**, **0 skipped**.
+- `dotnet test tests/NetworkMonitoring.Probe.IntegrationTests/NetworkMonitoring.Probe.IntegrationTests.csproj`
+  (2026-06-22, US3): **4 passed**, **0 failed**, **2 skipped** (Kafka-gated tests remain opt-in).
 
 ## SC-005 (manual sampling checklist)
 - **Intent**: With publication enabled, consume **`sessions.detected`** and verify sampled messages
@@ -165,3 +183,13 @@
   produce + consume + field assertions when `RUN_KAFKA_INTEGRATION=1`.
 - **Recorded outcome (manual 100% sampling)**: Not run in CI; operators should follow
   `quickstart.md` with a real consumer and attach evidence to release checklists when required.
+
+## SC-006 (deterministic-mode reproducibility checklist)
+- **Intent**: For the same deterministic PCAP source and probe configuration, sampled required
+  `SessionDetected` fields are equivalent across repeated runs.
+- **Recorded outcome (automation)**:
+  `DeterministicPcapTrafficProviderIntegrationTests.ExecuteAsync_WithSameDeterministicPcapInput_ProducesEquivalentSampleAcrossRuns`
+  compares the first sampled session fingerprints (`sourceIp`, `destinationIp`, `sourcePort`,
+  `destinationPort`, `protocol`, `bytesObserved`) across two runs and passed on 2026-06-22.
+- **Recorded outcome (manual)**: Optional; operators can follow `quickstart.md` deterministic-mode
+  validation steps and attach run evidence when required by release process.

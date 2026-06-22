@@ -10,7 +10,8 @@ integration.
 
 ## Common Envelope Fields
 - `eventType`: `"SessionDetected"`
-- `occurredAtUtc`: ISO-8601 timestamp
+- `occurredAtUtc`: ISO-8601 timestamp (instant the validated observation occurred; aligned with
+  `lastSeenUtc` for the emitted record)
 - `source`: `"probe"`
 - `schemaVersion`: integer (starts at `1`)
 

@@ -57,6 +57,8 @@ docs/local/
 # Traffic lab artifacts (keep manifests/docs, ignore external datasets)
 tools/traffic/pcaps/external/*
 !tools/traffic/pcaps/external/.gitkeep
+tools/traffic/pcaps/generated/*
+!tools/traffic/pcaps/generated/.gitkeep
 tools/traffic/output/runs/
 
 # Docker / herramientas locales (añade si aparecen)

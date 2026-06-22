@@ -10,7 +10,7 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 
 **Tests**: Unit + integration per plan; add broker-side integration when compose stack exists (SC-005).
 
-**Organization**: Phases 1–4 = completed MVP (**US1**). Phases 5–7 = **User Story 2** (Kafka + Schema Registry, KRaft, TLS/mTLS per ADRs). **Do not modify `specs/003-device-discovery/` from this list.**
+**Organization**: Phases 1–4 = completed MVP (**US1**). Phases 5–7 = **User Story 2** (Kafka + Schema Registry, KRaft, TLS/mTLS per ADRs). Phase 8 = **User Story 3** (deterministic test input mode). **Do not modify `specs/003-device-discovery/` from this list.**
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -152,6 +152,30 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 
 ---
 
+## Phase 8: User Story 3 — Deterministic test input mode (Priority: P2)
+
+**Goal**: Run the same probe pipeline with deterministic capture input for validation/testing workflows
+without changing live-mode semantics.
+
+**Independent Test**: Execute two probe runs with `InputMode=DeterministicTest` over the same capture
+source and confirm sampled required session fields remain equivalent across runs.
+
+### Tests for User Story 3
+
+- [X] T051 [P] [US3] Add unit tests for input-mode configuration validation in `tests/NetworkMonitoring.Probe.UnitTests/Host/Configuration/ProbeOptionsValidationTests.cs` (or equivalent)
+- [X] T052 [US3] Add integration test in `tests/NetworkMonitoring.Probe.IntegrationTests/` validating deterministic mode emits `SessionDetected` records and keeps invalid-observation continuation behavior
+- [X] T053 [US3] Add integration test in `tests/NetworkMonitoring.Probe.IntegrationTests/` comparing sampled required session fields across two deterministic-mode runs (SC-006 path)
+
+### Implementation for User Story 3
+
+- [X] T054 [US3] Extend `src/NetworkMonitoring.Probe/Application/Configuration/ProbeOptions.cs` and `appsettings*.json` with `InputMode` and deterministic test source settings
+- [X] T055 [US3] Implement deterministic test capture adapter (e.g. `PcapFileTrafficProvider`) in `src/NetworkMonitoring.Probe/Infrastructure/Traffic/` implementing `ITrafficProvider`
+- [X] T056 [US3] Update `src/NetworkMonitoring.Probe/Host/DependencyInjection/ServiceCollectionExtensions.cs` to select `ITrafficProvider` by input mode and fail fast on invalid deterministic source configuration
+- [X] T057 [P] [US3] Finalize probe capture contract docs in `specs/001-session-detection/contracts/probe-capture-contract.md` with concrete deterministic adapter class/file references after implementation
+- [X] T058 [P] [US3] Update `specs/001-session-detection/quickstart.md` and `research.md` with deterministic mode runbook and validation evidence notes for SC-006
+
+---
+
 ## Dependencies & Execution Order
 
 | Phase | Depends on |
@@ -160,6 +184,7 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 | 5 | 1–4 |
 | 6 | 5 (brokers + Registry reachable); 1–4 |
 | 7 | 6 |
+| 8 | 1–7 (provider/output paths already stable) |
 
 **User stories**: US2 builds on US1; US1 remains independently demoable via console.
 
@@ -170,6 +195,8 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 - T034 and T035 after plan approval
 - T038 and T040 early in Phase 6 (different files)
 - T047 and T048 in Phase 7
+- T051 and T054 can start in parallel
+- T057 and T058 can run in parallel after T055/T056
 
 ---
 
@@ -178,6 +205,8 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 1. Bring up **`docker-compose.reference-stack.yml`** (Phase 5); confirm topic + subject.
 2. Implement **Phase 6** publisher behind `IMessagePublisher`; keep domain untouched.
 3. **Phase 7**: automate what you can; document manual SC-005 until CI has broker.
+4. Implement **Phase 8** input-mode selection and deterministic provider without duplicating probe
+   use-case or output logic.
 
 ---
 
@@ -188,4 +217,4 @@ description: "Task list for 001-session-detection (console + Kafka session visib
 - **Kafka topic**: reference and production paths rely on **explicit** topic creation (Phase 5); align staging/prod with team IaC standards.
 - **`/speckit.analyze`** recommended before **`/speckit.implement`** once tasks are checked off.
 - Path to this file: `/home/hugo/network-monitoring/specs/001-session-detection/tasks.md`
-- **Task count**: T001–T050 **complete** (**50**). **Total defined: 50.**
+- **Task count**: T001–T058 **complete** (**58**). **Total defined: 58.**

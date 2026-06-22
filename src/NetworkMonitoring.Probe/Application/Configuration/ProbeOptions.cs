@@ -12,6 +12,11 @@ public sealed class ProbeOptions
     public const string SectionName = "Probe";
 
     /// <summary>
+    /// Selects the traffic source mode for the probe.
+    /// </summary>
+    public CaptureInputMode InputMode { get; init; } = CaptureInputMode.Live;
+
+    /// <summary>
     /// The path to the tshark executable. Defaults to "tshark".
     /// </summary>
     public string TSharkPath { get; init; } = "tshark";
@@ -20,6 +25,19 @@ public sealed class ProbeOptions
     /// The name of the network interface to listen on (e.g., "eth0").
     /// </summary>
     public string InterfaceName { get; init; } = "eth0";
+
+    /// <summary>
+    /// The path to a deterministic PCAP file used when <see cref="InputMode"/> is
+    /// <see cref="CaptureInputMode.DeterministicTest"/>.
+    /// </summary>
+    public string? DeterministicTestPcapPath { get; init; }
+
+    /// <summary>
+    /// Playback speed multiplier for deterministic PCAP ingestion.
+    /// <c>0</c> reads as fast as possible; <c>1</c> follows packet timestamps in real time;
+    /// values greater than <c>1</c> accelerate playback proportionally.
+    /// </summary>
+    public double DeterministicPlaybackSpeed { get; init; }
 
     /// <summary>
     /// An optional libpcap filter expression to restrict captured traffic.

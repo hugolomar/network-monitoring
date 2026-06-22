@@ -18,6 +18,8 @@ entities without coupling to a concrete destination.
 - Adapters must provide structured diagnostics for failed dispatches.
 - Invalid observations are filtered before publication via validation-result handling; exceptions are
   reserved for unexpected runtime failures.
+- Output behavior is invariant to capture input mode (`Live` vs `DeterministicTest`): same session
+  semantics, same deduplication identity, same payload contracts.
 
 ## Adapters (US1 + US2)
 
@@ -36,7 +38,8 @@ entities without coupling to a concrete destination.
 - **Partition key**: `SessionKafkaPartitionKey.Build(session)` — same five-tuple identity as session
   deduplication in `ProcessObservationsUseCase` (spec FR-014).
 - **Mapping**: `SessionDetectedAvroMapper.ToGenericRecord(session, occurredAtUtc)` in
-  `SessionDetectedAvroMapper.cs`.
+  `SessionDetectedAvroMapper.cs`. `occurredAtUtc` MUST use the validated session observation time
+  (`session.LastSeenUtc`), not wall-clock serialization time.
 - **Composition**: `CompositeMessagePublisher` fans out to one or more `IMessagePublisher` instances;
   host wiring in `ServiceCollectionExtensions.CreateMessagePublisher` selects console only, Kafka
   only, or both from `ProbeOptions.EnableConsole` / `EnableKafka` (if both flags are off, console is

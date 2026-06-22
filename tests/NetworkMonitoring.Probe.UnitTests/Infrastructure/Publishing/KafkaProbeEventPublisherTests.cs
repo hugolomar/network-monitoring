@@ -44,7 +44,9 @@ public sealed class KafkaProbeEventPublisherTests
             },
             factory);
 
-        await publisher.PublishSessionDetected(CreateSession(), CancellationToken.None);
+        await publisher.PublishSessionDetected(
+            CreateSession(new DateTimeOffset(2025, 3, 15, 10, 32, 0, TimeSpan.Zero)),
+            CancellationToken.None);
 
         var produced = Assert.Single(producer.Messages);
         Assert.Equal("sessions.detected", produced.Topic);
@@ -52,6 +54,41 @@ public sealed class KafkaProbeEventPublisherTests
         Assert.Equal("SessionDetected", produced.Message.Value["eventType"]);
         Assert.Equal("10.0.0.1", produced.Message.Value["sourceIp"]);
         Assert.Equal("10.0.0.2", produced.Message.Value["destinationIp"]);
+        Assert.Equal("2025-03-15T10:32:00.0000000+00:00", produced.Message.Value["occurredAtUtc"]);
+    }
+
+    /// <summary>
+    /// Verifies that publish session detected uses the observation timestamp for occurredAtUtc.
+    /// </summary>
+    [Fact]
+    public async Task PublishSessionDetected_UsesObservationTimestampForOccurredAtUtc()
+    {
+        var observedAt = new DateTimeOffset(2025, 3, 15, 10, 32, 0, TimeSpan.Zero);
+        var producer = new CapturingProducer();
+        var factory = new CapturingProducerFactory(producer);
+        using var publisher = CreatePublisher(new ProbeOptions { EnableKafka = true }, factory);
+
+        await publisher.PublishSessionDetected(CreateSession(observedAt), CancellationToken.None);
+
+        var produced = Assert.Single(producer.Messages);
+        Assert.Equal(observedAt.ToUniversalTime().ToString("O"), produced.Message.Value["occurredAtUtc"]);
+    }
+
+    /// <summary>
+    /// Verifies that publish device detected uses the observation timestamp for occurredAtUtc.
+    /// </summary>
+    [Fact]
+    public async Task PublishDeviceDetected_UsesObservationTimestampForOccurredAtUtc()
+    {
+        var observedAt = new DateTimeOffset(2025, 4, 20, 9, 6, 0, TimeSpan.Zero);
+        var producer = new CapturingProducer();
+        var factory = new CapturingProducerFactory(producer);
+        using var publisher = CreatePublisher(new ProbeOptions { EnableKafka = true }, factory);
+
+        await publisher.PublishDeviceDetected(CreateDevice(observedAt), CancellationToken.None);
+
+        var produced = Assert.Single(producer.Messages);
+        Assert.Equal(observedAt.ToUniversalTime().ToString("O"), produced.Message.Value["occurredAtUtc"]);
     }
 
     /// <summary>
@@ -112,9 +149,9 @@ public sealed class KafkaProbeEventPublisherTests
     private static KafkaProbeEventPublisher CreatePublisher(ProbeOptions options, IKafkaGenericRecordProducerFactory factory) =>
         new(Options.Create(options), NullLogger<KafkaProbeEventPublisher>.Instance, factory);
 
-    private static Session CreateSession()
+    private static Session CreateSession(DateTimeOffset? observedAt = null)
     {
-        var t = DateTimeOffset.UtcNow;
+        var t = observedAt ?? DateTimeOffset.UtcNow;
         return Session.Create(
             null,
             new IpAddress("10.0.0.1"),
@@ -127,9 +164,9 @@ public sealed class KafkaProbeEventPublisherTests
             2048);
     }
 
-    private static Device CreateDevice()
+    private static Device CreateDevice(DateTimeOffset? observedAt = null)
     {
-        var t = DateTimeOffset.UtcNow;
+        var t = observedAt ?? DateTimeOffset.UtcNow;
         return Device.Create(
             null,
             new MacAddress("aa-bb-cc-dd-ee-ff"),

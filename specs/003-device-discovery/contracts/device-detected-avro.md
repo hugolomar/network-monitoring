@@ -33,7 +33,8 @@ registered under `<topic>-value`.
 
 - Source file: [`device-detected-value.avsc`](./device-detected-value.avsc)
 - Timestamps (`occurredAtUtc`, `firstSeenUtc`, `lastSeenUtc`) are ISO-8601 strings in UTC to align
-  with the console contract.
+  with the console contract. `occurredAtUtc` reflects the validated observation time (aligned with
+  `lastSeenUtc` for the emitted record), not wall-clock serialization time.
 
 ## Implementation note
 

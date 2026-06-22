@@ -1,15 +1,17 @@
 # Implementation Plan: Probe Session Detection Visibility
 
 **Branch**: `001-session-detection` | **Date**: 2026-04-20 | **Spec**: `/home/hugo/network-monitoring/specs/001-session-detection/spec.md`  
-**Input**: Feature specification from `/home/hugo/network-monitoring/specs/001-session-detection/spec.md` covering **US1–US2**, **FR-001–FR-016**, **SC-001–SC-005**.
+**Input**: Feature specification from `/home/hugo/network-monitoring/specs/001-session-detection/spec.md` covering **US1–US3**, **FR-001–FR-020**, **SC-001–SC-006**.
 
 ## Summary
 
-The feature provides two capabilities over the same session detection semantics:
+The feature provides three capabilities over the same session detection semantics:
 
 1. **US1**: operator-visible structured records (console / JSONL) for live validation.
 2. **US2**: optional publication of validated outcomes to the platform asynchronous event stream
    (Kafka + Schema Registry, Avro per ADR 0006, topic `sessions.detected`).
+3. **US3**: deterministic test input mode for probe validation runs where live interface fidelity is
+   constrained (for example WSL networking artifacts), while preserving the same application flow.
 
 Shared architecture remains clean/hexagonal: `ITrafficProvider` for capture and `IMessagePublisher`
 for outputs. Kafka/Avro publishing is an infrastructure adapter alongside `ConsolePublisher`; domain
@@ -36,6 +38,15 @@ Architecture decision records for this feature: `docs/adr/0006-avro-schema-regis
 - **Verification**: SC-005; opt-in integration test `KafkaSessionEventPublishIntegrationTests` with
   `RUN_KAFKA_INTEGRATION=1`; manual validation in `quickstart.md`.
 
+### US3 — Deterministic probe validation input mode
+
+- **Intent**: Keep the probe observable and reproducible in local environments where live interface
+  capture identity can be distorted by virtualization layers.
+- **Primary pieces**: input-mode configuration, deterministic capture-source adapter implementing
+  `ITrafficProvider`, unchanged `ProcessObservationsUseCase` and output adapters.
+- **Verification**: SC-006; probe integration tests that compare sampled required fields across
+  repeated runs over the same deterministic source.
+
 ## Technical Context
 
 **Language/Version**: C# / .NET 10  
@@ -47,7 +58,8 @@ Confluent.SchemaRegistry, and Avro serializers for producers
 **Target Platform**: Linux host/container with capture capability; Docker Compose for Kafka + Registry validation  
 **Constraints**: SeedWork immutability; invalid observations must not stop stream processing; session
 identity for deduplication and Kafka record key must match; TLS minimum and mTLS for non-dev per ADR 0008;
-Kafka KRaft only per ADR 0007; contract evolution must remain compatible unless explicitly versioned
+Kafka KRaft only per ADR 0007; contract evolution must remain compatible unless explicitly versioned;
+deterministic input mode is for validation/testing workflows and must not alter live-mode defaults
 
 ## Constitution Check
 
@@ -57,7 +69,8 @@ Kafka KRaft only per ADR 0007; contract evolution must remain compatible unless 
 - **Security Controls**: Probe-to-Kafka transport uses encrypted communication, with mTLS target posture
   in integration/staging/production and documented dev relaxation.
 - **Containerized Deployables**: Probe Dockerfile and reference Kafka stack remain reproducible.
-- **Verification Path**: Unit/integration tests plus SC-005 stream sampling.
+- **Verification Path**: Unit/integration tests plus SC-005 stream sampling and SC-006 deterministic
+  replay equivalence checks.
 
 **Gate status**: PASS.
 
@@ -87,10 +100,11 @@ tests/
 
 - `data-model.md`: session entity and emission policy.
 - `contracts/`: console and Kafka/Avro contracts.
-- `quickstart.md`: console validation, Kafka + Registry bring-up, explicit topic provisioning, and
-  stream publication validation.
+- `quickstart.md`: console validation, Kafka + Registry bring-up, explicit topic provisioning,
+  deterministic test input mode setup, and stream publication validation.
 
 ## Next Step (Spec Kit)
 
 Follow `specs/001-session-detection/tasks.md` for implementation phases covering console visibility,
-Kafka publication, topic provisioning, mTLS posture, and SC-005 verification.
+Kafka publication, topic provisioning, deterministic test input mode, mTLS posture, and SC-005/SC-006
+verification.

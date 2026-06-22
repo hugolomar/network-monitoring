@@ -7,7 +7,7 @@
 
 ## Envelope Fields
 - `eventType`: `"DeviceDetected"`
-- `occurredAtUtc`: ISO-8601 timestamp (instant the record is emitted; observation-derived times are
+- `occurredAtUtc`: ISO-8601 timestamp (instant the validated observation occurred; aligned with
   `firstSeenUtc` / `lastSeenUtc` on the payload)
 - `source`: `"probe"`
 - `schemaVersion`: integer (starts at `1`)

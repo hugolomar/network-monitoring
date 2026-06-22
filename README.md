@@ -111,6 +111,7 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 
 ## Documentation map
 
+- Operational guides: `docs/guides/`
 - Traffic tooling: `tools/traffic/README.md`
 - Session detection quickstart: `specs/001-session-detection/quickstart.md`
 - Session indexing quickstart: `specs/002-session-indexing/quickstart.md`
@@ -120,7 +121,7 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 - Device management quickstart: `specs/006-device-management/quickstart.md`
 - Communication graph quickstart: `specs/007-device-communication-graph/quickstart.md`
 - ADR index: `docs/adr/index.md`
-- Notes: `docs/notes/`
+- Working notes: `docs/notes/`
 
 ## Repository layout
 
@@ -134,4 +135,5 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 | `infrastructure/stack/bootstrap/` | Stack init scripts (topics, index templates, connectors) |
 | `infrastructure/stack/health/` | Service health checks |
 | `infrastructure/connectors/` | Kafka Connect configs + registration scripts |
+| `docs/guides/` | Operational how-to guides (local E2E, tooling) |
 | `tools/traffic/` | Replay/composer traffic simulation toolkit |

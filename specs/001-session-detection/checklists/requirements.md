@@ -2,6 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-04-03  
+**Last Revalidated**: 2026-06-22  
 **Feature**: `/home/hugo/network-monitoring/specs/001-session-detection/spec.md`
 
 ## Content Quality
@@ -31,5 +32,5 @@
 
 ## Notes
 
-- Validation passed in iteration 1.
-- No blocking quality issues found.
+- Initial validation passed in iteration 1.
+- Revalidated after adding US3 deterministic test input mode requirements (FR-017..FR-020, SC-006); no blocking quality issues found.

@@ -52,7 +52,7 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
         try
         {
             EnsureProducer();
-            var record = SessionDetectedAvroMapper.ToGenericRecord(session, DateTimeOffset.UtcNow);
+            var record = SessionDetectedAvroMapper.ToGenericRecord(session, session.LastSeenUtc);
             var key = SessionKafkaPartitionKey.Build(session);
             await _producer!.ProduceAsync(
                     _options.KafkaSessionTopic,
@@ -82,7 +82,7 @@ public sealed class KafkaProbeEventPublisher : IMessagePublisher, IDisposable
         try
         {
             EnsureProducer();
-            var record = DeviceDetectedAvroMapper.ToGenericRecord(device, DateTimeOffset.UtcNow);
+            var record = DeviceDetectedAvroMapper.ToGenericRecord(device, device.LastSeenUtc);
             var key = DeviceKafkaPartitionKey.Build(device);
             await _producer!.ProduceAsync(
                     _options.KafkaDeviceTopic,

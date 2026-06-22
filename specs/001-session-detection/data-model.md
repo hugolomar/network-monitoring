@@ -10,11 +10,16 @@ constitution constraints.
 Application flow also uses an observation validation result object to capture input-validation
 errors before domain emission.
 
+Input origin selection is modeled as probe configuration, not as a domain concern, so session
+semantics remain unchanged regardless of capture source.
+
 ## Session emission policy (console / event stream)
 
 The same **logical** session detection outcome is emitted to **operator-visible output** (JSONL) and,
 when enabled, to the **event stream** (Kafka value per `session-detected-value.avsc`). Field
-semantics MUST stay aligned; only encoding differs (JSON text vs Avro bytes).
+semantics MUST stay aligned; only encoding differs (JSON text vs Avro bytes). Envelope
+`occurredAtUtc` MUST reflect the validated observation time (`lastSeenUtc`), not wall-clock
+serialization time.
 
 Before dispatching a `SessionDetected` record, the probe MAY apply **emission deduplication**:
 - **Identity key**: normalized source IP, destination IP, source port, destination port, and
@@ -25,6 +30,29 @@ Before dispatching a `SessionDetected` record, the probe MAY apply **emission de
 
 This reduces noise for long-lived or high-frequency flows without changing how `Session` entities are
 built from each observation.
+
+## Input Mode Configuration Model
+
+- `CaptureInputMode` (configuration enum/string):
+  - `Live`: observe traffic from a configured runtime interface.
+  - `DeterministicTest`: ingest from a configured deterministic test capture source.
+- `DeterministicTestSource` (configuration value/object):
+  - Identifies the deterministic capture source used for validation (for example a PCAP file path).
+  - Required when `CaptureInputMode=DeterministicTest`.
+  - Must be validated at startup for existence/accessibility and fail fast on invalid configuration.
+- `DeterministicPlaybackSpeed` (configuration value):
+  - Optional pacing multiplier for deterministic PCAP ingestion.
+  - `0` = as fast as possible (default).
+  - `1` = real-time according to packet timestamps.
+  - Values greater than `1` accelerate pacing proportionally.
+
+### Input Mode Rules
+
+- Input mode changes only the `ITrafficProvider` adapter selected by host wiring.
+- `Session` entity shape, validation rules, deduplication behavior, and output contracts are identical
+  between input modes.
+- `DeterministicTest` mode is scoped to validation/testing workflows and is not the default for
+  production-class operation.
 
 ## Application Validation Model
 

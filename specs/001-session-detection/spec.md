@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-session-detection`  
 **Created**: 2026-04-03  
-**Status**: In progress — US1 (operator-visible output) delivered; US2 (Kafka / SC-005) delivered  
+**Status**: Delivered — US1 (operator-visible output), US2 (Kafka / SC-005), and US3 (deterministic test input mode / SC-006)  
 **Input**: User description: "First probe increment to validate session capture and visibility."
 
 ## User Scenarios & Testing *(mandatory)*
@@ -47,11 +47,35 @@ required fields and meaning.
 
 ---
 
+### User Story 3 - Run deterministic probe tests without live interface dependency (Priority: P2)
+
+As a platform operator validating probe observability in constrained local environments (for example
+WSL), I want the same probe service to ingest predefined test captures so I can verify probe behavior
+without depending on live interface fidelity.
+
+**Why this priority**: This keeps observability validation reproducible and comparable across
+developer machines while preserving the same probe use-case and publication path.
+
+**Independent Test**: Start the probe in test input mode with a declared capture file and verify
+session output/publication occurs through the same downstream paths as live mode.
+
+**Acceptance Scenarios**:
+
+1. **Given** test input mode is selected with a valid capture source, **When** the probe runs, **Then**
+   it emits session detections using the same contract and deduplication behavior as live capture mode.
+2. **Given** test input mode is selected without a valid capture source, **When** startup begins,
+   **Then** the probe fails fast with explicit diagnostics and does not enter partial-running state.
+3. **Given** live mode remains selected, **When** operators run existing deployments, **Then** capture
+   behavior remains unchanged.
+
+---
+
 ### Edge Cases
 
 - No traffic is present during capture and therefore no session entities are produced.
 - Partial or malformed packet observations occur and cannot form valid session entities.
 - Capture starts or stops during active traffic bursts.
+- A test input source is configured but unavailable or unreadable at probe startup.
 
 ## Requirements *(mandatory)*
 
@@ -113,6 +137,26 @@ deployment turns it off.
   organizational security policy. **Non-production** environments MAY use relaxed controls only when
   explicitly documented as such.
 
+### Deterministic test input mode *(User Story 3)*
+
+- **FR-017**: The probe MUST support a configurable **capture input mode** that selects between
+  live interface capture and deterministic test capture source ingestion.
+- **FR-018**: Deterministic test input mode MUST be designated for **validation and automated/manual
+  testing workflows**; production-class deployments MUST continue using live capture mode unless an
+  explicit operational exception is approved.
+- **FR-019**: When deterministic test input mode is selected, required test source configuration MUST
+  be validated at startup and failures MUST be explicit and actionable.
+- **FR-020**: Session detections produced in deterministic test input mode MUST flow through the same
+  validation, deduplication, and publication paths as live capture mode so observability checks remain
+  representative.
+- **FR-021**: Published `occurredAtUtc` values MUST reflect the observation timestamp associated with
+  the validated detection (aligned with entity lifecycle timestamps such as `lastSeenUtc`), not the
+  wall-clock instant of serialization.
+- **FR-022**: Deterministic test input mode MUST support a configurable playback speed multiplier.
+  A value of zero MUST read the configured capture as fast as possible; a value of one MUST pace
+  observation delivery according to packet timestamps; values greater than one MUST accelerate pacing
+  proportionally.
+
 ### Key Entities *(include if feature involves data)*
 
 - **Session**: Represents a network communication observation with source, destination, protocol,
@@ -133,6 +177,8 @@ deployment turns it off.
 - **SC-005**: When stream publication is enabled in a controlled run, 100% of sampled session events
   on the **configured destination** (defaulting to the platform standard name) match the declared
   contract for required fields and semantics.
+- **SC-006**: In deterministic test input mode, repeated runs over the same test capture source in the
+  same configuration produce equivalent sampled session outputs for required fields and semantics.
 
 ## Assumptions
 
@@ -145,3 +191,5 @@ deployment turns it off.
   agree on meaning.
 - Duplicate-suppression state for emission lives **in the running probe** only; it is not a
   substitute for authoritative session storage and does not persist across restarts.
+- Deterministic test input mode is an operator-controlled probe configuration intended for validation
+  contexts; it does not replace live capture in production-class operation.

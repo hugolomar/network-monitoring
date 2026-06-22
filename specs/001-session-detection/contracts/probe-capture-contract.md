@@ -18,12 +18,26 @@ observations without coupling use-case logic to tshark.
 - Observation-level business validation is performed in Application using explicit validation
   results (error accumulation + skip invalid), not exception-driven normal flow.
 
-## Current Adapter (This Phase)
+## Input Mode Selection Contract
+- Host configuration selects exactly one `ITrafficProvider` adapter per probe run.
+- `Live` mode maps to interface-based capture (`TsharkTrafficProvider`).
+- `DeterministicTest` mode maps to deterministic capture-source ingestion (for example
+  `PcapFileTrafficProvider`).
+- Deterministic test mode requires explicit source configuration and MUST fail fast at startup when
+  source configuration is invalid.
+- Input mode selection MUST NOT alter downstream application behavior (validation, deduplication, or
+  publication semantics).
+
+## Current Adapters
 - `TsharkTrafficProvider` executes tshark capture and converts raw output lines into normalized
-  observation records.
+  observation records for `Live` mode.
+- Deterministic test adapter (`PcapFileTrafficProvider`) will implement `ITrafficProvider` for
+  replayable probe validation runs without live interface dependency.
+- When `DeterministicPlaybackSpeed` is greater than zero, the deterministic adapter MUST delay
+  between mapped observations according to PCAP timestamp deltas divided by the configured speed.
+  When the speed is zero, observations MAY be delivered as fast as the capture reader allows.
 
 ## Future Adapter Examples
-- `PcapFileTrafficProvider` for replay/testing.
 - `OtherSensorTrafficProvider` for alternative capture technologies.
 
 ## Compatibility Rule
@@ -33,6 +47,8 @@ observations without coupling use-case logic to tshark.
 ## Implementation Note (Current State)
 - Implemented adapter: `TsharkTrafficProvider` in
   `src/NetworkMonitoring.Probe/Infrastructure/Traffic/TsharkTrafficProvider.cs`.
+- Implemented deterministic adapter: `PcapFileTrafficProvider` in
+  `src/NetworkMonitoring.Probe/Infrastructure/Traffic/PcapFileTrafficProvider.cs`.
 - Implemented mapper: `TsharkObservationMapper` in
   `src/NetworkMonitoring.Probe/Infrastructure/Traffic/TsharkObservationMapper.cs`.
 - Shared domain entities/value objects consumed by the adapter pipeline are in
