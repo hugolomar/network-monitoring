@@ -23,5 +23,6 @@ Use `NNN-short-title.md` and a heading such as `# NNN - Title` (for example `003
 | [002 - CI Pipeline Architecture](./002-ci-pipeline-architecture.md) | Jenkins pipeline layout |
 | [003 - Why Probe Runs Separately](./003-probe-separated-stack.md) | Probe compose boundary and host networking |
 | [004 - CI/CD Delivery Path](./004-ci-cd-local-delivery-path.md) | Local bootstrap vs CD gaps |
+| [005 - Security Hardening Backlog](./005-security-hardening-backlog.md) | Known security gaps and target hardening |
 
 Promote stable procedural content to `docs/guides/` when it outgrows a note.

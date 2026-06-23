@@ -63,5 +63,7 @@
       href: ../../docs/notes/003-probe-separated-stack.md
     - name: "004 - CI/CD Delivery Path (Local Project Context)"
       href: ../../docs/notes/004-ci-cd-local-delivery-path.md
+    - name: "005 - Security Hardening Backlog"
+      href: ../../docs/notes/005-security-hardening-backlog.md
 - name: Constitution
   href: ../../.specify/memory/constitution.md
