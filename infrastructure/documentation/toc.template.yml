@@ -1,0 +1,36 @@
+- name: Home
+  href: ../../index.md
+- name: Product Specifications
+  items:
+    - name: 001 Session Detection
+      href: ../../specs/001-session-detection/spec.md
+    - name: 002 Session Indexing
+      href: ../../specs/002-session-indexing/spec.md
+    - name: 003 Device Discovery
+      href: ../../specs/003-device-discovery/spec.md
+    - name: 004 Device Ingestion
+      href: ../../specs/004-device-ingestion/spec.md
+    - name: 005 Device Inventory
+      href: ../../specs/005-device-inventory/spec.md
+    - name: 006 Device Management
+      href: ../../specs/006-device-management/spec.md
+    - name: 007 Communication Graph
+      href: ../../specs/007-device-communication-graph/spec.md
+- name: Technical Reference (Code)
+  href: technical/toc.yml
+- name: Infrastructure Wiki
+  href: wiki/toc.yml
+- name: Architecture Decisions (ADR)
+  href: ../../docs/adr/README.md
+  items:
+__GENERATED_ADR_ITEMS__
+- name: Operational Guides
+  href: ../../docs/guides/README.md
+  items:
+__GENERATED_GUIDES_ITEMS__
+- name: Technical Notes
+  href: ../../docs/notes/README.md
+  items:
+__GENERATED_NOTES_ITEMS__
+- name: Constitution
+  href: ../../.specify/memory/constitution.md

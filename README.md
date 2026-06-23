@@ -68,6 +68,14 @@ python3 -m pip install -r tools/traffic/composer/requirements.txt
 - Elasticsearch: `http://localhost:9200`
 - Neo4j Browser: `http://localhost:7474`
 
+## CI stack URLs
+
+Requires `docker compose -f docker-compose.ci.yml up -d` and a successful Jenkins build for the wiki.
+
+- Jenkins: `http://localhost:8085`
+- Technical wiki (DocFX, published after green build): `http://localhost:8090` — see `infrastructure/documentation/README.md`
+- SonarQube: `http://localhost:9000`
+
 ## Stop / Pause
 
 Pause without removing containers:
@@ -111,7 +119,7 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 
 ## Documentation map
 
-- Operational guides: `docs/guides/`
+- Operational guides: `docs/guides/` (also in DocFX sidebar under **Operational Guides**)
 - Traffic tooling: `tools/traffic/README.md`
 - Session detection quickstart: `specs/001-session-detection/quickstart.md`
 - Session indexing quickstart: `specs/002-session-indexing/quickstart.md`
@@ -120,7 +128,8 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 - Device inventory quickstart: `specs/005-device-inventory/quickstart.md`
 - Device management quickstart: `specs/006-device-management/quickstart.md`
 - Communication graph quickstart: `specs/007-device-communication-graph/quickstart.md`
-- ADR index: `docs/adr/index.md`
+- Architecture decisions (ADR): `docs/adr/`
+- DocFX build and sidebar: `infrastructure/documentation/README.md`
 - Working notes: `docs/notes/`
 
 ## Repository layout
@@ -136,4 +145,6 @@ RUN_KAFKA_INTEGRATION=1 dotnet test src/NetworkMonitoring.sln --filter "FullyQua
 | `infrastructure/stack/health/` | Service health checks |
 | `infrastructure/connectors/` | Kafka Connect configs + registration scripts |
 | `docs/guides/` | Operational how-to guides (local E2E, tooling) |
+| `docs/adr/` | Architecture decision records |
+| `infrastructure/documentation/` | DocFX site configuration and build scripts |
 | `tools/traffic/` | Replay/composer traffic simulation toolkit |

@@ -1,13 +1,16 @@
-# Note 002: CI/CD Pipeline Architecture
+# 002 - CI Pipeline Architecture
 
 This note documents the current state of the CI pipeline in this project, the differences compared to a professional environment, and the options for simulating real triggers locally.
 
 ## 1. Current State (Local Development Environment)
 Currently, the pipeline is designed to be autonomous and reproducible on a local machine using Docker:
-- **Execution**: Started with `docker-compose -f docker-compose.ci.yml up -d`.
-- **Code Passing**: Uses a **shared volume** (`.:/workspace:ro`) in the Jenkins container. This allows Jenkins to see the host code without needing to clone it from the Internet.
-- **Trigger**: Manual. The developer accesses Jenkins (`localhost:8085`) and triggers the build.
-- **Infrastructure**: Everything runs in local containers (Jenkins, SonarQube, Database, Nginx for docs).
+- **Execution**: Started with `docker compose -f docker-compose.ci.yml up -d`.
+- **Code passing**: Uses a **shared volume** (`.:/workspace:ro`) in the Jenkins container. This allows Jenkins to see the host code without needing to clone it from the Internet.
+- **Trigger**: Manual. The developer accesses Jenkins and triggers the build.
+- **CI stack endpoints**:
+  - **Jenkins** — `http://localhost:8085`
+  - **SonarQube** — `http://localhost:9000` (after the Sonar stage)
+  - **Technical wiki** — `http://localhost:8090` (after a successful docs stage; see `infrastructure/documentation/README.md`)
 
 ## 2. Professional Environment (Production)
 In a real-world scenario, the architecture evolves toward scalability and total automation:

@@ -47,7 +47,7 @@ Default interface resolution order:
 
 ## Documentation
 
-- End-to-end deterministic probe flow: `docs/guides/traffic-deterministic-probe.md`
+- End-to-end deterministic probe flow: `docs/guides/001-traffic-deterministic-probe.md`
 - Detailed operations: `tools/traffic/docs/traffic-lab.md`
 - Replay-specific runbook: `tools/traffic/docs/pcap-replay.md`
 - Composer flow guide: `tools/traffic/docs/composer-guide.md`

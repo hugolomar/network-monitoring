@@ -21,12 +21,47 @@
 - name: Infrastructure Wiki
   href: wiki/toc.yml
 - name: Architecture Decisions (ADR)
-  href: ../../docs/adr/index.md
-- name: Technical Notes
+  href: ../../docs/adr/README.md
   items:
-    - name: Scalar API Access
+    - name: "ADR 0000: Technology Stack Choice"
+      href: ../../docs/adr/0000-technology-stack-choice.md
+    - name: "ADR 0001: Shared Domain Modeling and .NET Baseline"
+      href: ../../docs/adr/0001-shared-domain-modeling.md
+    - name: "ADR 0002: Entity Identifier Type as UUID (.NET Guid)"
+      href: ../../docs/adr/0002-entity-id-uuid.md
+    - name: "ADR 0003: Validation Pattern for Probe Ingestion"
+      href: ../../docs/adr/0003-validation-pattern-for-probe-ingestion.md
+    - name: "ADR 0004: Revert Entity Identifier Type to Integer"
+      href: ../../docs/adr/0004-entity-id-revert-to-integer.md
+    - name: "ADR 0005: Nullable `Entity.Id` Until Persistence Assigns a Value"
+      href: ../../docs/adr/0005-entity-id-nullable-until-persistence.md
+    - name: "ADR 0006: Avro + Schema Registry for Session Kafka Payloads"
+      href: ../../docs/adr/0006-avro-schema-registry-for-session-kafka-payloads.md
+    - name: "ADR 0007: Kafka Cluster Metadata with KRaft (No ZooKeeper)"
+      href: ../../docs/adr/0007-kafka-kraft-without-zookeeper.md
+    - name: "ADR 0008: Mutual TLS (mTLS) for Kafka and Probe Clients"
+      href: ../../docs/adr/0008-mutual-tls-for-kafka-and-service-clients.md
+    - name: "ADR 0009: Elasticsearch for Session Indexing"
+      href: ../../docs/adr/0009-elasticsearch-for-session-detection-query.md
+    - name: "ADR 0010: Frontend Testing Convention"
+      href: ../../docs/adr/0010-frontend-testing-convention.md
+    - name: "ADR 0011: Graph Database for Device Communication Relationships"
+      href: ../../docs/adr/0011-graph-database-for-device-communications.md
+- name: Operational Guides
+  href: ../../docs/guides/README.md
+  items:
+    - name: "001 - Traffic Simulator and Deterministic Probe"
+      href: ../../docs/guides/001-traffic-deterministic-probe.md
+- name: Technical Notes
+  href: ../../docs/notes/README.md
+  items:
+    - name: "001 - Accessing Scalar API Documentation"
       href: ../../docs/notes/001-scalar-access.md
-    - name: CI Pipeline Architecture
+    - name: "002 - CI Pipeline Architecture"
       href: ../../docs/notes/002-ci-pipeline-architecture.md
+    - name: "003 - Why Probe Runs Separately"
+      href: ../../docs/notes/003-probe-separated-stack.md
+    - name: "004 - CI/CD Delivery Path (Local Project Context)"
+      href: ../../docs/notes/004-ci-cd-local-delivery-path.md
 - name: Constitution
   href: ../../.specify/memory/constitution.md

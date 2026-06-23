@@ -53,6 +53,7 @@ pipeline {
             steps {
                 echo 'Generating Technical Wiki with DocFX...'
                 sh 'dotnet tool restore'
+                sh 'python3 ./infrastructure/documentation/generate-conceptual-tocs.py'
                 sh 'dotnet docfx metadata'
                 sh 'dotnet docfx build'
                 echo 'Publishing to documentation server...'

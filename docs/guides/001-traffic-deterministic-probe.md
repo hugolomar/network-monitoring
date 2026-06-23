@@ -1,4 +1,4 @@
-# Traffic Simulator and Deterministic Probe
+# 001 - Traffic Simulator and Deterministic Probe
 
 **Audience:** Developers validating capture, Kafka publication, and downstream inventory locally  
 **Prerequisites:** Docker, reference stack running, `tools/traffic` composer dependencies installed  

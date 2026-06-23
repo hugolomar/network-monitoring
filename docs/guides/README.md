@@ -13,15 +13,19 @@ specifications (see `specs/`).
 | **Feature quickstart** | `specs/*/quickstart.md` | Validate one feature slice against its spec |
 | **Note** | `docs/notes/` | Short-lived context or topics not yet promoted to a guide |
 
+## Naming
+
+Use `NNN-short-title.md` and a heading such as `# NNN - Title` (for example `001-traffic-deterministic-probe.md`).
+
 ## Guides
 
 | Guide | Summary |
 |-------|---------|
-| [Traffic simulator and deterministic probe](./traffic-deterministic-probe.md) | Build scenario PCAPs, run the probe in `DeterministicTest` mode, choose playback speed, validate downstream |
+| [001 - Traffic simulator and deterministic probe](./001-traffic-deterministic-probe.md) | Build scenario PCAPs, run the probe in `DeterministicTest` mode, choose playback speed, validate downstream |
 
 ## Adding a guide
 
-Prefer a descriptive filename (`topic-action.md`). Each guide should include:
+Each guide should include:
 
 - **Audience** and **Prerequisites**
 - **Goal** (one sentence)
