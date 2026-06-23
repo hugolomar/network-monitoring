@@ -1,6 +1,7 @@
 - name: Home
   href: ../../index.md
 - name: Product Specifications
+  href: ../../specs/README.md
   items:
     - name: 001 Session Detection
       href: ../../specs/001-session-detection/spec.md
@@ -65,5 +66,7 @@
       href: ../../docs/notes/004-ci-cd-local-delivery-path.md
     - name: "005 - Security Hardening Backlog"
       href: ../../docs/notes/005-security-hardening-backlog.md
+    - name: "006 - SonarQube in Local CI (Operational Behavior)"
+      href: ../../docs/notes/006-sonarqube-local-ci-behavior.md
 - name: Constitution
   href: ../../.specify/memory/constitution.md

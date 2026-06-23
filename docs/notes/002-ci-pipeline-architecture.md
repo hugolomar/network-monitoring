@@ -11,38 +11,8 @@ Currently, the pipeline is designed to be autonomous and reproducible on a local
   - **Jenkins** — `http://localhost:8085`
   - **SonarQube** — `http://localhost:9000` (after the Sonar stage)
   - **Technical wiki** — `http://localhost:8090` (after a successful docs stage; see `infrastructure/documentation/README.md`)
-- **Sonar analysis token:** injected from Jenkins credential `sonarqube-token` (not stored in git). See [§1.1](#11-sonar-token--jenkins-credential-setup) below. Target hardening context: [§2.2](#22-security-and-secrets), [005](./005-security-hardening-backlog.md) **SEC-001**.
-
-### 1.1 Sonar token — Jenkins credential setup
-
-One-time setup (and again after `docker compose … down -v` on **`jenkins-home`**, or when Sonar invalidates the token). **Order matters:** create the credential **before** running a build that expects it.
-
-1. **Ensure a valid Sonar token**
-   - Open `http://localhost:9000` → **My Account** → **Security** → **Generate Tokens**.
-   - **Type:** **Project Analysis Token** (project `network-monitoring`), or **User Token** for a quick lab fix.
-   - **Expiration:** none on a single-developer machine.
-   - Copy the token (shown once).
-
-2. **Store it in Jenkins**
-   - Open `http://localhost:8085` → **Manage Jenkins** → **Credentials**.
-   - Open **(global)** → **Add Credentials**.
-   - **Kind:** Secret text  
-   - **Secret:** paste the Sonar token  
-   - **ID:** `sonarqube-token` (must match `Jenkinsfile`)  
-   - **Description:** e.g. `Sonar project analysis token (network-monitoring)`  
-   - Save. No compose restart required.
-
-3. **Confirm `Jenkinsfile`**
-   - `environment { SONAR_TOKEN = credentials('sonarqube-token') }` — no literal token in the file.
-
-4. **Run the pipeline**
-   - Jenkins → your job → **Build Now**.
-   - Sonar stages **Backend - Prepare Analysis** and **SonarQube - End Analysis** use the credential automatically.
-
-5. **Commit safely**
-   - Commit the `Jenkinsfile` change only (no token in git). Old tokens may still exist in git history; rotate in Sonar if the repo is or will be shared.
-
-**When the token expires or Sonar is reset (`down -v` on Sonar volumes):** generate a new token in Sonar (step 1), update the existing Jenkins credential **Secret** (step 2, edit instead of add), re-run the build. Do not put the new token in `Jenkinsfile`.
+- **Secrets (local CI):** stored in the **Jenkins credential store** — **Manage Jenkins → Credentials** (Secret text, e.g. `sonarqube-token`). Values persist in the `jenkins-home` volume; the `Jenkinsfile` only references credential IDs via `credentials('…')`. Not a separate tool beyond Jenkins.
+- **Sonar analysis token:** Jenkins credential `sonarqube-token` (not in git). Operational detail: [006 - SonarQube in Local CI](./006-sonarqube-local-ci-behavior.md). Hardening: [§2.2](#22-security-and-secrets); **SEC-001** closed in [005](./005-security-hardening-backlog.md) (residual: expired token in old commits).
 
 ## 2. Professional Environment (Production)
 In a real-world scenario, the CI stack evolves on two axes that are kept separate below: **how builds run**
@@ -55,8 +25,10 @@ In a real-world scenario, the CI stack evolves on two axes that are kept separat
 - **Source checkout**: The pipeline clones from the remote repository (`checkout scm`) with deploy keys or OAuth—not a host bind-mount of working tree.
 
 ### 2.2 Security and secrets
-- **No secrets in git**: Tokens and passwords (Sonar, registry, deploy keys) live in the CI **credential store** or secret manager, injected at runtime (e.g. Jenkins `withCredentials`), never in `Jenkinsfile` or compose files committed to the repo.
-- **Sonar analysis token**: Use a **Project Analysis Token** scoped to `network-monitoring`, stored as a Jenkins Secret text credential (e.g. `sonarqube-token`). See **SEC-001** in [005](./005-security-hardening-backlog.md).
+- **No secrets in git**: Tokens and passwords (Sonar, registry, deploy keys) are injected at runtime, never in `Jenkinsfile` or compose files committed to the repo.
+- **Local lab — Jenkins credential store**: In this project the CI credential store **is Jenkins Credentials** (`http://localhost:8085` → **Manage Jenkins** → **Credentials**). Use **Secret text** entries (for example `sonarqube-token`) and bind them in the pipeline with `credentials('id')` or `withCredentials`. Secrets live in the **`jenkins-home`** Docker volume, not in git.
+- **Production**: The same pattern applies; the store may be Jenkins Credentials plus an external **secret manager** (Vault, cloud provider secrets) or the hosting platform’s secret store (GitHub Actions Secrets, GitLab CI variables), depending on where CI runs.
+- **Sonar analysis token**: **Project Analysis Token** scoped to `network-monitoring`, in Jenkins Secret text (`sonarqube-token`). **SEC-001** resolved — see [005](./005-security-hardening-backlog.md).
 - **Least privilege**: Agents without host `docker.sock`, non-root where possible, strong Jenkins auth, TLS and auth at the edge if services are reachable beyond localhost.
 - **Broader backlog**: Other known lab gaps (default compose passwords, privileged Jenkins, etc.) are tracked in [005 - Security Hardening Backlog](./005-security-hardening-backlog.md).
 

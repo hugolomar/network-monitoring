@@ -1,6 +1,7 @@
 - name: Home
   href: ../../index.md
 - name: Product Specifications
+  href: ../../specs/README.md
   items:
     - name: 001 Session Detection
       href: ../../specs/001-session-detection/spec.md

@@ -2,7 +2,7 @@
 
 Task-oriented documentation for running and validating the platform locally. Guides answer **how to
 do something**; they are not architecture decision records (see `docs/adr/`) and are not feature
-specifications (see `specs/`).
+specifications (see `specs/README.md`).
 
 ## When to use what
 
@@ -10,7 +10,7 @@ specifications (see `specs/`).
 |------|----------|---------|
 | **Guide** | `docs/guides/` | Repeatable procedures, local E2E flows, operational caveats |
 | **ADR** | `docs/adr/` | Why a design or technology choice was made |
-| **Feature quickstart** | `specs/*/quickstart.md` | Validate one feature slice against its spec |
+| **Feature quickstart** | `specs/*/quickstart.md` | Validate one feature slice against its spec (see `specs/README.md`) |
 | **Note** | `docs/notes/` | Short-lived context or topics not yet promoted to a guide |
 
 ## Naming

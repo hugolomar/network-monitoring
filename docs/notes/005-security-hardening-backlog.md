@@ -22,7 +22,6 @@ the fix is self-explanatory in code.
 
 | ID | Area | What | Risk (lab) | Status | Target |
 |----|------|------|------------|--------|--------|
-| SEC-001 | CI / Sonar | Sonar token must not live in git; historical commits may still contain old tokens | Medium (high if repo is public) | Pending | `Jenkinsfile` uses `credentials('sonarqube-token')`; one-time **Secret text** in Jenkins UI; **Project Analysis Token** for `network-monitoring`. Rotate/revoke old tokens in Sonar if repo is shared. Setup: note 002 §1.1. |
 | SEC-002 | CI / Jenkins | Jenkins container runs **privileged**, as **root**, with **`/var/run/docker.sock`** mounted | Medium | Accepted (lab) | Non-privileged agent, no host Docker socket, or dedicated ephemeral agents with minimal mounts |
 | SEC-003 | CI / Jenkins | Jenkins on `:8085` with setup wizard skipped; no documented strong auth baseline | Medium | Accepted (lab) | Admin password + RBAC; do not expose port without reverse proxy and auth |
 | SEC-004 | CI / Sonar | PostgreSQL for Sonar uses default credentials (`sonar` / `sonar`) in `docker-compose.ci.yml` | Low (localhost only) | Accepted (lab) | Strong generated passwords; secrets via env file not committed |
@@ -33,10 +32,13 @@ the fix is self-explanatory in code.
 
 ## Resolved
 
-*(None yet.)*
+| ID | Closed | Fix | Residual / follow-up |
+|----|--------|-----|----------------------|
+| SEC-001 | 2026-06-23 | `Jenkinsfile` uses `credentials('sonarqube-token')`; live token in Jenkins **Secret text** only (Project Analysis Token). See [006](./006-sonarqube-local-ci-behavior.md). | Older commits may still contain an **expired** Sonar token (`sqa_…`). **Low risk in private lab** once revoked/expired in Sonar UI. Re-evaluate (history rewrite or assume exposure) before making the repo **public**. |
 
 ## Related notes
 
 - [002 - CI Pipeline Architecture](./002-ci-pipeline-architecture.md) — Sonar token operations and CI vs production layout
 - [003 - Why Probe Runs Separately](./003-probe-separated-stack.md) — elevated capabilities scoped to probe only
 - [004 - CI/CD Delivery Path](./004-ci-cd-local-delivery-path.md) — delivery gates and promotion (future CD security belongs there)
+- [006 - SonarQube in Local CI](./006-sonarqube-local-ci-behavior.md) — token lifecycle, Jenkins checkout, Stage View

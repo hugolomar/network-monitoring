@@ -24,5 +24,6 @@ Use `NNN-short-title.md` and a heading such as `# NNN - Title` (for example `003
 | [003 - Why Probe Runs Separately](./003-probe-separated-stack.md) | Probe compose boundary and host networking |
 | [004 - CI/CD Delivery Path](./004-ci-cd-local-delivery-path.md) | Local bootstrap vs CD gaps |
 | [005 - Security Hardening Backlog](./005-security-hardening-backlog.md) | Known security gaps and target hardening |
+| [006 - SonarQube in Local CI](./006-sonarqube-local-ci-behavior.md) | Sonar token, checkout, and Stage View behavior |
 
 Promote stable procedural content to `docs/guides/` when it outgrows a note.

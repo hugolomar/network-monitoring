@@ -63,7 +63,7 @@ Adding a guide, note, or ADR:
 1. Create the markdown file under the appropriate `docs/` folder with an `#` heading.
 2. Run `bash infrastructure/documentation/build-docfx.sh` (or at least the Python generator before `docfx build`).
 
-Section landing pages (`README.md` in each `docs/` folder) are linked manually in `toc.template.yml`.
+Section landing pages (`README.md` in `docs/` and `specs/`) are linked manually in `toc.template.yml`.
 Their body is written for readers browsing the repo on GitHub; keep DocFX build instructions here, not
 in those READMEs.
 
