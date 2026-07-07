@@ -10,3 +10,4 @@ services:
     environment:
       DOTNET_ENVIRONMENT: Development
       Probe__InterfaceName: eth0
+      Probe__EnableConsole: "false"

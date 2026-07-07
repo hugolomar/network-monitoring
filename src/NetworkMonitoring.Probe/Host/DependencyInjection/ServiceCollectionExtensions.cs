@@ -26,16 +26,34 @@ public static class ServiceCollectionExtensions
             .AddOptions<ProbeOptions>()
             .Bind(configuration.GetSection(ProbeOptions.SectionName))
             .Validate(
+                options => Enum.IsDefined(options.InputMode),
+                "Probe:InputMode must be one of: Live, DeterministicTest.")
+            .Validate(
+                options =>
+                    options.InputMode != CaptureInputMode.DeterministicTest
+                    || !string.IsNullOrWhiteSpace(options.DeterministicTestPcapPath),
+                "Probe:DeterministicTestPcapPath is required when Probe:InputMode is DeterministicTest.")
+            .Validate(
+                options =>
+                    options.InputMode != CaptureInputMode.DeterministicTest
+                    || File.Exists(options.DeterministicTestPcapPath),
+                "Probe:DeterministicTestPcapPath must point to an existing file when Probe:InputMode is DeterministicTest.")
+            .Validate(
                 options => !options.EnableKafka || !string.IsNullOrWhiteSpace(options.KafkaBootstrapServers),
                 "Probe:KafkaBootstrapServers is required when Probe:EnableKafka is true.")
             .Validate(
                 options => !options.EnableKafka || !string.IsNullOrWhiteSpace(options.SchemaRegistryUrl),
                 "Probe:SchemaRegistryUrl is required when Probe:EnableKafka is true.")
+            .Validate(
+                options => options.DeterministicPlaybackSpeed >= 0,
+                "Probe:DeterministicPlaybackSpeed must be zero or greater.")
             .ValidateOnStart();
 
         services.AddSingleton<TsharkObservationMapper>();
         services.AddSingleton<ConsoleRecordSerializer>();
-        services.AddSingleton<ITrafficProvider, TsharkTrafficProvider>();
+        services.AddSingleton<TsharkTrafficProvider>();
+        services.AddSingleton<PcapFileTrafficProvider>();
+        services.AddSingleton<ITrafficProvider>(sp => CreateTrafficProvider(sp));
         services.AddSingleton<ConsolePublisher>();
         services.AddSingleton<IKafkaGenericRecordProducerFactory, KafkaGenericRecordProducerFactory>();
         services.AddSingleton<KafkaProbeEventPublisher>();
@@ -43,6 +61,16 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ProcessObservationsUseCase>();
 
         return services;
+    }
+
+    private static ITrafficProvider CreateTrafficProvider(IServiceProvider sp)
+    {
+        var options = sp.GetRequiredService<IOptions<ProbeOptions>>().Value;
+        return options.InputMode switch
+        {
+            CaptureInputMode.DeterministicTest => sp.GetRequiredService<PcapFileTrafficProvider>(),
+            _ => sp.GetRequiredService<TsharkTrafficProvider>()
+        };
     }
 
     private static IMessagePublisher CreateMessagePublisher(IServiceProvider sp)

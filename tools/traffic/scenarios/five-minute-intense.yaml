@@ -1,0 +1,57 @@
+name: five-minute-intense
+duration_seconds: 300
+default_iface: eth0
+
+sources:
+  baseline_http: pcaps/external/http.cap
+  baseline_dns: pcaps/external/dns.cap
+  dhcp_churn: pcaps/external/dhcp.pcap
+  mixed_burst: pcaps/external/SkypeIRC.cap
+  arp_storm: pcaps/external/arp-storm.pcap
+
+tracks:
+  - name: baseline-http
+    source: baseline_http
+    start_second: 0
+    duration_seconds: 300
+    pps: 360
+
+  - name: baseline-dns
+    source: baseline_dns
+    start_second: 0
+    duration_seconds: 300
+    pps: 220
+
+  - name: discovery-dhcp-bootstrap
+    source: dhcp_churn
+    start_second: 0
+    duration_seconds: 80
+    pps: 500
+
+  - name: discovery-arp-bootstrap
+    source: arp_storm
+    start_second: 10
+    duration_seconds: 60
+    pps: 850
+
+  - name: mixed-burst
+    source: mixed_burst
+    start_second: 25
+    duration_seconds: 70
+    pps: 800
+
+  - name: dhcp-refresh
+    source: dhcp_churn
+    start_second: 120
+    duration_seconds: 35
+    pps: 360
+    repeat_every_seconds: 90
+    repeat_count: 2
+
+  - name: arp-tail
+    source: arp_storm
+    start_second: 210
+    duration_seconds: 25
+    pps: 1000
+    repeat_every_seconds: 40
+    repeat_count: 2

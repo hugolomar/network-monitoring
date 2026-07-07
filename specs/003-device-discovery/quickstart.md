@@ -20,7 +20,8 @@ valid observation regardless of emission throttling.
 
 For event-stream publication, configure:
 - `EnableKafka`: `true` to publish detected devices to Kafka.
-- `EnableConsole`: `true` / `false` for operator-visible JSONL output.
+- `EnableConsole`: `false` by default (recommended for normal runs), `true` only when operator-visible
+  JSONL output is required for debugging.
 - `KafkaBootstrapServers`, `SchemaRegistryUrl`, and `KafkaDeviceTopic` (`devices.detected` default).
 - Optional TLS/mTLS settings: `KafkaSecurityProtocol`, `KafkaSslCaLocation`,
   `KafkaSslCertificateLocation`, and `KafkaSslKeyLocation`.

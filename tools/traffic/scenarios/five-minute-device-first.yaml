@@ -1,0 +1,61 @@
+name: five-minute-device-first
+duration_seconds: 300
+default_iface: eth0
+
+sources:
+  baseline_http: pcaps/external/http.cap
+  baseline_dns: pcaps/external/dns.cap
+  dhcp_churn: pcaps/external/dhcp.pcap
+  mixed_burst: pcaps/external/SkypeIRC.cap
+  arp_storm: pcaps/external/arp-storm.pcap
+
+tracks:
+  - name: warmup-dhcp
+    source: dhcp_churn
+    start_second: 0
+    duration_seconds: 45
+    pps: 520
+
+  - name: warmup-dns
+    source: baseline_dns
+    start_second: 5
+    duration_seconds: 60
+    pps: 420
+
+  - name: warmup-mixed
+    source: mixed_burst
+    start_second: 10
+    duration_seconds: 80
+    pps: 620
+
+  - name: warmup-arp
+    source: arp_storm
+    start_second: 35
+    duration_seconds: 35
+    pps: 700
+
+  - name: baseline-dns
+    source: baseline_dns
+    start_second: 90
+    duration_seconds: 210
+    pps: 240
+
+  - name: baseline-mixed
+    source: mixed_burst
+    start_second: 90
+    duration_seconds: 210
+    pps: 320
+
+  - name: dhcp-refresh
+    source: dhcp_churn
+    start_second: 150
+    duration_seconds: 35
+    pps: 360
+    repeat_every_seconds: 80
+    repeat_count: 2
+
+  - name: final-http-tail
+    source: baseline_http
+    start_second: 240
+    duration_seconds: 45
+    pps: 260

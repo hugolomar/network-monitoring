@@ -1,0 +1,65 @@
+name: fifteen-minute-intense
+duration_seconds: 900
+default_iface: eth0
+
+sources:
+  baseline_http: pcaps/external/http.cap
+  baseline_dns: pcaps/external/dns.cap
+  dhcp_churn: pcaps/external/dhcp.pcap
+  mixed_burst: pcaps/external/SkypeIRC.cap
+  arp_storm: pcaps/external/arp-storm.pcap
+
+tracks:
+  - name: baseline-http
+    source: baseline_http
+    start_second: 0
+    duration_seconds: 900
+    pps: 340
+
+  - name: baseline-dns
+    source: baseline_dns
+    start_second: 0
+    duration_seconds: 900
+    pps: 210
+
+  - name: discovery-dhcp-bootstrap
+    source: dhcp_churn
+    start_second: 0
+    duration_seconds: 120
+    pps: 460
+
+  - name: discovery-arp-bootstrap
+    source: arp_storm
+    start_second: 20
+    duration_seconds: 80
+    pps: 780
+
+  - name: mixed-bursts
+    source: mixed_burst
+    start_second: 45
+    duration_seconds: 90
+    pps: 760
+    repeat_every_seconds: 240
+    repeat_count: 3
+
+  - name: dhcp-periodic-noise
+    source: dhcp_churn
+    start_second: 150
+    duration_seconds: 35
+    pps: 330
+    repeat_every_seconds: 150
+    repeat_count: 5
+
+  - name: arp-periodic-noise
+    source: arp_storm
+    start_second: 180
+    duration_seconds: 25
+    pps: 900
+    repeat_every_seconds: 180
+    repeat_count: 4
+
+  - name: final-mixed-spike
+    source: mixed_burst
+    start_second: 760
+    duration_seconds: 120
+    pps: 920

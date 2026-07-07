@@ -12,11 +12,23 @@ structured records. Optionally publish the same validated detections to Kafka.
 
 ## Configuration (session scope)
 - Application settings section `Probe` (see `src/NetworkMonitoring.Probe/appsettings.json`):
+  - `InputMode`: probe capture source mode (`Live` default, `DeterministicTest` for validation runs).
   - `TSharkPath`: capture executable (default `tshark`).
   - `InterfaceName`: capture interface (default `eth0`; adjust to your environment).
+  - `DeterministicTestPcapPath`: required when `InputMode=DeterministicTest`; points to a replayable
+    capture source used for probe validation.
+  - `DeterministicPlaybackSpeed`: optional pacing multiplier for deterministic PCAP ingestion (`0`
+    default = as fast as possible; `1` = real-time according to packet timestamps; `10` = ten times
+    faster than real-time).
   - `CaptureFilter`: optional BPF-style filter string.
   - `SessionDeduplicationWindowMinutes`: sliding window for suppressing duplicate `SessionDetected`
     emissions for the same session identity (default `10`; use `0` to disable).
+
+### Input mode usage guidance
+- `Live` mode is the default and the expected production-class operation path.
+- `DeterministicTest` mode is intended for reproducible testing/observability validation (for example
+  environments where live interface identity is distorted by virtualization).
+- `DeterministicTest` mode must fail fast on invalid or inaccessible test source configuration.
 
 ## Steps
 1. Restore and build solution/projects.
@@ -24,18 +36,30 @@ structured records. Optionally publish the same validated detections to Kafka.
 3. Generate or observe representative network traffic.
 4. Confirm console emits `SessionDetected` records.
 5. Introduce malformed/partial sample input and verify processing continues.
+6. (Optional) Run deterministic test mode with the same source twice and compare sampled required
+   fields for reproducibility.
 
 ## Expected Outcomes
 - At least one valid session record is printed.
 - Repeated similar traffic produces stable payload structures.
 - Malformed observations are dropped with diagnostics, without stopping the probe.
 - Invalid observations report explicit validation errors in logs and do not rely on exception control flow for normal handling.
+- In deterministic test mode, repeated runs over the same source produce equivalent sampled required
+  fields.
 
 ## Validation Commands (example flow)
 - Build and test:
   - `dotnet test src/NetworkMonitoring.sln`
 - Start probe:
   - `dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
+- Start probe in deterministic test mode (example):
+  - `Probe__InputMode=DeterministicTest Probe__DeterministicTestPcapPath=tools/traffic/pcaps/generated/five-minute-mac-coverage.pcap dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
+- Deterministic playback pacing (optional):
+  - `Probe__DeterministicPlaybackSpeed=0` — ingest as fast as possible (default).
+  - `Probe__DeterministicPlaybackSpeed=1` — pace observation delivery using PCAP timestamps.
+  - `Probe__DeterministicPlaybackSpeed=10` — accelerated pacing (scenario timeline / 10).
+- Docker example with generated scenario PCAP:
+  - `docker compose -f docker-compose.probe.yml run --rm -v "$(pwd)/tools/traffic/pcaps/generated:/pcaps:ro" -e Probe__InputMode=DeterministicTest -e Probe__DeterministicTestPcapPath=/pcaps/five-minute-mac-coverage.pcap -e Probe__DeterministicPlaybackSpeed=1 probe`
 - Optional startup smoke check:
   - `timeout 8 dotnet run --project src/NetworkMonitoring.Probe/NetworkMonitoring.Probe.csproj`
 - Build container image:
@@ -93,10 +117,18 @@ Example: run with Kafka enabled:
 - Manual: consume `sessions.detected`, deserialize Avro using Registry, and confirm fields match
   `session-detected-value.avsc` (SC-005).
 
+### Validate deterministic test input mode (US3 / SC-006)
+- Automated:
+  - `dotnet test tests/NetworkMonitoring.Probe.IntegrationTests/NetworkMonitoring.Probe.IntegrationTests.csproj --filter FullyQualifiedName~DeterministicPcapTrafficProviderIntegrationTests`
+- Manual:
+  - Run probe twice with `Probe__InputMode=DeterministicTest` and the same `Probe__DeterministicTestPcapPath`.
+  - Sample `SessionDetected` required fields (`sourceIp`, `destinationIp`, ports, `protocol`, `bytesObserved`) and confirm equivalence across runs.
+
 ### Troubleshooting
 - Unknown topic or errors on produce: run `./infrastructure/stack/bootstrap/kafka-topics-init.sh` and re-check the topic.
 - Schema / deserialization errors: ensure Registry is up and the subject `sessions.detected-value` matches the Avro contract.
 - Connection refused to `localhost:9092`: confirm compose is running and ports are not used by another stack.
+- Deterministic mode fails at startup: verify `Probe__DeterministicTestPcapPath` points to an existing readable file and that `tshark` is available in PATH.
 
 ## Out of scope (other modules)
 

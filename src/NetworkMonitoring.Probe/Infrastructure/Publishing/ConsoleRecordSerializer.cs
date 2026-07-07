@@ -19,7 +19,7 @@ public sealed class ConsoleRecordSerializer
         var payload = new
         {
             eventType = "SessionDetected",
-            occurredAtUtc = DateTimeOffset.UtcNow,
+            occurredAtUtc = session.LastSeenUtc,
             source = "probe",
             schemaVersion = 1,
             sessionId = session.Id,
@@ -46,7 +46,7 @@ public sealed class ConsoleRecordSerializer
         var payload = new
         {
             eventType = "DeviceDetected",
-            occurredAtUtc = DateTimeOffset.UtcNow,
+            occurredAtUtc = device.LastSeenUtc,
             source = "probe",
             schemaVersion = 1,
             deviceId = device.Id,

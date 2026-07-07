@@ -1,0 +1,59 @@
+name: five-minute-mac-coverage
+duration_seconds: 300
+default_iface: eth0
+
+sources:
+  baseline_http: pcaps/external/http.cap
+  baseline_dns: pcaps/external/dns.cap
+  dhcp_churn: pcaps/external/dhcp.pcap
+  mixed_burst: pcaps/external/SkypeIRC.cap
+  arp_storm: pcaps/external/arp-storm.pcap
+
+tracks:
+  - name: coverage-http-full
+    source: baseline_http
+    start_second: 0
+    pps: 450
+    loop_count: 1
+
+  - name: coverage-dns-full
+    source: baseline_dns
+    start_second: 20
+    pps: 420
+    loop_count: 1
+
+  - name: coverage-dhcp-full
+    source: dhcp_churn
+    start_second: 40
+    pps: 500
+    loop_count: 1
+
+  - name: coverage-mixed-full
+    source: mixed_burst
+    start_second: 60
+    pps: 520
+    loop_count: 1
+
+  - name: coverage-arp-full
+    source: arp_storm
+    start_second: 80
+    pps: 600
+    loop_count: 1
+
+  - name: reinforce-dns
+    source: baseline_dns
+    start_second: 140
+    duration_seconds: 60
+    pps: 260
+
+  - name: reinforce-mixed
+    source: mixed_burst
+    start_second: 170
+    duration_seconds: 90
+    pps: 320
+
+  - name: reinforce-dhcp
+    source: dhcp_churn
+    start_second: 220
+    duration_seconds: 40
+    pps: 340
