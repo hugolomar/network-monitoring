@@ -66,7 +66,24 @@ python3 -m pip install -r tools/traffic/composer/requirements.txt
 - Schema Registry: `http://localhost:8081`
 - Kafka Connect: `http://localhost:8083`
 - Elasticsearch: `http://localhost:9200`
+- Kibana: `http://localhost:5601`
 - Neo4j Browser: `http://localhost:7474`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3001`
+- Jaeger: `http://localhost:16686`
+
+## Observability baseline checks
+
+- Backend liveness endpoint: `http://localhost:5090/health/live`
+- Backend readiness endpoint: `http://localhost:5090/health/ready`
+- Elasticsearch log count: `curl -sS "http://localhost:9200/observability-logs-*/_count"`
+- CI gate script: `infrastructure/ci/check-observability-baseline.sh`
+- SeedWork immutability gate: `infrastructure/ci/check-seedwork-immutability.sh`
+
+Runtime toggles (per service `Observability` section / env override):
+
+- `EnableConsoleLogging` (default `true`): emit JSON logs to stdout.
+- `EnableOtlpLogs` (default `true`): export logs via OTLP to collector endpoint.
 
 ## CI stack URLs
 

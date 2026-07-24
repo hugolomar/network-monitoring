@@ -1,0 +1,41 @@
+{
+  "index_patterns": [
+    "observability-logs-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.refresh_interval": "5s"
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "service.name": {
+          "type": "keyword"
+        },
+        "service.namespace": {
+          "type": "keyword"
+        },
+        "severity_text": {
+          "type": "keyword"
+        },
+        "correlationId": {
+          "type": "keyword"
+        },
+        "traceId": {
+          "type": "keyword"
+        },
+        "body": {
+          "type": "text"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Baseline index template for observability structured logs."
+  }
+}

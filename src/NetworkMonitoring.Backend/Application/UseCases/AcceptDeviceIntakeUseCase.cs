@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using NetworkMonitoring.Backend.Application.Models;
 using NetworkMonitoring.Backend.Application.Ports;
@@ -18,6 +19,7 @@ public sealed class AcceptDeviceIntakeUseCase(
     IInventoryUnitOfWork unitOfWork,
     ILogger<AcceptDeviceIntakeUseCase> logger)
 {
+    private static readonly ActivitySource ActivitySource = new("NetworkMonitoring.Backend.Intake");
     // A dictionary of semaphores used to serialize processing of intake requests for the same MAC address.
     // This prevents race conditions when multiple discovery sources report the same device simultaneously.
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> MacLocks = new(StringComparer.Ordinal);
@@ -30,8 +32,13 @@ public sealed class AcceptDeviceIntakeUseCase(
     /// <returns>A task that represents the asynchronous operation. The task result contains the outcome of the intake.</returns>
     public async Task<DeviceIntakeOutcome> Execute(DeviceIntakeCommand command, CancellationToken cancellationToken)
     {
+        using var activity = ActivitySource.StartActivity("device.intake.accept", ActivityKind.Internal);
+        activity?.SetTag("device.idempotency_key", command.IdempotencyKey);
+        activity?.SetTag("device.discovery_source", command.DiscoverySource);
+
         if (!TryBuildIncomingDevice(command, out var incoming, out var rejectionReason))
         {
+            activity?.SetStatus(ActivityStatusCode.Error, rejectionReason);
             logger.LogWarning("Rejected device intake: {Reason}", rejectionReason);
             return DeviceIntakeOutcome.Rejected(rejectionReason);
         }
@@ -50,6 +57,7 @@ public sealed class AcceptDeviceIntakeUseCase(
                 await repository.Add(incoming, cancellationToken);
                 await unitOfWork.SaveChanges(cancellationToken);
 
+                activity?.SetTag("device.intake_outcome", "created");
                 logger.LogInformation("Accepted new device intake for {MacAddress}", incoming.MacAddress.Value);
                 return DeviceIntakeOutcome.Created(ToItem(incoming));
             }
@@ -61,15 +69,18 @@ public sealed class AcceptDeviceIntakeUseCase(
 
             if (!consolidated.Changed)
             {
+                activity?.SetTag("device.intake_outcome", "idempotent");
                 logger.LogInformation("Accepted idempotent duplicate device intake for {MacAddress}", existing.MacAddress.Value);
                 return DeviceIntakeOutcome.Idempotent(ToItem(consolidated.Device));
             }
 
+            activity?.SetTag("device.intake_outcome", "updated");
             logger.LogInformation("Updated device inventory state for {MacAddress}", existing.MacAddress.Value);
             return DeviceIntakeOutcome.Updated(ToItem(consolidated.Device));
         }
         catch (Exception ex)
         {
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             logger.LogError(ex, "Persistence failure while accepting device intake for {MacAddress}", incoming.MacAddress.Value);
             return DeviceIntakeOutcome.PersistenceFailure("Device inventory persistence dependency is unavailable.");
         }

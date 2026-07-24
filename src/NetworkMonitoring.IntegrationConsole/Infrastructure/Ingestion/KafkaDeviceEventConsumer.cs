@@ -3,6 +3,7 @@ using Confluent.Kafka;
 using Confluent.Kafka.SyncOverAsync;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.IntegrationConsole.Application.Configuration;
@@ -18,6 +19,7 @@ namespace NetworkMonitoring.IntegrationConsole.Infrastructure.Ingestion;
 /// </summary>
 public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
 {
+    private static readonly ActivitySource ActivitySource = new("NetworkMonitoring.IntegrationConsole");
     private readonly IntegrationConsoleOptions _options;
     private readonly ILogger<KafkaDeviceEventConsumer> _logger;
     private readonly Lazy<IConsumer<string, GenericRecord>> _consumer;
@@ -55,6 +57,16 @@ public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
             try
             {
                 result = consumer.Consume(cancellationToken);
+                using var activity = ActivitySource.StartActivity("kafka.devices.consume", ActivityKind.Consumer);
+                activity?.SetTag("messaging.system", "kafka");
+                activity?.SetTag("messaging.destination", _options.KafkaDeviceTopic);
+                activity?.SetTag("messaging.kafka.partition", result.Partition.Value);
+                activity?.SetTag("messaging.kafka.offset", result.Offset.Value);
+                if (!string.IsNullOrWhiteSpace(result.Message.Key))
+                {
+                    activity?.SetTag("correlation.id", result.Message.Key);
+                        ApplyCorrelationContext(activity, result.Message.Key);
+                }
                 consumedEvent = new ConsumedDeviceEvent(
                     result.Message.Key,
                     DeviceDetectedEventMapper.FromGenericRecord(result.Message.Value),
@@ -172,6 +184,14 @@ public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
         Enum.TryParse<SecurityProtocol>(value, ignoreCase: true, out var protocol)
             ? protocol
             : SecurityProtocol.Plaintext;
+
+    internal static void ApplyCorrelationContext(Activity? activity, string? correlationId)
+    {
+        if (activity is not null && !string.IsNullOrWhiteSpace(correlationId))
+        {
+            activity.AddBaggage("correlation.id", correlationId);
+        }
+    }
 
     private static string? TryDecodeUtf8(byte[]? value)
     {

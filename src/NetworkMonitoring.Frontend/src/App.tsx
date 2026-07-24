@@ -1,5 +1,6 @@
 import DeviceManagementPage from "./pages/DeviceManagementPage";
 import DeviceGraphPage from "./pages/DeviceGraphPage";
+import DiagnosticsPage from "./pages/DiagnosticsPage";
 import { useState } from "react";
 
 /**
@@ -8,7 +9,7 @@ import { useState } from "react";
  * @returns The rendered application layout.
  */
 export default function App() {
-  const [page, setPage] = useState<"inventory" | "graph">("inventory");
+  const [page, setPage] = useState<"inventory" | "graph" | "diagnostics">("inventory");
 
   return (
     <div className="app-root">
@@ -27,8 +28,21 @@ export default function App() {
         >
           Graph
         </button>
+        <button
+          type="button"
+          className={page === "diagnostics" ? "primary" : ""}
+          onClick={() => setPage("diagnostics")}
+        >
+          Diagnostics
+        </button>
       </nav>
-      {page === "inventory" ? <DeviceManagementPage /> : <DeviceGraphPage />}
+      {page === "inventory" ? (
+        <DeviceManagementPage />
+      ) : page === "graph" ? (
+        <DeviceGraphPage />
+      ) : (
+        <DiagnosticsPage />
+      )}
     </div>
   );
 }

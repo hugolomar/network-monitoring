@@ -1,0 +1,29 @@
+groups:
+  - name: observability-baseline
+    rules:
+      # Early warning, so operators get lead time before the SC-004 objective is breached.
+      - alert: CriticalFlowErrorRateWarning
+        expr: >
+          100 * sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[5m]))
+          / clamp_min(sum(rate(http_server_request_duration_seconds_count[5m])), 1e-9) > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Critical flow error rate above 2%"
+          description: >
+            Server-error rate has exceeded 2% for 2 minutes. Objective SC-004 is breached at 5% for
+            5 minutes, so this fires early to leave time to react.
+
+      # The SC-004 objective itself: error rate above 5% for 5 consecutive minutes.
+      - alert: CriticalFlowErrorRateBreach
+        expr: >
+          100 * sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[5m]))
+          / clamp_min(sum(rate(http_server_request_duration_seconds_count[5m])), 1e-9) > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical flow error rate objective breached"
+          description: >
+            Server-error rate has exceeded 5% for 5 consecutive minutes, breaching objective SC-004.

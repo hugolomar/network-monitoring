@@ -6,7 +6,7 @@ alwaysApply: true
 
 # network-monitoring Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-21
+Auto-generated from all feature plans. Last updated: 2026-07-07
 
 ## Active Technologies
 - C# / .NET 10 + .NET Worker runtime, shared domain SeedWork abstractions, tshark capture adapter, console serialization pipeline (Kafka-ready contracts) (003-device-discovery)
@@ -25,6 +25,8 @@ Auto-generated from all feature plans. Last updated: 2026-05-21
 - Graph database (communication projection), existing device inventory store remains authoritative for internal device lifecycle (007-device-communication-graph)
 - C# / .NET 10 for API/hosted services; JSON for connector configuration + ASP.NET Core minimal APIs, Microsoft DI/options hosting stack, graph database adapter boundary, Kafka Connect Neo4j sink contract (007-device-communication-graph)
 - Graph database for communication projection; existing inventory store remains authoritative for internal devices (007-device-communication-graph)
+- C# / .NET 10 (Probe, Integration Console, Backend), TypeScript/React (Frontend) + OpenTelemetry SDK/runtime instrumentation, OpenTelemetry Collector (OTLP), (008-observability-baseline)
+- Prometheus TSDB for metrics; trace store via Jaeger; existing operational datastores remain (008-observability-baseline)
 
 ## Project Structure
 
@@ -42,9 +44,9 @@ tests/
 C# / .NET 10: Follow standard conventions
 
 ## Recent Changes
+- 008-observability-baseline: Added C# / .NET 10 (Probe, Integration Console, Backend), TypeScript/React (Frontend) + OpenTelemetry SDK/runtime instrumentation, OpenTelemetry Collector (OTLP),
 - 007-device-communication-graph: Added C# / .NET 10 for API/hosted services; JSON for connector configuration + ASP.NET Core minimal APIs, Microsoft DI/options hosting stack, graph database adapter boundary, Kafka Connect Neo4j sink contract
 - 007-device-communication-graph: Added C# / .NET 10 for API and background services; JSON connector configuration + ASP.NET Core API hosting, graph database driver for API graph access, Kafka Connect graph sink connector for projection ingest
-- 006-device-management: Added TypeScript on current Node.js LTS, browser runtime JavaScript + React, Vite, TypeScript, browser Fetch API, lightweight runtime configuration, container static file serving
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -14,8 +14,77 @@ volumes:
   connect-plugins: {}
   postgres-data: {}
   neo4j-data: {}
+  grafana-data: {}
+  kibana-data: {}
 
 services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.105.0
+    hostname: otel-collector
+    networks:
+      - kafka-net
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "9464:9464"
+    volumes:
+      - ./infrastructure/observability/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    hostname: prometheus
+    networks:
+      - kafka-net
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/observability/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+    depends_on:
+      otel-collector:
+        condition: service_started
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    hostname: jaeger
+    networks:
+      - kafka-net
+    ports:
+      - "16686:16686"
+      - "4319:4317"
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    hostname: grafana
+    networks:
+      - kafka-net
+    ports:
+      - "3001:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.4
+    hostname: kibana
+    networks:
+      - kafka-net
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+
   kafka-1:
     image: confluentinc/cp-kafka:7.6.1
     hostname: kafka-1
@@ -275,6 +344,10 @@ services:
       # Uncomment the following line to enable Scalar API Documentation (Development mode only)
       # ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
+      Observability__OtlpEndpoint: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      Observability__EnableOtlpLogs: "true"
+      Observability__EnableConsoleLogging: "true"
       Backend__ConnectionString: Host=postgres;Port=5432;Database=network_monitoring;Username=network_monitoring;Password=network_monitoring
       Backend__ApplyMigrationsOnStartup: "true"
       Backend__Graph__Provider: Neo4j
@@ -301,6 +374,10 @@ services:
       IntegrationConsole__KafkaConsumerGroupId: device-ingestion-local
       IntegrationConsole__BackendBaseUrl: http://network-monitoring-backend:8080
       IntegrationConsole__KafkaSecurityProtocol: Plaintext
+      Observability__OtlpEndpoint: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      Observability__EnableOtlpLogs: "true"
+      Observability__EnableConsoleLogging: "true"
 
   network-monitoring-device-management-ui:
     build:

@@ -24,13 +24,16 @@ existing .NET 10 services, Docker-based local/reference stack, and incremental f
 
 Adopt the following observability stack baseline:
 
-- **Instrumentation standard:** OpenTelemetry for metrics and traces in services.
+- **Instrumentation standard:** OpenTelemetry for logs, metrics, and traces in services.
 - **Telemetry transport/control plane:** OpenTelemetry Collector (OTLP ingest, pipeline routing,
   exporter decoupling).
 - **Metrics storage/query:** Prometheus.
 - **Dashboards and visualization:** Grafana.
 - **Trace backend and UI:** Jaeger (via OpenTelemetry Collector export path).
-- **Structured application logs:** Serilog JSON output with mandatory correlation/trace enrichment.
+- **Structured application logs:** JSON console logs plus OpenTelemetry log export with mandatory
+  correlation/trace enrichment.
+- **Centralized log storage/search:** Elasticsearch indices.
+- **Log exploration UI:** Kibana.
 
 Baseline obligations by runtime path:
 
@@ -46,8 +49,15 @@ specified in feature specs/plans (starting with `observability-baseline`).
 
 - **Open standard and low lock-in:** OpenTelemetry + OTLP keeps instrumentation portable.
 - **.NET ecosystem fit:** Native support in .NET 10 hosting and instrumentation libraries.
-- **Separation of concerns:** Collector decouples app code from backend-specific exporters.
-- **Operational familiarity:** Prometheus/Grafana/Jaeger are established observability components.
+- **Separation of concerns:** Collector decouples app code from backend-specific exporters and allows
+  routing/pipeline changes without service-code churn.
+- **Metrics/traces fit:** Prometheus/Grafana/Jaeger cover SLI/SLO dashboards, alert expressions, and
+  distributed trace diagnosis with mature operational patterns.
+- **Log diagnosis requirements fit:** Elasticsearch + Kibana support advanced indexed search and
+  high-selectivity filtering over structured fields (`correlationId`, `traceId`, `service`, `severity`)
+  required for cross-service incident analysis.
+- **Existing stack reuse:** Elasticsearch is already part of the platform runtime, reducing adoption cost
+  while preserving required search depth for logs.
 - **Incremental adoption:** Allows phased rollout (health/logging first, then metrics/traces) without
   redesigning the stack.
 
@@ -79,12 +89,19 @@ specified in feature specs/plans (starting with `observability-baseline`).
      projection concerns.
    - Rejected for this baseline.
 
+6. **Loki for centralized logs**
+   - Pros: lightweight operation and tight Grafana integration.
+   - Cons: weaker fit for this baseline's indexed-search-first diagnostics requirements compared with
+     Elasticsearch/Kibana (rich field filtering and exploratory investigation workflows).
+   - Rejected in favor of Elasticsearch + Kibana for baseline log centralization/search.
+
 ## Consequences
 
 - **Positive:** establishes one consistent telemetry architecture across services and environments;
   enables verifiable observability gates and baseline dashboards/alerts.
-- **Negative:** introduces additional operational components (Collector, Prometheus, Grafana, Jaeger)
-  that must be configured, secured, and maintained.
+- **Negative:** introduces additional operational components (Collector, Prometheus, Grafana, Jaeger,
+  Kibana) and indexed log governance concerns (retention/mapping) that must be configured and
+  maintained.
 - **Implementation note:** existing no-op telemetry adapters (for example graph telemetry) should be
   replaced by OpenTelemetry-backed implementations while preserving clean/hexagonal boundaries.
 - **Governance note:** future telemetry backend substitutions remain possible if they preserve OTel

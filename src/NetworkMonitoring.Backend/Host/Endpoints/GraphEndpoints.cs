@@ -1,5 +1,6 @@
 using NetworkMonitoring.Backend.Application.UseCases;
 using NetworkMonitoring.Backend.Infrastructure.Graph;
+using NetworkMonitoring.Backend.Host.Telemetry;
 
 namespace NetworkMonitoring.Backend.Host.Endpoints;
 
@@ -80,7 +81,16 @@ public static class GraphEndpoints
         catch (Exception ex)
         {
             var logger = loggerFactory.CreateLogger("GraphEndpoints");
-            logger.LogError(ex, "Graph retrieval failed for rootDeviceId {RootDeviceId}", request.RootDeviceId);
+            var correlationId = httpContext.Items["X-Correlation-ID"]?.ToString()
+                ?? httpContext.Request.Headers["X-Correlation-ID"].FirstOrDefault()
+                ?? string.Empty;
+            logger.LogError(
+                ex,
+                "Graph retrieval failed for rootDeviceId {RootDeviceId}. correlationId={CorrelationId} traceId={TraceId} errorContext={ErrorContext}",
+                request.RootDeviceId,
+                correlationId,
+                System.Diagnostics.Activity.Current?.TraceId.ToString() ?? httpContext.TraceIdentifier,
+                TelemetryRedaction.Redact(ex.Message));
             _ = Neo4jGraphErrorMapper.Map(ex);
             return Results.Json(
                 GraphErrorResponses.GraphUnavailable("Communication graph is temporarily unavailable.", httpContext.TraceIdentifier),
@@ -129,7 +139,15 @@ public static class GraphEndpoints
         catch (Exception ex)
         {
             var logger = loggerFactory.CreateLogger("GraphEndpoints");
-            logger.LogError(ex, "Graph snapshot retrieval failed.");
+            var correlationId = httpContext.Items["X-Correlation-ID"]?.ToString()
+                ?? httpContext.Request.Headers["X-Correlation-ID"].FirstOrDefault()
+                ?? string.Empty;
+            logger.LogError(
+                ex,
+                "Graph snapshot retrieval failed. correlationId={CorrelationId} traceId={TraceId} errorContext={ErrorContext}",
+                correlationId,
+                System.Diagnostics.Activity.Current?.TraceId.ToString() ?? httpContext.TraceIdentifier,
+                TelemetryRedaction.Redact(ex.Message));
             _ = Neo4jGraphErrorMapper.Map(ex);
             return Results.Json(
                 GraphErrorResponses.GraphUnavailable("Communication graph is temporarily unavailable.", httpContext.TraceIdentifier),

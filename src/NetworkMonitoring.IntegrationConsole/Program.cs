@@ -4,6 +4,7 @@ using NetworkMonitoring.IntegrationConsole.Host.DependencyInjection;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddIntegrationConsole(builder.Configuration);
+builder.Services.AddHealthChecks();
 
 await builder.Build().RunAsync();
 

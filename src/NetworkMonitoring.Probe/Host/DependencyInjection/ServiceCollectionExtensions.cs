@@ -1,11 +1,16 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Probe.Application.Configuration;
 using NetworkMonitoring.Probe.Application.Ports;
 using NetworkMonitoring.Probe.Application.UseCases;
 using NetworkMonitoring.Probe.Infrastructure.Publishing;
 using NetworkMonitoring.Probe.Infrastructure.Traffic;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace NetworkMonitoring.Probe.Host.DependencyInjection;
 /// <summary>
@@ -59,6 +64,60 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<KafkaProbeEventPublisher>();
         services.AddSingleton<IMessagePublisher>(sp => CreateMessagePublisher(sp));
         services.AddSingleton<ProcessObservationsUseCase>();
+        services.AddHealthChecks().AddCheck("probe-live", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: ["live", "ready"]);
+
+        var enableStructuredLogging = configuration.GetValue<bool?>("Observability:EnableStructuredLogging") ?? true;
+        var enableConsoleLogging = configuration.GetValue<bool?>("Observability:EnableConsoleLogging") ?? true;
+        var enableOpenTelemetry = configuration.GetValue<bool?>("Observability:EnableOpenTelemetry") ?? true;
+        var enableOtlpLogs = configuration.GetValue<bool?>("Observability:EnableOtlpLogs") ?? true;
+        var configuredOtlpEndpoint = configuration["Observability:OtlpEndpoint"];
+        var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT")
+            ?? configuredOtlpEndpoint;
+
+        if (enableStructuredLogging && enableConsoleLogging)
+        {
+            services.AddLogging(builder =>
+            {
+                builder.AddJsonConsole(options =>
+                {
+                    options.IncludeScopes = true;
+                    options.UseUtcTimestamp = true;
+                });
+            });
+        }
+
+        if (enableOpenTelemetry && !string.IsNullOrWhiteSpace(otlpEndpoint))
+        {
+            services.AddOpenTelemetry()
+                .ConfigureResource(resource => resource.AddService("network-monitoring-probe"))
+                .WithTracing(builder =>
+                {
+                    builder
+                        .AddSource("NetworkMonitoring.Probe")
+                        .AddOtlpExporter(exporter => exporter.Endpoint = new Uri(otlpEndpoint));
+                })
+                .WithMetrics(builder =>
+                {
+                    builder
+                        .AddMeter("NetworkMonitoring.Probe")
+                        .AddRuntimeInstrumentation()
+                        .AddOtlpExporter(exporter => exporter.Endpoint = new Uri(otlpEndpoint));
+                });
+        }
+
+        if (enableOpenTelemetry && enableOtlpLogs && !string.IsNullOrWhiteSpace(otlpEndpoint))
+        {
+            services.AddLogging(builder =>
+            {
+                builder.AddOpenTelemetry(logging =>
+                {
+                    logging.IncludeScopes = true;
+                    logging.IncludeFormattedMessage = true;
+                    logging.ParseStateValues = true;
+                    logging.AddOtlpExporter(exporter => exporter.Endpoint = new Uri(otlpEndpoint));
+                });
+            });
+        }
 
         return services;
     }

@@ -4,11 +4,13 @@
 #   bash ./infrastructure/stack/bootstrap/reference-stack-init.sh
 # Optional env:
 #   STACK_BUILD=0   # skip --build in docker compose up
+#   OBSERVABILITY_BOOTSTRAP=0   # skip observability template + Kibana object import
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
 COMPOSE_FILE="${ROOT}/docker-compose.reference-stack.yml"
 STACK_BUILD="${STACK_BUILD:-1}"
+OBSERVABILITY_BOOTSTRAP="${OBSERVABILITY_BOOTSTRAP:-1}"
 
 if [[ ! -f "$COMPOSE_FILE" ]]; then
   echo "error: missing compose file: $COMPOSE_FILE" >&2
@@ -38,6 +40,19 @@ bash ./infrastructure/stack/bootstrap/elasticsearch/apply-index-template.sh
 
 echo "==> Registering Elasticsearch sink connector"
 bash ./infrastructure/connectors/register/register-elasticsearch-sink-connector.sh
+
+if [[ "$OBSERVABILITY_BOOTSTRAP" = "1" ]]; then
+  echo "==> Applying observability logs Elasticsearch template/index bootstrap"
+  ES_INDEX_TEMPLATE_NAME=observability-logs \
+  ES_INDEX_TEMPLATE_FILE="${ROOT}/infrastructure/observability/elasticsearch/logs-index-template.json" \
+  ES_SESSIONS_INDEX_NAME=observability-logs-default \
+  bash ./infrastructure/stack/bootstrap/elasticsearch/apply-index-template.sh
+
+  echo "==> Importing Kibana observability saved objects"
+  bash ./infrastructure/stack/bootstrap/kibana/import-observability-logs.sh
+else
+  echo "==> Skipping observability bootstrap (OBSERVABILITY_BOOTSTRAP=${OBSERVABILITY_BOOTSTRAP})"
+fi
 
 echo ""
 echo "Reference stack is ready."
