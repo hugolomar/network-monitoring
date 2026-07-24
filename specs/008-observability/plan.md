@@ -1,14 +1,16 @@
-# Implementation Plan: Production Observability Baseline
+# Implementation Plan: Production Observability
 
-**Branch**: `008-observability-baseline` | **Date**: 2026-07-07 | **Spec**: [spec.md](./spec.md)  
-**Input**: Feature specification from `/home/hugo/network-monitoring/specs/008-observability-baseline/spec.md`
+**Branch**: `008-observability` | **Date**: 2026-07-07 | **Spec**: [spec.md](./spec.md)  
+**Input**: Feature specification from `/home/hugo/network-monitoring/specs/008-observability/spec.md`
 
 ## Summary
 
-Establish a cross-cutting production observability baseline that standardizes correlation, structured
+Establish a cross-cutting production observability capability that standardizes correlation, structured
 logging, service metrics, distributed tracing, health signaling, and actionable alerts across
-production-path services, with objective verification gates in tests/CI and alignment with the
-observability stack defined in ADR 0012.
+production-path services **and the platform components they run on**, adds business-flow throughput and
+capture-loss visibility so pipeline limitations are measurable, and provides log-to-trace navigation in a
+single exploration UI, with objective verification gates in tests/CI and alignment with the observability
+stack defined in ADR 0013.
 
 ## Architecture Grounding
 
@@ -51,22 +53,26 @@ observability stack defined in ADR 0012.
 ## Technical Context
 
 **Language/Version**: C# / .NET 10 (Probe, Integration Console, Backend), TypeScript/React (Frontend)  
-**Primary Dependencies**: OpenTelemetry SDK/runtime instrumentation, OpenTelemetry Collector (OTLP),
-Prometheus, Grafana, Jaeger, Elasticsearch, Kibana, structured JSON logging pipeline  
-**Storage**: Prometheus TSDB for metrics; trace store via Jaeger; Elasticsearch for centralized log
-indexing/search; existing operational datastores remain authoritative for domain data
-(PostgreSQL/Neo4j/Kafka)  
+**Primary Dependencies**: OpenTelemetry SDK/runtime instrumentation, OpenTelemetry Collector (OTLP ingest,
+platform log tailing, platform metric receivers), Prometheus, Alertmanager, Grafana, Elastic APM Server,
+Fluent Bit (OTLP-to-JSON adaptation), Logstash (platform log normalization), Elasticsearch, Kibana  
+**Storage**: Prometheus TSDB for metrics; Elasticsearch for centralized log indexing/search and for APM
+trace data, which is what enables log-to-trace navigation in one store; existing operational datastores
+remain authoritative for domain data (PostgreSQL/Neo4j/Kafka)  
 **Testing**: xUnit (unit/integration), frontend Vitest where relevant, CI smoke/contract checks for
 observability gates  
 **Target Platform**: Linux containerized local/reference stack and CI  
 **Project Type**: Cross-cutting backend/probe/integration/frontend capability plus infra/docs contracts  
-**Performance Goals**: Meet spec SC-001..SC-006 (traceability coverage, diagnosis time, critical-flow
-signal coverage, proactive alerting, zero sensitive telemetry leakage, centralized log retrieval time)  
+**Performance Goals**: Meet spec SC-001..SC-013 (traceability coverage, diagnosis time, critical-flow
+signal coverage, proactive alerting, zero sensitive telemetry leakage, centralized log retrieval time,
+platform coverage, log-to-trace navigation time, parse-failure visibility, alert delivery and
+suppression, pipeline throughput comparability, loss-cause attribution, end-to-end freshness)  
 **Constraints**: Platform-agnostic baseline behavior (no vendor lock-in at requirement level), no PII in
-telemetry, preserve clean/hexagonal boundaries, enforce verifiable gates. ADR 0012 defines the
+telemetry, preserve clean/hexagonal boundaries, enforce verifiable gates. ADR 0013 defines the
 reference stack for this increment and does not alter vendor-neutral requirement semantics.  
-**Scale/Scope**: Apply baseline to all production-path services in current repository; define minimal
-shared signal taxonomy and validation path
+**Scale/Scope**: Apply the capability to all production-path services in the current repository and to
+the platform components of the reference stack (broker, connector runtime, relational store, graph
+store); define the shared signal taxonomy, the log field contract, and the validation path
 
 ## Constitution Check
 
@@ -97,7 +103,11 @@ Research outcomes are consolidated in [research.md](./research.md):
 - correlation/trace propagation strategy across sync + async boundaries,
 - health endpoint and readiness semantics across services,
 - alerting trigger model for critical-flow degradation,
-- objective verification patterns for observability gates in CI.
+- objective verification patterns for observability gates in CI,
+- platform log collection and normalization path, including the measured payload shapes between the
+  collector, the adaptation layer, and the normalization layer,
+- multi-line record joining, event-time extraction, and durable buffering responsibilities per hop,
+- business-flow metric taxonomy per pipeline stage, including capture-loss attribution.
 
 All initial technical unknowns for this feature slice are resolved in research artifacts.
 
@@ -113,7 +123,7 @@ All initial technical unknowns for this feature slice are resolved in research a
 ### Documentation (this feature)
 
 ```text
-specs/008-observability-baseline/
+specs/008-observability/
 ├── plan.md
 ├── research.md
 ├── data-model.md
@@ -162,10 +172,12 @@ No constitutional violations identified for this planning pass.
 
 ## Implementation Compliance Record
 
-- **Validation date**: 2026-07-08
+- **Validation date**: 2026-07-08 (services scope, FR-001..FR-010)
 - **Result**: PASS
+- **Pending**: platform coverage, cross-signal navigation, alert delivery, log field contract, and
+  business-flow metrics (FR-011..FR-018) are validated in the scope-extension phase of `tasks.md`.
 - **Evidence anchors**:
   - Observability CI gate script in `infrastructure/ci/check-observability-baseline.sh`
   - SeedWork immutability gate in `infrastructure/ci/check-seedwork-immutability.sh`
-  - Baseline observability verification workflow in `specs/008-observability-baseline/quickstart.md`
-  - Critical-flow inventory for SC-003 in `specs/008-observability-baseline/contracts/critical-flow-inventory.md`
+  - Baseline observability verification workflow in `specs/008-observability/quickstart.md`
+  - Critical-flow inventory for SC-003 in `specs/008-observability/contracts/critical-flow-inventory.md`

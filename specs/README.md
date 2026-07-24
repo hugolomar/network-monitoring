@@ -49,14 +49,15 @@ specs/NNN-feature-name/
 
 ## Features
 
-| ID | Folder | Specification | Quickstart |
-|----|--------|---------------|------------|
-| 001 | [session-detection](./001-session-detection/) | [Probe session detection](./001-session-detection/spec.md) | [quickstart](./001-session-detection/quickstart.md) |
-| 002 | [session-indexing](./002-session-indexing/) | [Session indexing](./002-session-indexing/spec.md) | [quickstart](./002-session-indexing/quickstart.md) |
-| 003 | [device-discovery](./003-device-discovery/) | [Device discovery](./003-device-discovery/spec.md) | [quickstart](./003-device-discovery/quickstart.md) |
-| 004 | [device-ingestion](./004-device-ingestion/) | [Device ingestion](./004-device-ingestion/spec.md) | [quickstart](./004-device-ingestion/quickstart.md) |
-| 005 | [device-inventory](./005-device-inventory/) | [Device inventory](./005-device-inventory/spec.md) | [quickstart](./005-device-inventory/quickstart.md) |
-| 006 | [device-management](./006-device-management/) | [Device management UI](./006-device-management/spec.md) | [quickstart](./006-device-management/quickstart.md) |
-| 007 | [device-communication-graph](./007-device-communication-graph/) | [Communication graph](./007-device-communication-graph/spec.md) | [quickstart](./007-device-communication-graph/quickstart.md) |
+| ID | Folder | Specification | Quickstart | Status |
+|----|--------|---------------|------------|--------|
+| 001 | [session-detection](./001-session-detection/) | [Probe session detection](./001-session-detection/spec.md) | [quickstart](./001-session-detection/quickstart.md) | Delivered |
+| 002 | [session-indexing](./002-session-indexing/) | [Session indexing](./002-session-indexing/spec.md) | [quickstart](./002-session-indexing/quickstart.md) | Delivered |
+| 003 | [device-discovery](./003-device-discovery/) | [Device discovery](./003-device-discovery/spec.md) | [quickstart](./003-device-discovery/quickstart.md) | Delivered |
+| 004 | [device-ingestion](./004-device-ingestion/) | [Device ingestion](./004-device-ingestion/spec.md) | [quickstart](./004-device-ingestion/quickstart.md) | Delivered |
+| 005 | [device-inventory](./005-device-inventory/) | [Device inventory](./005-device-inventory/spec.md) | [quickstart](./005-device-inventory/quickstart.md) | Delivered |
+| 006 | [device-management](./006-device-management/) | [Device management UI](./006-device-management/spec.md) | [quickstart](./006-device-management/quickstart.md) | Delivered |
+| 007 | [device-communication-graph](./007-device-communication-graph/) | [Communication graph](./007-device-communication-graph/spec.md) | [quickstart](./007-device-communication-graph/quickstart.md) | Delivered |
+| 008 | [observability](./008-observability/) | [Production observability](./008-observability/spec.md) | [quickstart](./008-observability/quickstart.md) | In progress |
 
 Promote stable cross-feature procedures to `docs/guides/` when they outgrow a feature quickstart.

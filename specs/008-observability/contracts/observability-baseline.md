@@ -1,4 +1,4 @@
-# Contract: Production Observability Baseline
+# Contract: Production Observability
 
 ## Purpose
 

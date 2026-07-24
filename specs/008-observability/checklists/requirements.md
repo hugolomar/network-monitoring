@@ -1,8 +1,8 @@
-# Specification Quality Checklist: Production Observability Baseline
+# Specification Quality Checklist: Production Observability
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-07-07  
-**Feature**: `/specs/008-observability-baseline/spec.md`
+**Feature**: `/specs/008-observability/spec.md`
 
 ## Content Quality
 

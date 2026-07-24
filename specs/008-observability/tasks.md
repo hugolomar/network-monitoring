@@ -1,6 +1,6 @@
-# Tasks: Production Observability Baseline
+# Tasks: Production Observability
 
-**Input**: Design documents from `/specs/008-observability-baseline/`  
+**Input**: Design documents from `/specs/008-observability/`  
 **Prerequisites**: `plan.md` (required), `spec.md` (required), `research.md`, `data-model.md`, `contracts/`
 
 **Tests**: Include automated tests and CI checks because objective verification is part of the feature
@@ -78,9 +78,9 @@ responsible component without server access.
 - [X] T025 [US1] Add structured logging enrichment + OTLP log export wiring for integration console in `src/NetworkMonitoring.IntegrationConsole/Host/DependencyInjection/ServiceCollectionExtensions.cs`
 - [X] T026 [US1] Apply telemetry redaction at log emission boundaries in `src/NetworkMonitoring.Backend/Host/Telemetry/TelemetryRedaction.cs`
 - [X] T027 [US1] Add mandatory error context fields in `src/NetworkMonitoring.Backend/Host/Endpoints/GraphEndpoints.cs`
-- [X] T028 [US1] Document diagnostic lookup workflow in `specs/008-observability-baseline/quickstart.md`
+- [X] T028 [US1] Document diagnostic lookup workflow in `specs/008-observability/quickstart.md`
 - [X] T058 [US1] Implement frontend diagnostic correlation lookup behavior in `src/NetworkMonitoring.Frontend/src/pages/DiagnosticsPage.tsx`
-- [X] T066 [US1] Add Kibana log lookup guide for incident diagnosis in `specs/008-observability-baseline/quickstart.md`
+- [X] T066 [US1] Add Kibana log lookup guide for incident diagnosis in `specs/008-observability/quickstart.md`
 
 **Checkpoint**: Error diagnosis baseline is independently functional and testable.
 
@@ -135,7 +135,7 @@ responsible component without server access.
 - [X] T046 [US3] Implement critical-flow objective evaluation service in `src/NetworkMonitoring.Backend/Application/Services/CriticalFlowObjectiveEvaluator.cs`
 - [X] T047 [US3] Implement actionable alert payload builder in `src/NetworkMonitoring.Backend/Application/Models/OperationalAlertPayload.cs`
 - [X] T048 [US3] Add alert trigger orchestration in `src/NetworkMonitoring.Backend/Host/Services/GraphRetentionHostedService.cs`
-- [X] T068 [US3] Define and version critical-flow inventory for SC-003 coverage checks in `specs/008-observability-baseline/contracts/critical-flow-inventory.md`
+- [X] T068 [US3] Define and version critical-flow inventory for SC-003 coverage checks in `specs/008-observability/contracts/critical-flow-inventory.md`
 - [X] T049 [US3] Add baseline alert rules and policy in `infrastructure/observability/alert-rules.yml`
 - [X] T050 [US3] Wire observability CI gate into Jenkins pipeline in `Jenkinsfile`
 
@@ -149,12 +149,87 @@ responsible component without server access.
 
 - [X] T051 [P] Add baseline dashboards JSON bundle in `infrastructure/observability/grafana/dashboards/observability-baseline.json`
 - [X] T052 [P] Update operational documentation for observability baseline in `infrastructure/documentation/README.md`
-- [X] T053 [P] Update feature quickstart evidence section in `specs/008-observability-baseline/quickstart.md`
-- [X] T054 Run full backend/probe/integration observability test suites and capture evidence in `specs/008-observability-baseline/quickstart.md`
-- [X] T069 Validate SC-004 drill lead-time evidence (5-minute threshold against 5%-for-5m breach condition) in `specs/008-observability-baseline/quickstart.md`
-- [X] T055 Validate constitution compliance and record result in `specs/008-observability-baseline/plan.md`
+- [X] T053 [P] Update feature quickstart evidence section in `specs/008-observability/quickstart.md`
+- [X] T054 Run full backend/probe/integration observability test suites and capture evidence in `specs/008-observability/quickstart.md`
+- [X] T069 Validate SC-004 drill lead-time evidence (5-minute threshold against 5%-for-5m breach condition) in `specs/008-observability/quickstart.md`
+- [X] T055 Validate constitution compliance and record result in `specs/008-observability/plan.md`
 - [X] T060 Add explicit documentation compliance sweep for new public APIs/tests in `infrastructure/documentation/README.md`
 - [X] T061 Add XML/TSDoc updates for all new public symbols introduced by this feature in `src/NetworkMonitoring.Backend/` and `src/NetworkMonitoring.Frontend/src/`
+
+---
+
+## Phase 7: Platform Coverage and Definitive Stack
+
+**Purpose**: Extend coverage to platform components, deliver cross-signal navigation and alert
+delivery, and make pipeline throughput and capture loss measurable (FR-011 to FR-018, SC-007 to SC-013).
+Stack composition is defined in ADR 0013.
+
+### Trace backend and alert delivery
+
+- [ ] T070 Replace Jaeger with Elastic APM Server in `docker-compose.reference-stack.yml`
+- [ ] T071 Route the trace pipeline to Elastic APM via OTLP in `infrastructure/observability/otel-collector-config.yml`
+- [ ] T072 [P] Remove the Jaeger datasource and add APM navigation links in `infrastructure/observability/grafana/provisioning/datasources/datasources.yml`
+- [ ] T073 Add Alertmanager service and reference it from the `alerting` section in `infrastructure/observability/prometheus.yml`
+- [ ] T074 Define alert grouping, deduplication, and maintenance suppression in `infrastructure/observability/alertmanager.yml`
+
+### Platform log collection and normalization
+
+- [ ] T075 Add the `filelog` receiver with multi-line joining for platform containers in `infrastructure/observability/otel-collector-config.yml`
+- [ ] T076 Split application and platform log pipelines so application logs never traverse Logstash in `infrastructure/observability/otel-collector-config.yml`
+- [ ] T077 Add Fluent Bit with OTLP input and JSON HTTP output in `docker-compose.reference-stack.yml` and `infrastructure/observability/fluent-bit.conf`
+- [ ] T078 Add Logstash with persistent queue and dead letter queue in `docker-compose.reference-stack.yml`
+- [ ] T079 Add grok parsing for broker, connector runtime, relational store, and graph store formats in `infrastructure/observability/logstash/pipeline.conf`
+- [ ] T080 Map severity and promote parsed event time to `@timestamp` in `infrastructure/observability/logstash/pipeline.conf`
+- [ ] T081 Strip transport-added fields (`http`, `url`, `user_agent`, `date`, `__internal__`) in `infrastructure/observability/logstash/pipeline.conf`
+- [ ] T082 Enable file-backed sending queue in the collector and filesystem buffering in Fluent Bit
+- [ ] T083 Extend the log field contract mapping for platform records in `infrastructure/observability/elasticsearch/logs-index-template.json`
+
+### Platform metrics
+
+- [ ] T084 Add broker, relational store, and search store metric receivers in `infrastructure/observability/otel-collector-config.yml`
+- [ ] T085 [P] Add container runtime metrics collection in `infrastructure/observability/otel-collector-config.yml`
+
+### Business flow metrics
+
+- [ ] T086 [P] Add capture-loss metric tests in `tests/NetworkMonitoring.Probe.UnitTests/Observability/`
+- [ ] T087 [P] Add throughput metric tests in `tests/NetworkMonitoring.IntegrationConsole.UnitTests/Observability/`
+- [ ] T088 Emit packets received, capture-dropped, and unparsable-input counters in `src/NetworkMonitoring.Probe/`
+- [ ] T089 Emit sessions detected rate in `src/NetworkMonitoring.Probe/`
+- [ ] T090 Emit devices discovered rate in `src/NetworkMonitoring.Probe/`
+- [ ] T091 Emit ingestion throughput and consumer lag exposure in `src/NetworkMonitoring.IntegrationConsole/`
+- [ ] T092 Emit end-to-end freshness histogram from network observation to queryable record in `src/NetworkMonitoring.Backend/`
+- [ ] T093 [P] Expose search-store write rejection metrics in `infrastructure/observability/otel-collector-config.yml`
+
+### Browser telemetry
+
+- [ ] T105 [P] Add browser trace propagation and error reporting tests in `src/NetworkMonitoring.Frontend/src/__tests__/`
+- [ ] T106 Add the OpenTelemetry browser SDK with OTLP/HTTP export in `src/NetworkMonitoring.Frontend/`
+- [ ] T107 Propagate trace context on backend API calls from the browser in `src/NetworkMonitoring.Frontend/src/`
+- [ ] T108 Report client-side errors and failed requests, including those that never reach a service, in `src/NetworkMonitoring.Frontend/src/`
+- [ ] T109 Expose page load and in-application navigation timings in `src/NetworkMonitoring.Frontend/src/`
+- [ ] T110 Enable CORS for browser OTLP ingest and restrict it to known origins in `infrastructure/observability/otel-collector-config.yml`
+- [ ] T111 Verify no end-user identity or personal data leaves the browser, extending `tests/NetworkMonitoring.Backend.UnitTests/Observability/` hygiene coverage to the browser payload contract
+
+### Dashboards
+
+- [ ] T094 [P] Add the cross-service triage overview dashboard in `infrastructure/observability/grafana/dashboards/`
+- [ ] T095 [P] Add per-service dashboards for backend, probe, and integration console in `infrastructure/observability/grafana/dashboards/`
+- [ ] T096 Add the pipeline stage dashboard presenting consecutive stages and drop-off in `infrastructure/observability/grafana/dashboards/`
+
+### Validation and documentation alignment
+
+- [ ] T097 Validate SC-007 to SC-010 drills and capture evidence in `specs/008-observability/quickstart.md`
+- [ ] T098 Validate SC-011 to SC-014 drills and capture evidence in `specs/008-observability/quickstart.md`
+- [ ] T099 [P] Record measured payload shapes and per-hop responsibilities in `specs/008-observability/research.md`
+- [ ] T100 [P] Extend the cross-service log field contract in `specs/008-observability/contracts/observability-baseline.md`
+- [ ] T101 [P] Add pipeline stage and capture-loss entities in `specs/008-observability/data-model.md`
+- [ ] T102 [P] Update operational documentation and Kibana saved objects for APM in `infrastructure/documentation/README.md`
+- [ ] T103 Extend the observability CI gate for the new obligations in `infrastructure/ci/check-observability-baseline.sh`
+- [ ] T104 Re-validate constitution compliance and update the compliance record in `specs/008-observability/plan.md`
+- [ ] T112 Drop "baseline" from implementation artifact names now that the stack is no longer a baseline: rename `infrastructure/ci/check-observability-baseline.sh` (updating `Jenkinsfile`, `README.md`, and `ObservabilityGatePolicyTests.cs`), the `observability-baseline` group in `infrastructure/observability/alert-rules.yml`, `specs/008-observability/contracts/observability-baseline.md` (updating `plan.md`, `tasks.md`, and `infrastructure/documentation/README.md`), and retire `grafana/dashboards/observability-baseline.json` in favor of the T094-T096 dashboards rather than renaming its `uid`
+
+**Checkpoint**: Platform components are diagnosable through the same tooling, alerts reach a recipient,
+log-to-trace navigation works in one UI, and pipeline limitations are measurable.
 
 ---
 
@@ -166,6 +241,9 @@ responsible component without server access.
 - **Foundational (Phase 2)**: Depends on Phase 1; blocks all user stories.
 - **User Story phases (Phase 3-5)**: Depend on Phase 2 completion.
 - **Polish (Phase 6)**: Depends on completion of required user stories.
+- **Platform Coverage (Phase 7)**: Depends on Phase 6; the trace backend replacement (T070-T072) must
+  land before navigation validation, and the log path (T075-T083) before platform log drills. The
+  artifact renaming (T112) runs last, once every file it touches has settled.
 
 ### User Story Dependencies
 

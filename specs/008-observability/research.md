@@ -1,4 +1,4 @@
-# Research: Production Observability Baseline
+# Research: Production Observability
 
 ## Decision 1: Baseline stack alignment
 

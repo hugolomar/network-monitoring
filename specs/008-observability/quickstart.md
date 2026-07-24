@@ -1,4 +1,4 @@
-# Quickstart: Production Observability Baseline
+# Quickstart: Production Observability
 
 ## Goal
 

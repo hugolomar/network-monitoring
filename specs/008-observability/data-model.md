@@ -1,4 +1,4 @@
-# Data Model: Production Observability Baseline
+# Data Model: Production Observability
 
 ## Overview
 

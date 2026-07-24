@@ -1,7 +1,8 @@
 # ADR 0012: Observability Stack Baseline
 
-- Status: Accepted
+- Status: Superseded by ADR 0013
 - Date: 2026-07-07
+- Superseded by: [ADR 0013](0013-definitive-observability-stack.md) (definitive observability stack)
 
 ## Context
 
@@ -43,7 +44,7 @@ Baseline obligations by runtime path:
   signals.
 
 This ADR defines the stack choice. Thresholds, concrete signal names, and rollout sequencing remain
-specified in feature specs/plans (starting with `observability-baseline`).
+specified in feature specs/plans (starting with `008-observability`).
 
 ## Rationale
 

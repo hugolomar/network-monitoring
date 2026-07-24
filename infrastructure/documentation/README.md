@@ -75,10 +75,10 @@ The Jenkins pipeline runs the same generator step before `docfx metadata` and `d
 
 The observability baseline is documented in:
 
-- `specs/008-observability-baseline/spec.md` (requirements and measurable outcomes)
-- `specs/008-observability-baseline/contracts/observability-baseline.md` (cross-service contract)
-- `specs/008-observability-baseline/contracts/critical-flow-inventory.md` (SC-003 authoritative flow list)
-- `specs/008-observability-baseline/quickstart.md` (validation drills and evidence templates)
+- `specs/008-observability/spec.md` (requirements and measurable outcomes)
+- `specs/008-observability/contracts/observability-baseline.md` (cross-service contract)
+- `specs/008-observability/contracts/critical-flow-inventory.md` (SC-003 authoritative flow list)
+- `specs/008-observability/quickstart.md` (validation drills and evidence templates)
 
 ## Documentation compliance sweep
 
