@@ -8,6 +8,7 @@ using NetworkMonitoring.IntegrationConsole.Application.UseCases;
 using NetworkMonitoring.IntegrationConsole.Host.Services;
 using NetworkMonitoring.IntegrationConsole.Infrastructure.Backend;
 using NetworkMonitoring.IntegrationConsole.Infrastructure.Ingestion;
+using NetworkMonitoring.IntegrationConsole.Infrastructure.Observability;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -38,6 +39,7 @@ public static class ServiceCollectionExtensions
             .ValidateOnStart();
 
         services.AddSingleton(sp => RetryOptions.From(sp.GetRequiredService<IOptions<IntegrationConsoleOptions>>().Value));
+        services.AddSingleton<IIngestionFlowTelemetry, IngestionFlowTelemetry>();
         services.AddSingleton<ProcessDeviceDetectionsUseCase>();
         services.AddSingleton<IDeviceEventConsumer, KafkaDeviceEventConsumer>();
         services.AddSingleton<DeviceIntakeRetryPolicy>();

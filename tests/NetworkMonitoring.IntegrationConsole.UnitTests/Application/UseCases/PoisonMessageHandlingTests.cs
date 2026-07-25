@@ -20,7 +20,7 @@ public sealed class PoisonMessageHandlingTests
         var valid = TestEvents.Consumed(key: "AA:BB:CC:DD:EE:FF");
         var consumer = new FakeDeviceEventConsumer(poison, valid);
         var intake = new FakeDeviceIntakeClient(IngestionOutcome.Succeeded());
-        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
+        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NoOpIngestionFlowTelemetry.Instance, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
 
         await useCase.Run(CancellationToken.None);
 

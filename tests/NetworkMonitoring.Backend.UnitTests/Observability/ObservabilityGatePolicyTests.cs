@@ -12,7 +12,7 @@ public sealed class ObservabilityGatePolicyTests
     public void Gate_script_references_required_observability_files()
     {
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
-        var scriptPath = Path.Combine(root, "infrastructure/ci/check-observability-baseline.sh");
+        var scriptPath = Path.Combine(root, "infrastructure/ci/check-observability.sh");
         var script = File.ReadAllText(scriptPath);
 
         Assert.Contains("otel-collector-config.yml", script, StringComparison.Ordinal);

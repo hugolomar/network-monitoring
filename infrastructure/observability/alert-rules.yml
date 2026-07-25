@@ -1,5 +1,5 @@
 groups:
-  - name: observability-baseline
+  - name: observability
     rules:
       # Early warning, so operators get lead time before the SC-004 objective is breached.
       - alert: CriticalFlowErrorRateWarning
@@ -9,6 +9,7 @@ groups:
         for: 2m
         labels:
           severity: warning
+          objective: SC-004
         annotations:
           summary: "Critical flow error rate above 2%"
           description: >
@@ -23,6 +24,7 @@ groups:
         for: 5m
         labels:
           severity: critical
+          objective: SC-004
         annotations:
           summary: "Critical flow error rate objective breached"
           description: >

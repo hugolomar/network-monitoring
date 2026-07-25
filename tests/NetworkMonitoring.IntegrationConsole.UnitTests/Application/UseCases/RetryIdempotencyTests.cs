@@ -19,7 +19,7 @@ public sealed class RetryIdempotencyTests
         var consumed = TestEvents.Consumed(TestEvents.DeviceDetected("aa-bb-cc-dd-ee-ff"), "AABBCCDDEEFF");
         var consumer = new FakeDeviceEventConsumer(consumed);
         var intake = new FakeDeviceIntakeClient(IngestionOutcome.RetryExhausted(3, 503, "retry exhausted"));
-        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
+        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NoOpIngestionFlowTelemetry.Instance, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
 
         await useCase.Process(consumed, CancellationToken.None);
 

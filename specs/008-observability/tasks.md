@@ -44,7 +44,7 @@ independently.
 - [X] T012 Add service health endpoint mapping baseline in `src/NetworkMonitoring.Backend/Program.cs`
 - [X] T013 Add telemetry hygiene redaction utility in `src/NetworkMonitoring.Backend/Host/Telemetry/TelemetryRedaction.cs`
 - [X] T014 [P] Add baseline observability contract section references in `README.md`
-- [X] T015 Add CI gate script for observability validation in `infrastructure/ci/check-observability-baseline.sh`
+- [X] T015 Add CI gate script for observability validation in `infrastructure/ci/check-observability.sh`
 - [X] T056 Add explicit SeedWork immutability check task in `infrastructure/ci/check-seedwork-immutability.sh`
 - [X] T064 Add collector pipeline/exporter for Elasticsearch logs in `infrastructure/observability/otel-collector-config.yml`
 
@@ -147,7 +147,7 @@ responsible component without server access.
 
 **Purpose**: Finalize documentation, dashboards, and end-to-end verification.
 
-- [X] T051 [P] Add baseline dashboards JSON bundle in `infrastructure/observability/grafana/dashboards/observability-baseline.json`
+- [X] T051 [P] Add initial Grafana dashboards under `infrastructure/observability/grafana/dashboards/` (later replaced by T094-T096)
 - [X] T052 [P] Update operational documentation for observability baseline in `infrastructure/documentation/README.md`
 - [X] T053 [P] Update feature quickstart evidence section in `specs/008-observability/quickstart.md`
 - [X] T054 Run full backend/probe/integration observability test suites and capture evidence in `specs/008-observability/quickstart.md`
@@ -166,67 +166,68 @@ Stack composition is defined in ADR 0013.
 
 ### Trace backend and alert delivery
 
-- [ ] T070 Replace Jaeger with Elastic APM Server in `docker-compose.reference-stack.yml`
-- [ ] T071 Route the trace pipeline to Elastic APM via OTLP in `infrastructure/observability/otel-collector-config.yml`
-- [ ] T072 [P] Remove the Jaeger datasource and add APM navigation links in `infrastructure/observability/grafana/provisioning/datasources/datasources.yml`
-- [ ] T073 Add Alertmanager service and reference it from the `alerting` section in `infrastructure/observability/prometheus.yml`
-- [ ] T074 Define alert grouping, deduplication, and maintenance suppression in `infrastructure/observability/alertmanager.yml`
+- [X] T070 Replace Jaeger with Elastic APM Server in `docker-compose.reference-stack.yml`
+- [X] T071 Route the trace pipeline to Elastic APM via OTLP in `infrastructure/observability/otel-collector-config.yml`
+- [X] T072 [P] Remove the Jaeger datasource and add APM navigation links in `infrastructure/observability/grafana/provisioning/datasources/datasources.yml`
+- [X] T073 Add Alertmanager service and reference it from the `alerting` section in `infrastructure/observability/prometheus.yml`
+- [X] T074 Define alert grouping, deduplication, and maintenance suppression in `infrastructure/observability/alertmanager.yml`
 
 ### Platform log collection and normalization
 
-- [ ] T075 Add the `filelog` receiver with multi-line joining for platform containers in `infrastructure/observability/otel-collector-config.yml`
-- [ ] T076 Split application and platform log pipelines so application logs never traverse Logstash in `infrastructure/observability/otel-collector-config.yml`
-- [ ] T077 Add Fluent Bit with OTLP input and JSON HTTP output in `docker-compose.reference-stack.yml` and `infrastructure/observability/fluent-bit.conf`
-- [ ] T078 Add Logstash with persistent queue and dead letter queue in `docker-compose.reference-stack.yml`
-- [ ] T079 Add grok parsing for broker, connector runtime, relational store, and graph store formats in `infrastructure/observability/logstash/pipeline.conf`
-- [ ] T080 Map severity and promote parsed event time to `@timestamp` in `infrastructure/observability/logstash/pipeline.conf`
-- [ ] T081 Strip transport-added fields (`http`, `url`, `user_agent`, `date`, `__internal__`) in `infrastructure/observability/logstash/pipeline.conf`
-- [ ] T082 Enable file-backed sending queue in the collector and filesystem buffering in Fluent Bit
-- [ ] T083 Extend the log field contract mapping for platform records in `infrastructure/observability/elasticsearch/logs-index-template.json`
+- [X] T075 Add Fluent Bit with a Forward input and JSON HTTP output in `docker-compose.reference-stack.yml` and `infrastructure/observability/fluent-bit.conf`
+- [X] T076 Route platform component standard output to Fluent Bit through the runtime logging driver with asynchronous delivery and a bounded buffer, leaving application containers on the default driver, in `docker-compose.reference-stack.yml`
+- [X] T077 Add multi-line assembly with named parsers per platform format in `infrastructure/observability/fluent-bit.conf`
+- [X] T078 Add Logstash with persistent queue and dead letter queue in `docker-compose.reference-stack.yml`
+- [X] T079 Add grok parsing for broker, connector runtime, relational store, and graph store formats in `infrastructure/observability/logstash/pipeline.conf`
+- [X] T080 Map severity and promote parsed event time to `@timestamp` in `infrastructure/observability/logstash/pipeline.conf`
+- [X] T081 Derive component identity from the container name, normalizing its leading slash, and strip transport-added fields (`http`, `url`, `user_agent`, ingest-time `date`) in `infrastructure/observability/logstash/pipeline.conf`
+- [X] T082 Enable filesystem buffering in Fluent Bit so durability does not depend on memory-only defaults
+- [X] T083 Extend the log field contract mapping for platform records in `infrastructure/observability/elasticsearch/logs-index-template.json`
+- [X] T113 Enforce telemetry hygiene redaction on the platform log path in `infrastructure/observability/logstash/pipeline.conf`, since platform logs do not pass the Collector and relational store logs can carry statement values (FR-003)
 
 ### Platform metrics
 
-- [ ] T084 Add broker, relational store, and search store metric receivers in `infrastructure/observability/otel-collector-config.yml`
-- [ ] T085 [P] Add container runtime metrics collection in `infrastructure/observability/otel-collector-config.yml`
+- [X] T084 Add broker, relational store, and search store metric receivers in `infrastructure/observability/otel-collector-config.yml`
+- [X] T085 [P] Add container runtime metrics collection in `infrastructure/observability/otel-collector-config.yml`
 
 ### Business flow metrics
 
-- [ ] T086 [P] Add capture-loss metric tests in `tests/NetworkMonitoring.Probe.UnitTests/Observability/`
-- [ ] T087 [P] Add throughput metric tests in `tests/NetworkMonitoring.IntegrationConsole.UnitTests/Observability/`
-- [ ] T088 Emit packets received, capture-dropped, and unparsable-input counters in `src/NetworkMonitoring.Probe/`
-- [ ] T089 Emit sessions detected rate in `src/NetworkMonitoring.Probe/`
-- [ ] T090 Emit devices discovered rate in `src/NetworkMonitoring.Probe/`
-- [ ] T091 Emit ingestion throughput and consumer lag exposure in `src/NetworkMonitoring.IntegrationConsole/`
-- [ ] T092 Emit end-to-end freshness histogram from network observation to queryable record in `src/NetworkMonitoring.Backend/`
-- [ ] T093 [P] Expose search-store write rejection metrics in `infrastructure/observability/otel-collector-config.yml`
+- [X] T086 [P] Add capture-loss metric tests in `tests/NetworkMonitoring.Probe.UnitTests/Observability/`
+- [X] T087 [P] Add throughput metric tests in `tests/NetworkMonitoring.IntegrationConsole.UnitTests/Observability/`
+- [X] T088 Emit packets received, capture-dropped, and unparsable-input counters in `src/NetworkMonitoring.Probe/`
+- [X] T089 Emit sessions detected rate in `src/NetworkMonitoring.Probe/`
+- [X] T090 Emit devices discovered rate in `src/NetworkMonitoring.Probe/`
+- [X] T091 Emit ingestion throughput and consumer lag exposure in `src/NetworkMonitoring.IntegrationConsole/`
+- [X] T092 Emit end-to-end freshness histogram from network observation to queryable record in `src/NetworkMonitoring.Backend/`
+- [X] T093 [P] Expose search-store write rejection metrics in `infrastructure/observability/otel-collector-config.yml`
 
 ### Browser telemetry
 
-- [ ] T105 [P] Add browser trace propagation and error reporting tests in `src/NetworkMonitoring.Frontend/src/__tests__/`
-- [ ] T106 Add the OpenTelemetry browser SDK with OTLP/HTTP export in `src/NetworkMonitoring.Frontend/`
-- [ ] T107 Propagate trace context on backend API calls from the browser in `src/NetworkMonitoring.Frontend/src/`
-- [ ] T108 Report client-side errors and failed requests, including those that never reach a service, in `src/NetworkMonitoring.Frontend/src/`
-- [ ] T109 Expose page load and in-application navigation timings in `src/NetworkMonitoring.Frontend/src/`
-- [ ] T110 Enable CORS for browser OTLP ingest and restrict it to known origins in `infrastructure/observability/otel-collector-config.yml`
-- [ ] T111 Verify no end-user identity or personal data leaves the browser, extending `tests/NetworkMonitoring.Backend.UnitTests/Observability/` hygiene coverage to the browser payload contract
+- [X] T105 [P] Add browser trace propagation and error reporting tests in `src/NetworkMonitoring.Frontend/src/__tests__/`
+- [X] T106 Add the OpenTelemetry browser SDK with OTLP/HTTP export in `src/NetworkMonitoring.Frontend/`
+- [X] T107 Propagate trace context on backend API calls from the browser in `src/NetworkMonitoring.Frontend/src/`
+- [X] T108 Report client-side errors and failed requests, including those that never reach a service, in `src/NetworkMonitoring.Frontend/src/`
+- [X] T109 Expose page load and in-application navigation timings in `src/NetworkMonitoring.Frontend/src/`
+- [X] T110 Enable CORS for browser OTLP ingest and restrict it to known origins in `infrastructure/observability/otel-collector-config.yml`
+- [X] T111 Verify no end-user identity or personal data leaves the browser, extending `tests/NetworkMonitoring.Backend.UnitTests/Observability/` hygiene coverage to the browser payload contract
 
 ### Dashboards
 
-- [ ] T094 [P] Add the cross-service triage overview dashboard in `infrastructure/observability/grafana/dashboards/`
-- [ ] T095 [P] Add per-service dashboards for backend, probe, and integration console in `infrastructure/observability/grafana/dashboards/`
-- [ ] T096 Add the pipeline stage dashboard presenting consecutive stages and drop-off in `infrastructure/observability/grafana/dashboards/`
+- [X] T094 [P] Add the cross-service triage overview dashboard in `infrastructure/observability/grafana/dashboards/`
+- [X] T095 [P] Add per-service dashboards for backend, probe, and integration console in `infrastructure/observability/grafana/dashboards/`
+- [X] T096 Add the pipeline stage dashboard presenting consecutive stages and drop-off in `infrastructure/observability/grafana/dashboards/`
 
 ### Validation and documentation alignment
 
-- [ ] T097 Validate SC-007 to SC-010 drills and capture evidence in `specs/008-observability/quickstart.md`
-- [ ] T098 Validate SC-011 to SC-014 drills and capture evidence in `specs/008-observability/quickstart.md`
-- [ ] T099 [P] Record measured payload shapes and per-hop responsibilities in `specs/008-observability/research.md`
-- [ ] T100 [P] Extend the cross-service log field contract in `specs/008-observability/contracts/observability-baseline.md`
-- [ ] T101 [P] Add pipeline stage and capture-loss entities in `specs/008-observability/data-model.md`
-- [ ] T102 [P] Update operational documentation and Kibana saved objects for APM in `infrastructure/documentation/README.md`
-- [ ] T103 Extend the observability CI gate for the new obligations in `infrastructure/ci/check-observability-baseline.sh`
-- [ ] T104 Re-validate constitution compliance and update the compliance record in `specs/008-observability/plan.md`
-- [ ] T112 Drop "baseline" from implementation artifact names now that the stack is no longer a baseline: rename `infrastructure/ci/check-observability-baseline.sh` (updating `Jenkinsfile`, `README.md`, and `ObservabilityGatePolicyTests.cs`), the `observability-baseline` group in `infrastructure/observability/alert-rules.yml`, `specs/008-observability/contracts/observability-baseline.md` (updating `plan.md`, `tasks.md`, and `infrastructure/documentation/README.md`), and retire `grafana/dashboards/observability-baseline.json` in favor of the T094-T096 dashboards rather than renaming its `uid`
+- [X] T097 Validate SC-007 to SC-010 drills and capture evidence in `specs/008-observability/quickstart.md`
+- [X] T098 Validate SC-011 to SC-014 drills and capture evidence in `specs/008-observability/quickstart.md`
+- [X] T099 [P] Record measured payload shapes and per-hop responsibilities in `specs/008-observability/research.md`
+- [X] T100 [P] Extend the cross-service log field contract in `specs/008-observability/contracts/observability.md`
+- [X] T101 [P] Add pipeline stage and capture-loss entities in `specs/008-observability/data-model.md`
+- [X] T102 [P] Update operational documentation and Kibana saved objects for APM in `infrastructure/documentation/README.md`
+- [X] T103 Extend the observability CI gate for the new obligations in `infrastructure/ci/check-observability.sh`
+- [X] T104 Re-validate constitution compliance and update the compliance record in `specs/008-observability/plan.md`
+- [X] T112 Drop "baseline" from implementation artifact names now that the stack is no longer a baseline: rename `infrastructure/ci/check-observability.sh` (updating `Jenkinsfile`, `README.md`, and `ObservabilityGatePolicyTests.cs`), the `observability` group in `infrastructure/observability/alert-rules.yml`, `specs/008-observability/contracts/observability.md` (updating `plan.md`, `tasks.md`, and `infrastructure/documentation/README.md`), and retire `grafana/dashboards/observability-baseline.json` in favor of the T094-T096 dashboards rather than renaming its `uid`
 
 **Checkpoint**: Platform components are diagnosable through the same tooling, alerts reach a recipient,
 log-to-trace navigation works in one UI, and pipeline limitations are measurable.

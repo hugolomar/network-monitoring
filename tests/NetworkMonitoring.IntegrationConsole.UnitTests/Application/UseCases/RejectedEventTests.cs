@@ -19,7 +19,7 @@ public sealed class RejectedEventTests
         var malformed = new ConsumedDeviceEvent("AA:BB:CC:DD:EE:FF", null, "devices.detected", 0, 1, "Unknown magic byte");
         var consumer = new FakeDeviceEventConsumer(malformed);
         var intake = new FakeDeviceIntakeClient();
-        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
+        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NoOpIngestionFlowTelemetry.Instance, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
 
         var outcome = await useCase.Process(malformed, CancellationToken.None);
 

@@ -184,6 +184,7 @@ public sealed class ProcessObservationsUseCaseTests
         var useCase = new ProcessObservationsUseCase(
             provider,
             publisher,
+            NoOpProbeFlowTelemetry.Instance,
             options,
             NullLogger<ProcessObservationsUseCase>.Instance);
 
@@ -208,8 +209,19 @@ public sealed class ProcessObservationsUseCaseTests
         return new ProcessObservationsUseCase(
             provider,
             publisher,
+            NoOpProbeFlowTelemetry.Instance,
             options,
             NullLogger<ProcessObservationsUseCase>.Instance);
+    }
+
+    private sealed class NoOpProbeFlowTelemetry : IProbeFlowTelemetry
+    {
+        public static NoOpProbeFlowTelemetry Instance { get; } = new();
+        public void TrackPacketReceived() { }
+        public void TrackCaptureDropped(long count) { }
+        public void TrackUnparsableInput() { }
+        public void TrackSessionDetected() { }
+        public void TrackDeviceDiscovered() { }
     }
 
     /// <summary>

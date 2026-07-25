@@ -32,3 +32,7 @@
 ## Notes
 
 - Specification validated against cross-cutting capability goals and non-goals provided in the input.
+- Re-validated 2026-07-25 after FR-011..FR-019 / SC-007..SC-014 were folded into the same spec as the
+  definitive stack (ADR 0013). Success criteria remain behavioral; ADR 0013 is the reference
+  implementation path, not a second requirements document.
+- Implementation compliance is recorded in `plan.md` and drill evidence in `quickstart.md`.

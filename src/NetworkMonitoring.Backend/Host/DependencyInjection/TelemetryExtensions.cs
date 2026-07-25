@@ -43,6 +43,7 @@ internal static class TelemetryExtensions
                     .AddRuntimeInstrumentation()
                     .AddMeter("NetworkMonitoring.Backend.Graph")
                     .AddMeter("NetworkMonitoring.Backend.Alerting")
+                    .AddMeter("NetworkMonitoring.Backend.Intake")
                     .AddOtlpExporter(exporter => exporter.Endpoint = new Uri(options.OtlpEndpoint));
             });
 

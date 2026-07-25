@@ -2,7 +2,7 @@
 
 **Feature Branch**: `008-observability`  
 **Created**: 2026-07-07  
-**Status**: Draft  
+**Status**: Implemented  
 **Input**: User description: "cross-cutting capability specification"
 
 ## User Scenarios & Testing *(mandatory)*
@@ -105,8 +105,8 @@ diagnostic context to start triage immediately.
 - **FR-009 (Cross-Cutting Scope)**: This capability MUST apply consistently across all production-path
   services in scope, including backend, probe, integration console, and frontend runtime/app surfaces
   that participate in diagnostics, not only a single module.
-- **FR-010 (Platform-Agnostic Baseline)**: The baseline MUST define required signals and behaviors
-  in vendor-neutral terms. The stack selected for this feature increment (ADR 0013) is a reference
+- **FR-010 (Platform-Agnostic Contract)**: Required signals and behaviors MUST be defined in
+  vendor-neutral terms. The stack selected for this feature increment (ADR 0013) is a reference
   implementation path and MUST NOT invalidate equivalent implementations that satisfy the same
   behavioral obligations.
 - **FR-011 (Platform Component Coverage)**: Runtime components that the team does not author, such as
@@ -197,10 +197,10 @@ diagnostic context to start triage immediately.
 
 ## Assumptions
 
-- Existing services already have baseline runtime hooks where observability signals can be attached.
+- Existing services already have runtime hooks where observability signals can be attached.
 - The organization will define and maintain operational objectives for critical flows.
-- Teams accept a cross-cutting baseline that may be extended by domain-specific observability later.
-- Existing monitoring tools may continue, but this feature defines the mandatory common baseline.
+- Teams accept a cross-cutting observability contract that may be extended by domain-specific signals later.
+- Existing monitoring tools may continue, but this feature defines the mandatory common contract.
 - Existing Elasticsearch runtime is available and will be reused for centralized log indexing.
 - Platform components cannot be instrumented from inside, so their logs are only available as
   unstructured output and their metrics only through the interfaces each component exposes.

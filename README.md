@@ -70,14 +70,22 @@ python3 -m pip install -r tools/traffic/composer/requirements.txt
 - Neo4j Browser: `http://localhost:7474`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`
-- Jaeger: `http://localhost:16686`
+- APM Server ingest: `http://localhost:8200`
+- Alertmanager: `http://localhost:9095`
 
-## Observability baseline checks
+Traces are explored in the Kibana APM UI (`http://localhost:5601/app/apm/services`) rather than a
+separate trace UI, since logs and traces share one store per ADR 0013. Local Kibana runs with
+security disabled, so Fleet cannot install the APM package; `reference-stack-init.sh` applies a
+dev-only traces template instead. If Services stays empty after a wipe, re-run that init (or
+`bash ./infrastructure/stack/bootstrap/elasticsearch/apply-apm-traces-template.sh`) and generate
+API traffic, then set the time picker to at least **Last 1 hour**.
+
+## Observability checks
 
 - Backend liveness endpoint: `http://localhost:5090/health/live`
 - Backend readiness endpoint: `http://localhost:5090/health/ready`
 - Elasticsearch log count: `curl -sS "http://localhost:9200/observability-logs-*/_count"`
-- CI gate script: `infrastructure/ci/check-observability-baseline.sh`
+- CI gate script: `infrastructure/ci/check-observability.sh`
 - SeedWork immutability gate: `infrastructure/ci/check-seedwork-immutability.sh`
 
 Runtime toggles (per service `Observability` section / env override):

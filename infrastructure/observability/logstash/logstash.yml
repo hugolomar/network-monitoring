@@ -1,0 +1,14 @@
+node.name: logstash
+http.host: 0.0.0.0
+
+# Survives an Elasticsearch outage without losing platform logs already accepted.
+queue.type: persisted
+queue.max_bytes: 1gb
+
+# Records Elasticsearch rejects (mapping conflicts) are retained here instead of vanishing.
+dead_letter_queue.enable: true
+path.dead_letter_queue: /usr/share/logstash/data/dead_letter_queue
+
+# The pipeline defines the field contract explicitly; ECS field naming is deliberately not
+# applied on top of it, see ADR 0013 consequences.
+pipeline.ecs_compatibility: disabled

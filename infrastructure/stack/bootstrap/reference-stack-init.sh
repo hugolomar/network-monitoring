@@ -50,6 +50,9 @@ if [[ "$OBSERVABILITY_BOOTSTRAP" = "1" ]]; then
 
   echo "==> Importing Kibana observability saved objects"
   bash ./infrastructure/stack/bootstrap/kibana/import-observability-logs.sh
+
+  echo "==> Applying local APM traces template (Kibana APM without Fleet/security)"
+  bash ./infrastructure/stack/bootstrap/elasticsearch/apply-apm-traces-template.sh
 else
   echo "==> Skipping observability bootstrap (OBSERVABILITY_BOOTSTRAP=${OBSERVABILITY_BOOTSTRAP})"
 fi

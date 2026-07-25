@@ -58,6 +58,6 @@ specs/NNN-feature-name/
 | 005 | [device-inventory](./005-device-inventory/) | [Device inventory](./005-device-inventory/spec.md) | [quickstart](./005-device-inventory/quickstart.md) | Delivered |
 | 006 | [device-management](./006-device-management/) | [Device management UI](./006-device-management/spec.md) | [quickstart](./006-device-management/quickstart.md) | Delivered |
 | 007 | [device-communication-graph](./007-device-communication-graph/) | [Communication graph](./007-device-communication-graph/spec.md) | [quickstart](./007-device-communication-graph/quickstart.md) | Delivered |
-| 008 | [observability](./008-observability/) | [Production observability](./008-observability/spec.md) | [quickstart](./008-observability/quickstart.md) | In progress |
+| 008 | [observability](./008-observability/) | [Production observability](./008-observability/spec.md) | [quickstart](./008-observability/quickstart.md) | Delivered |
 
 Promote stable cross-feature procedures to `docs/guides/` when they outgrow a feature quickstart.

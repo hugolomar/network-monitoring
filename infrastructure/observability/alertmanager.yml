@@ -1,0 +1,58 @@
+global:
+  # An alert stops being re-sent once Prometheus has stopped reporting it for this long.
+  resolve_timeout: 5m
+
+# Planned maintenance is declared here rather than by silencing alerts one by one,
+# so a maintenance window does not depend on an operator remembering to create silences.
+time_intervals:
+  - name: planned-maintenance
+    time_intervals:
+      - weekdays: ["sunday"]
+        times:
+          - start_time: "02:00"
+            end_time: "04:00"
+
+route:
+  receiver: default
+  # Alerts about the same problem on the same service arrive as one notification.
+  group_by: ["alertname", "service_name"]
+  # Wait before the first notification so a burst of related alerts groups together.
+  group_wait: 30s
+  # Wait before notifying again about new members of an existing group.
+  group_interval: 5m
+  # Deduplication window: an unchanged firing alert is not repeated before this elapses.
+  repeat_interval: 12h
+  routes:
+    - receiver: critical
+      matchers:
+        - severity = "critical"
+      group_wait: 10s
+      repeat_interval: 4h
+      mute_time_intervals:
+        - planned-maintenance
+    - receiver: default
+      matchers:
+        - severity = "warning"
+      mute_time_intervals:
+        - planned-maintenance
+
+# A critical alert makes the early warning for the same objective redundant, so only the
+# critical one is delivered. Matching is on the shared `objective` label because the two
+# alerts deliberately carry different names.
+inhibit_rules:
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ["objective"]
+
+receivers:
+  - name: default
+    webhook_configs:
+      - url: http://alert-sink:8080/alerts/warning
+        send_resolved: true
+
+  - name: critical
+    webhook_configs:
+      - url: http://alert-sink:8080/alerts/critical
+        send_resolved: true

@@ -5,6 +5,77 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+        # Browser RUM/OTLP ingest (ADR 0013). Origins are the UI surfaces that may submit
+        # telemetry; wildcards are intentionally avoided.
+        cors:
+          allowed_origins:
+            - http://localhost:5173
+            - http://localhost:3000
+            - http://localhost:8080
+            - http://127.0.0.1:5173
+            - http://127.0.0.1:3000
+            - http://127.0.0.1:8080
+          allowed_headers:
+            - "*"
+
+  # Platform components are scraped through their own protocols, so their health does not
+  # depend on instrumentation they will never carry (FR-011).
+  kafkametrics:
+    brokers:
+      - kafka-1:29092
+      - kafka-2:29092
+      - kafka-3:29092
+    protocol_version: 2.6.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+    collection_interval: 30s
+
+  postgresql:
+    endpoint: postgres:5432
+    username: network_monitoring
+    password: network_monitoring
+    databases:
+      - network_monitoring
+    tls:
+      insecure: true
+    collection_interval: 30s
+
+  elasticsearch:
+    endpoint: http://elasticsearch:9200
+    collection_interval: 30s
+    # Search-store write pressure and thread-pool rejections (FR-017 / T093). Kept explicit so
+    # dashboards and alerts do not depend on receiver defaults changing across Collector upgrades.
+    metrics:
+      elasticsearch.indexing_pressure.memory.total.primary_rejections:
+        enabled: true
+      elasticsearch.indexing_pressure.memory.total.replica_rejections:
+        enabled: true
+      elasticsearch.node.thread_pool.tasks.finished:
+        enabled: true
+
+  # The connector runtime and the graph store have no metric protocol available here, so their
+  # availability is observed by probing the endpoint each one already exposes. This covers the
+  # availability half of SC-011; saturation for these two is not collected.
+  httpcheck:
+    targets:
+      - endpoint: http://connect:8083/
+        method: GET
+      - endpoint: http://neo4j:7474/
+        method: GET
+    collection_interval: 30s
+
+  # Per-container CPU, memory and I/O. Requires the runtime control socket (ADR 0013). The compose
+  # service name is the useful dimension; image name alone is not.
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    api_version: "1.44"
+    collection_interval: 30s
+    timeout: 20s
+    container_labels_to_metric_labels:
+      com.docker.compose.service: service.name
+      com.docker.compose.project: service.namespace
 
 processors:
   batch:
@@ -14,8 +85,8 @@ exporters:
     endpoint: "0.0.0.0:9464"
   debug:
     verbosity: normal
-  otlp/jaeger:
-    endpoint: jaeger:4317
+  otlp/elastic-apm:
+    endpoint: apm-server:8200
     tls:
       insecure: true
   elasticsearch:
@@ -29,10 +100,10 @@ service:
       processors: [batch]
       exporters: [elasticsearch, debug]
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, kafkametrics, postgresql, elasticsearch, httpcheck, docker_stats]
       processors: [batch]
       exporters: [prometheus, debug]
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/jaeger, debug]
+      exporters: [otlp/elastic-apm, debug]

@@ -20,6 +20,15 @@
         "service.namespace": {
           "type": "keyword"
         },
+        "service.type": {
+          "type": "keyword"
+        },
+        "container.id": {
+          "type": "keyword"
+        },
+        "tags": {
+          "type": "keyword"
+        },
         "severity_text": {
           "type": "keyword"
         },
@@ -36,6 +45,6 @@
     }
   },
   "_meta": {
-    "description": "Baseline index template for observability structured logs."
+    "description": "Index template for observability structured logs from authored services and platform components. `service.type` separates the two origins, and `tags` carries normalization failures so unparsed records stay queryable rather than being discarded."
   }
 }

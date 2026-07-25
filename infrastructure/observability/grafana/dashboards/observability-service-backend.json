@@ -1,0 +1,315 @@
+{
+  "title": "Service: Backend",
+  "uid": "observability-service-backend",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "RPS",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count[1m]))",
+          "refId": "A",
+          "legendFormat": "Requests/s"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "description": "HTTP request rate to the Backend (all routes)."
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "5xx %",
+      "targets": [
+        {
+          "expr": "100 * sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[1m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count[1m])), 1e-9)",
+          "refId": "A",
+          "legendFormat": "5xx %"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "description": "Percent of Backend responses with HTTP 5xx. Empty often means no server errors."
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Latency p95",
+      "targets": [
+        {
+          "expr": "1000 * histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket[1m])) by (le))",
+          "refId": "A",
+          "legendFormat": "p95 latency"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "description": "p95 Backend HTTP request duration."
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Freshness p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(observation_to_inventory_freshness_ms_bucket[1m])) by (le))",
+          "refId": "A",
+          "legendFormat": "p95 time to inventory"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "description": "p95 age of device observations at inventory accept time."
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "RPS by route",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count[1m])) by (http_route)",
+          "refId": "A",
+          "legendFormat": "{{http_route}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "HTTP request rate broken down by route (health, devices, graph APIs, etc.)."
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Freshness by outcome",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(observation_to_inventory_freshness_ms_bucket[1m])) by (le, outcome))",
+          "refId": "A",
+          "legendFormat": "{{outcome}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "p95 observation\u2192inventory freshness split by intake outcome (created, updated, idempotent)."
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Graph projection rate",
+      "targets": [
+        {
+          "expr": "sum(rate(graph_projection_total[1m])) by (operation, outcome)",
+          "refId": "A",
+          "legendFormat": "{{operation}}/{{outcome}}"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Rate of communication-graph projection operations by operation/outcome. Empty until projection runs."
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Graph projection latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graph_projection_latency_ms_bucket[1m])) by (le, operation))",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "p95 latency of graph projection operations. Empty until projection runs."
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Critical flow alerts",
+      "targets": [
+        {
+          "expr": "sum(rate(critical_flow_alerts_total[1m])) by (flowId)",
+          "refId": "A",
+          "legendFormat": "{{flowId}}"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Critical flow alert firings from Backend alerting/retention checks. Empty means no breach recorded."
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": ".NET exceptions",
+      "targets": [
+        {
+          "expr": "sum(rate(process_runtime_dotnet_exceptions_count_total[1m]))",
+          "refId": "A",
+          "legendFormat": ".NET exceptions"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Rate of .NET runtime exceptions in the Backend process."
+    }
+  ],
+  "tags": [
+    "observability",
+    "008"
+  ],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "editable": true
+}

@@ -1,0 +1,277 @@
+{
+  "title": "Service: Probe",
+  "uid": "observability-service-probe",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Packets received",
+      "targets": [
+        {
+          "expr": "sum(rate(packets_received_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Packets received"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Rate of packets the Probe accepted from capture or deterministic pcap playback."
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Capture dropped",
+      "targets": [
+        {
+          "expr": "sum(rate(capture_dropped_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Capture dropped"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Rate of packets dropped at capture (capacity / interface loss), distinct from parse failures."
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Unparsable input",
+      "targets": [
+        {
+          "expr": "sum(rate(unparsable_input_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Unparsable input"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Rate of input lines/frames the Probe could not parse (malformed tshark output, etc.)."
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Sessions detected",
+      "targets": [
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Sessions detected"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Rate of SessionDetected domain events produced by the Probe."
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Capture capacity",
+      "targets": [
+        {
+          "expr": "sum(rate(packets_received_total[1m]))",
+          "refId": "A",
+          "legendFormat": "packets_received"
+        },
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "B",
+          "legendFormat": "sessions_detected"
+        },
+        {
+          "expr": "sum(rate(devices_discovered_total[1m]))",
+          "refId": "C",
+          "legendFormat": "devices_discovered"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Packets received vs sessions/devices discovered \u2014 capture volume versus derived domain events."
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Loss split",
+      "targets": [
+        {
+          "expr": "sum(rate(capture_dropped_total[1m]))",
+          "refId": "A",
+          "legendFormat": "capture_dropped"
+        },
+        {
+          "expr": "sum(rate(unparsable_input_total[1m]))",
+          "refId": "B",
+          "legendFormat": "unparsable_input"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Capture drops and unparsable input on the same chart to attribute Probe loss causes."
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Domain throughput",
+      "targets": [
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "A",
+          "legendFormat": "sessions_detected"
+        },
+        {
+          "expr": "sum(rate(devices_discovered_total[1m]))",
+          "refId": "B",
+          "legendFormat": "devices_discovered"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Sessions detected and devices discovered rates (domain events leaving the Probe)."
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": ".NET exceptions",
+      "targets": [
+        {
+          "expr": "sum(rate(process_runtime_dotnet_exceptions_count_total[1m]))",
+          "refId": "A",
+          "legendFormat": ".NET exceptions"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Rate of .NET runtime exceptions in the Probe process."
+    }
+  ],
+  "tags": [
+    "observability",
+    "008"
+  ],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "editable": true
+}

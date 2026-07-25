@@ -2,6 +2,9 @@ import DeviceManagementPage from "./pages/DeviceManagementPage";
 import DeviceGraphPage from "./pages/DeviceGraphPage";
 import DiagnosticsPage from "./pages/DiagnosticsPage";
 import { useState } from "react";
+import { trackInAppNavigation } from "./telemetry/browserTelemetry";
+
+type AppPage = "inventory" | "graph" | "diagnostics";
 
 /**
  * Root component of the Network Monitoring application.
@@ -9,7 +12,12 @@ import { useState } from "react";
  * @returns The rendered application layout.
  */
 export default function App() {
-  const [page, setPage] = useState<"inventory" | "graph" | "diagnostics">("inventory");
+  const [page, setPage] = useState<AppPage>("inventory");
+
+  const navigate = (next: AppPage) => {
+    setPage(next);
+    trackInAppNavigation(next);
+  };
 
   return (
     <div className="app-root">
@@ -17,21 +25,21 @@ export default function App() {
         <button
           type="button"
           className={page === "inventory" ? "primary" : ""}
-          onClick={() => setPage("inventory")}
+          onClick={() => navigate("inventory")}
         >
           Inventory
         </button>
         <button
           type="button"
           className={page === "graph" ? "primary" : ""}
-          onClick={() => setPage("graph")}
+          onClick={() => navigate("graph")}
         >
           Graph
         </button>
         <button
           type="button"
           className={page === "diagnostics" ? "primary" : ""}
-          onClick={() => setPage("diagnostics")}
+          onClick={() => navigate("diagnostics")}
         >
           Diagnostics
         </button>

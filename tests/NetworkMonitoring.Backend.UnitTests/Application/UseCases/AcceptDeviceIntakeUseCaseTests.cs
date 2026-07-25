@@ -101,6 +101,7 @@ public sealed class AcceptDeviceIntakeUseCaseTests
         return new AcceptDeviceIntakeUseCase(
             repository,
             repository,
+            NoOpIntakeFlowTelemetry.Instance,
             NullLogger<AcceptDeviceIntakeUseCase>.Instance);
     }
 }

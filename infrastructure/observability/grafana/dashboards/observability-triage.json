@@ -1,0 +1,368 @@
+{
+  "title": "Observability Triage Overview",
+  "uid": "observability-triage",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Collector Up",
+      "targets": [
+        {
+          "expr": "max(up{job=\"otel-collector\"})",
+          "refId": "A",
+          "legendFormat": "Collector up"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Whether the OpenTelemetry Collector scrape target is up (1 = healthy metrics path into Prometheus)."
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Backend RPS",
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_request_duration_seconds_count[1m]))",
+          "refId": "A",
+          "legendFormat": "Backend requests/s"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 4,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "description": "HTTP request rate to the Backend API (all routes)."
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Backend 5xx %",
+      "targets": [
+        {
+          "expr": "100 * sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[1m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count[1m])), 1e-9)",
+          "refId": "A",
+          "legendFormat": "Backend 5xx %"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 9,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "description": "Percent of Backend HTTP responses with status 5xx. Empty often means no server errors in the window."
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Freshness p95 (ms)",
+      "description": "p95 age of a device observation when it reaches inventory (event LastSeen/FirstSeen \u2192 Backend accept).",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(observation_to_inventory_freshness_ms_bucket[1m])) by (le))",
+          "refId": "A",
+          "legendFormat": "p95 time to inventory"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 14,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Consumer Lag",
+      "description": "DeviceDetected messages still waiting in Kafka for the Integration Console. 0 means ingestion is caught up.",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumer_lag) or sum(kafka_consumer_group_lag_ratio{group=\"device-ingestion-local\"})",
+          "refId": "A",
+          "legendFormat": "Pending Kafka messages"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Pipeline rates",
+      "targets": [
+        {
+          "expr": "sum(rate(packets_received_total[1m]))",
+          "refId": "A",
+          "legendFormat": "packets_received"
+        },
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "B",
+          "legendFormat": "sessions_detected"
+        },
+        {
+          "expr": "sum(rate(devices_discovered_total[1m]))",
+          "refId": "C",
+          "legendFormat": "devices_discovered"
+        },
+        {
+          "expr": "sum(rate(devices_ingested_total[1m]))",
+          "refId": "D",
+          "legendFormat": "devices_ingested"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Throughput of the main business stages: packets \u2192 sessions \u2192 devices discovered \u2192 devices ingested."
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Capture loss vs unparsable",
+      "targets": [
+        {
+          "expr": "sum(rate(capture_dropped_total[1m]))",
+          "refId": "A",
+          "legendFormat": "capture_dropped"
+        },
+        {
+          "expr": "sum(rate(unparsable_input_total[1m]))",
+          "refId": "B",
+          "legendFormat": "unparsable_input"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Capture drops versus unparsable tshark/input lines \u2014 two different loss causes at the Probe."
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Sessions / devices / ingested",
+      "targets": [
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "A",
+          "legendFormat": "sessions"
+        },
+        {
+          "expr": "sum(rate(devices_discovered_total[1m]))",
+          "refId": "B",
+          "legendFormat": "devices_discovered"
+        },
+        {
+          "expr": "sum(rate(devices_ingested_total[1m]))",
+          "refId": "C",
+          "legendFormat": "devices_ingested"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Lower-volume stages of the funnel: sessions detected, devices discovered, and devices ingested."
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Critical flow alerts",
+      "targets": [
+        {
+          "expr": "sum(rate(critical_flow_alerts_total[1m]))",
+          "refId": "A",
+          "legendFormat": "alerts"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Count of critical business-flow alert firings. Empty means no breach was recorded."
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Container CPU % by service",
+      "targets": [
+        {
+          "expr": "container_cpu_utilization_ratio * 100",
+          "refId": "A",
+          "legendFormat": "{{exported_job}}"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "CPU utilization per Docker Compose service (from Collector docker_stats)."
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Container memory working set",
+      "targets": [
+        {
+          "expr": "container_memory_usage_total_bytes",
+          "refId": "A",
+          "legendFormat": "{{exported_job}}"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Memory usage (bytes) per Docker Compose service (from Collector docker_stats)."
+    }
+  ],
+  "tags": [
+    "observability",
+    "008"
+  ],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "editable": true
+}

@@ -75,6 +75,26 @@ internal static class DeviceInventoryMigrationExtensions
         }
 
         var dbContext = scope.ServiceProvider.GetRequiredService<DeviceInventoryDbContext>();
-        await dbContext.Database.MigrateAsync();
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("NetworkMonitoring.Backend.Migrations");
+
+        const int maxAttempts = 10;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await dbContext.Database.MigrateAsync();
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts)
+            {
+                logger.LogWarning(
+                    ex,
+                    "Device inventory migration attempt {Attempt}/{MaxAttempts} failed; retrying",
+                    attempt,
+                    maxAttempts);
+                await Task.Delay(TimeSpan.FromSeconds(Math.Min(30, attempt * 2)));
+            }
+        }
     }
 }

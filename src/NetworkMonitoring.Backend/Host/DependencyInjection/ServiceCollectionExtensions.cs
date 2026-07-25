@@ -6,6 +6,7 @@ using NetworkMonitoring.Backend.Application.Services;
 using NetworkMonitoring.Backend.Application.UseCases;
 using NetworkMonitoring.Backend.Infrastructure;
 using NetworkMonitoring.Backend.Infrastructure.Graph;
+using NetworkMonitoring.Backend.Infrastructure.Observability;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
 using NetworkMonitoring.Backend.Host.Health;
 using NetworkMonitoring.Backend.Host.Services;
@@ -51,6 +52,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AcceptDeviceIntakeUseCase>();
         services.AddScoped<ListDevicesUseCase>();
         services.AddSingleton<IGraphTelemetry, NullGraphTelemetry>();
+        services.AddSingleton<IIntakeFlowTelemetry, IntakeFlowTelemetry>();
         services.AddSingleton<InMemoryGraphStore>();
         services.AddSingleton(sp =>
         {

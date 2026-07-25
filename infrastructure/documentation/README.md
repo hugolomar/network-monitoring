@@ -71,14 +71,28 @@ in those READMEs.
 
 The Jenkins pipeline runs the same generator step before `docfx metadata` and `docfx build`, then publishes to the `docs-site` volume served at [http://localhost:8090](http://localhost:8090). See **Published site (CI)** above.
 
-## Observability baseline documentation
+## Observability documentation
 
-The observability baseline is documented in:
+Production observability (feature `008-observability`, ADR 0013) is documented in:
 
 - `specs/008-observability/spec.md` (requirements and measurable outcomes)
-- `specs/008-observability/contracts/observability-baseline.md` (cross-service contract)
+- `specs/008-observability/contracts/observability.md` (cross-service contract)
 - `specs/008-observability/contracts/critical-flow-inventory.md` (SC-003 authoritative flow list)
 - `specs/008-observability/quickstart.md` (validation drills and evidence templates)
+- `docs/adr/0013-definitive-observability-stack.md` (reference stack decisions)
+- `docs/notes/007-elasticsearch-tenancy.md` (shared Elasticsearch instance trade-offs)
+
+### Reference stack operations map
+
+| Signal | Path |
+| --- | --- |
+| Application logs | SDK → OpenTelemetry Collector → Elasticsearch |
+| Platform logs | Docker Forward driver → Fluent Bit → Logstash → Elasticsearch |
+| Traces | SDK / browser OTLP → Collector → Elastic APM Server → Elasticsearch (Kibana APM) |
+| Metrics | SDK + Collector receivers (`kafkametrics`, `postgresql`, `elasticsearch`, `httpcheck`, `docker_stats`) → Prometheus → Grafana |
+| Alerts | Prometheus rules → Alertmanager → receiver (`alert-sink` in local stack) |
+
+Grafana provisioned dashboards: triage overview, per-service (backend/probe/integration console), pipeline stages.
 
 ## Documentation compliance sweep
 

@@ -14,6 +14,7 @@ namespace NetworkMonitoring.Probe.Infrastructure.Traffic;
 public sealed class TsharkTrafficProvider(
     IOptions<ProbeOptions> options,
     TsharkObservationMapper mapper,
+    IProbeFlowTelemetry flowTelemetry,
     ILogger<TsharkTrafficProvider> logger) : ITrafficProvider
 {
     /// <summary>
@@ -56,6 +57,11 @@ public sealed class TsharkTrafficProvider(
                 var error = await process.StandardError.ReadLineAsync(cancellationToken);
                 if (!string.IsNullOrWhiteSpace(error))
                 {
+                    if (TsharkCaptureDiagnostics.TryReadCaptureDrops(error, out var dropped))
+                    {
+                        flowTelemetry.TrackCaptureDropped(dropped);
+                    }
+
                     logger.LogDebug("tshark: {Error}", error);
                 }
             }
@@ -72,10 +78,12 @@ public sealed class TsharkTrafficProvider(
 
             if (!mapper.TryMap(line, out var observation) || observation is null)
             {
+                flowTelemetry.TrackUnparsableInput();
                 logger.LogWarning("Skipping malformed tshark line: {Line}", line);
                 continue;
             }
 
+            flowTelemetry.TrackPacketReceived();
             yield return observation;
         }
 

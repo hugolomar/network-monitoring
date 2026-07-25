@@ -19,7 +19,7 @@ public sealed class ProcessDeviceDetectionsUseCaseConsumeTests
         var consumed = TestEvents.Consumed();
         var consumer = new FakeDeviceEventConsumer(consumed);
         var intake = new FakeDeviceIntakeClient(IngestionOutcome.Succeeded());
-        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
+        var useCase = new ProcessDeviceDetectionsUseCase(consumer, intake, NoOpIngestionFlowTelemetry.Instance, NullLogger<ProcessDeviceDetectionsUseCase>.Instance);
 
         await useCase.Run(CancellationToken.None);
 

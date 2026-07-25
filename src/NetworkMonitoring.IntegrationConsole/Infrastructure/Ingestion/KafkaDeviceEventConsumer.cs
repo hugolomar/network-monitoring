@@ -21,6 +21,7 @@ public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
 {
     private static readonly ActivitySource ActivitySource = new("NetworkMonitoring.IntegrationConsole");
     private readonly IntegrationConsoleOptions _options;
+    private readonly IIngestionFlowTelemetry _flowTelemetry;
     private readonly ILogger<KafkaDeviceEventConsumer> _logger;
     private readonly Lazy<IConsumer<string, GenericRecord>> _consumer;
 
@@ -28,12 +29,15 @@ public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
     /// Initializes a new instance of the <see cref="KafkaDeviceEventConsumer"/> class.
     /// </summary>
     /// <param name="options">Integration console configuration options.</param>
+    /// <param name="flowTelemetry">Ingestion flow telemetry sink.</param>
     /// <param name="logger">Logger instance.</param>
     public KafkaDeviceEventConsumer(
         IOptions<IntegrationConsoleOptions> options,
+        IIngestionFlowTelemetry flowTelemetry,
         ILogger<KafkaDeviceEventConsumer> logger)
     {
         _options = options.Value;
+        _flowTelemetry = flowTelemetry;
         _logger = logger;
         _consumer = new Lazy<IConsumer<string, GenericRecord>>(CreateConsumer);
     }
@@ -73,6 +77,7 @@ public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
                     result.Topic,
                     result.Partition.Value,
                     result.Offset.Value);
+                RecordConsumerLag(consumer, result);
             }
             catch (ConsumeException ex)
             {
@@ -145,6 +150,20 @@ public sealed class KafkaDeviceEventConsumer : IDeviceEventConsumer
         }
 
         return ValueTask.CompletedTask;
+    }
+
+    private void RecordConsumerLag(IConsumer<string, GenericRecord> consumer, ConsumeResult<string, GenericRecord> result)
+    {
+        try
+        {
+            var watermarks = consumer.QueryWatermarkOffsets(result.TopicPartition, TimeSpan.FromSeconds(1));
+            var lag = Math.Max(0, watermarks.High.Value - result.Offset.Value - 1);
+            _flowTelemetry.TrackConsumerLag(result.Topic, result.Partition.Value, lag);
+        }
+        catch (KafkaException ex)
+        {
+            _logger.LogDebug(ex, "Unable to query consumer lag for {Topic}[{Partition}]", result.Topic, result.Partition.Value);
+        }
     }
 
     private IConsumer<string, GenericRecord> CreateConsumer()

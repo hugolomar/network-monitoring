@@ -13,10 +13,12 @@ namespace NetworkMonitoring.Backend.Application.UseCases;
 /// </summary>
 /// <param name="repository">The repository for accessing and storing device data.</param>
 /// <param name="unitOfWork">The unit of work for managing persistence transactions.</param>
+/// <param name="flowTelemetry">Intake freshness telemetry.</param>
 /// <param name="logger">The logger for recording operation details.</param>
 public sealed class AcceptDeviceIntakeUseCase(
     IDeviceInventoryRepository repository,
     IInventoryUnitOfWork unitOfWork,
+    IIntakeFlowTelemetry flowTelemetry,
     ILogger<AcceptDeviceIntakeUseCase> logger)
 {
     private static readonly ActivitySource ActivitySource = new("NetworkMonitoring.Backend.Intake");
@@ -58,6 +60,7 @@ public sealed class AcceptDeviceIntakeUseCase(
                 await unitOfWork.SaveChanges(cancellationToken);
 
                 activity?.SetTag("device.intake_outcome", "created");
+                TrackFreshness(command, "created");
                 logger.LogInformation("Accepted new device intake for {MacAddress}", incoming.MacAddress.Value);
                 return DeviceIntakeOutcome.Created(ToItem(incoming));
             }
@@ -70,11 +73,13 @@ public sealed class AcceptDeviceIntakeUseCase(
             if (!consolidated.Changed)
             {
                 activity?.SetTag("device.intake_outcome", "idempotent");
+                TrackFreshness(command, "idempotent");
                 logger.LogInformation("Accepted idempotent duplicate device intake for {MacAddress}", existing.MacAddress.Value);
                 return DeviceIntakeOutcome.Idempotent(ToItem(consolidated.Device));
             }
 
             activity?.SetTag("device.intake_outcome", "updated");
+            TrackFreshness(command, "updated");
             logger.LogInformation("Updated device inventory state for {MacAddress}", existing.MacAddress.Value);
             return DeviceIntakeOutcome.Updated(ToItem(consolidated.Device));
         }
@@ -88,6 +93,18 @@ public sealed class AcceptDeviceIntakeUseCase(
         {
             macLock.Release();
         }
+    }
+
+    private void TrackFreshness(DeviceIntakeCommand command, string outcome)
+    {
+        var observedAtUtc = command.LastSeenUtc ?? command.FirstSeenUtc;
+        if (observedAtUtc is null)
+        {
+            return;
+        }
+
+        var freshnessMs = (long)Math.Max(0, (DateTimeOffset.UtcNow - observedAtUtc.Value).TotalMilliseconds);
+        flowTelemetry.TrackFreshness(freshnessMs, outcome);
     }
 
     private static bool TryBuildIncomingDevice(

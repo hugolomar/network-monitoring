@@ -2,128 +2,115 @@
 
 ## Goal
 
-Validate that production-path services satisfy the observability baseline for correlation, structured
-logs, metrics, traces, health signaling, and proactive alerting.
+Validate that production-path services and platform components satisfy the observability contract for
+correlation, structured logs, metrics, traces, health signaling, proactive alerting, pipeline business
+metrics, and browser telemetry (ADR 0013 / FR-001..FR-019).
 
 ## Preconditions
 
-- Local reference stack is running.
-- Production-path services are running with baseline observability enabled.
-- Critical flows for validation are defined.
+- Local reference stack is running (`docker compose -f docker-compose.reference-stack.yml up -d`).
+- Production-path services are running with observability enabled.
+- Critical flows for validation are defined in `contracts/critical-flow-inventory.md`.
 
 ## 1) Validate correlation and traceability
 
 1. Trigger one sampled critical operation that crosses multiple services.
 2. Locate the operation by correlation identifier.
 3. Confirm related logs, traces, and error context can be discovered from that identifier.
-4. Confirm all participating service operations are linked under the same distributed trace lineage.
+4. Confirm all participating service operations are linked under the same distributed trace lineage in
+   Kibana APM.
 
-Expected outcome:
+Expected outcome: request/event is traceable end-to-end without server shell access.
 
-- Request/event is traceable end-to-end without server shell access.
-
-## 2) Validate structured logging baseline
+## 2) Validate structured logging (application)
 
 1. Trigger success and failure paths for sampled operations.
-2. Inspect log records from each participating service.
-3. Confirm required fields exist (service, environment, severity, timestamp, correlation linkage).
+2. Confirm documents exist: `curl -sS "http://localhost:9200/observability-logs-*/_count"`.
+3. In Kibana, query by `correlationId` and filter by `service.name` / `severity_text`.
 4. Confirm no sensitive values appear in sampled records.
 
-Expected outcome:
+## 2b) Validate platform logs (Fluent Bit → Logstash)
 
-- Logs are machine-readable, correlated, and hygiene-compliant.
+1. Confirm platform components use the Forward logging driver and that `fluent-bit` / `logstash` are up.
+2. Confirm platform indices receive documents:
+   `curl -sS "http://localhost:9200/observability-logs-platform-*/_count"`.
+3. Query a broker or store component by `service.name` (e.g. `kafka-1`, `postgres`).
+4. Confirm multiline stack traces arrive as a single `body` and that unparsable lines carry
+   `_platform_parse_failure` rather than disappearing.
+5. Confirm Elasticsearch itself is **not** on this path; diagnose it with `docker logs` and metrics.
 
-## 2b) Validate centralized log search (Elasticsearch/Kibana)
+Expected outcome: SC-007 / SC-009 — platform logs are centralized and parse failures remain visible.
 
-1. Ensure services are exporting logs via OTLP to collector (`OTEL_EXPORTER_OTLP_ENDPOINT` / `Observability:OtlpEndpoint`).
-2. Confirm documents exist: `curl -sS "http://localhost:9200/observability-logs-*/_count"` (count > 0).
-3. Open Kibana and query logs for a sampled failing operation using `correlationId`.
-4. Filter by service and severity to confirm cross-service traceability of related events.
-5. Save the KQL query and screenshot evidence for incident runbook attachment.
+## 3) Validate log ↔ trace navigation (SC-008)
 
-Expected outcome:
+1. From a log document with `traceId`, follow the Grafana/Kibana data link into Kibana APM.
+2. From an APM transaction, open related logs for the same `traceId` / `correlationId`.
 
-- Operators can retrieve correlated cross-service logs via Kibana without server shell access.
+Expected outcome: navigation completes in one UI family without re-running a manual search.
 
-## 3) Validate service metrics baseline
+## 4) Validate service and platform metrics
 
-1. Generate representative load for one critical flow.
-2. Verify metrics exist for availability, volume, errors, timing, and relevant resources.
-3. Verify critical-flow success/failure metrics are present.
+1. Open Grafana dashboards under folder **Observability**:
+   - `Observability Triage Overview`
+   - `Service: Backend` / `Service: Probe` / `Service: Integration Console`
+   - `Pipeline Stage Throughput`
+2. Verify RED metrics for the backend, probe capture/domain counters, ingestion + lag, freshness, and
+   container stats (`docker_stats` via Collector).
 
-Expected outcome:
+Expected outcome: baseline metric coverage plus pipeline stage rates (SC-011).
 
-- Baseline metric coverage exists across all in-scope services.
+## 5) Validate capture-loss attribution (SC-012)
 
-## 4) Validate service health signaling
+1. Induce or simulate capture drops (tshark drop lines) and unparsable input separately.
+2. Confirm `capture_dropped_total` and `unparsable_input_total` move independently on the pipeline
+   dashboard.
+
+## 6) Validate end-to-end freshness (SC-013)
+
+1. Ingest a device with a known `LastSeenUtc` in the past.
+2. Confirm `observation_to_inventory_freshness_ms` records a positive latency on the backend dashboard.
+
+## 7) Validate service health signaling
 
 1. Query each service health status endpoint.
 2. Confirm liveness and readiness semantics are machine-consumable.
 3. Simulate one dependency issue and verify readiness impact behavior.
 
-Expected outcome:
+## 8) Validate alerting and Alertmanager (SC-004 / SC-010)
 
-- Operators can determine if each service is alive and ready for traffic.
-
-## 5) Validate alerting behavior
-
-1. Simulate a controlled degradation against a defined critical flow.
-2. Confirm alert generation when objectives are breached.
-3. Confirm alert payload includes: `flowId`, breach reason, timestamp, impacted component, severity,
-   and correlation/trace linkage (when available).
+1. Confirm Prometheus loads `alert-rules.yml` and points at Alertmanager.
+2. Simulate a controlled degradation against a defined critical flow.
+3. Confirm Alertmanager delivers to the configured receiver (dev: `alert-sink`) and that warning
+   alerts for the same `objective` are inhibited while critical is firing.
 4. Capture timestamps for alert trigger and objective-breach confirmation to compute lead time.
 
-Expected outcome:
+## 9) Validate browser telemetry (SC-014 / FR-019)
 
-- Alert arrives before severe user impact threshold in validation scenarios.
+1. Build/run the frontend with `VITE_OTEL_OTLP_HTTP_URL=http://localhost:4318`.
+2. Perform a navigation and an API call; optionally force a network failure (backend stopped).
+3. In Kibana APM, confirm service `network-monitoring-frontend` spans (`http.client`, `ui.navigation`,
+   and/or client failure spans) and that backend spans share `traceparent` lineage for successful calls.
+4. Confirm exported attributes omit end-user identity and URL query strings.
 
-## 6) Validate objective gates
+## 10) Validate objective gates
 
-1. Run automated test suites covering observability baseline obligations.
-2. Run CI checks enforcing mandatory observability gates.
-3. Confirm failing baseline obligations produce delivery failure.
-
-Expected outcome:
-
-- Observability baseline is objectively verifiable and gate-enforced.
-
-## 7) Validate frontend diagnostics surface
-
-1. Trigger one failing flow and open the frontend diagnostic/operation view.
-2. Confirm the frontend can search or link by correlation identifier.
-3. Confirm distributed trace linkage and impacted component context are visible to operators.
-4. Confirm no sensitive values are rendered in diagnostic payload fragments.
-
-Expected outcome:
-
-- Frontend participation in diagnostics aligns with cross-cutting scope and does not require server access.
-
-## Suggested validation evidence
-
-- Test run outputs for correlation propagation and distributed trace completeness.
-- Sample structured log payloads demonstrating required fields and hygiene compliance.
-- Metric snapshots showing baseline coverage by service and critical flow.
-- Health endpoint responses under normal and degraded conditions.
-- Alert payload sample from controlled degradation drill.
-- CI gate result proving fail-on-noncompliance behavior.
+1. Run automated test suites covering observability obligations.
+2. Run `./infrastructure/ci/check-observability.sh`.
+3. Confirm failing obligations produce delivery failure in CI.
 
 ## Diagnostic lookup workflow (US1)
 
 1. Capture `correlationId` from the failing backend response header `X-Correlation-ID`.
 2. Open frontend **Diagnostics** page and enter `correlationId` (+ optional `traceId`).
-3. Copy generated KQL query and run it in Kibana Discover against `observability-logs-*`.
-4. Filter by `service.name` and `severity_text` to isolate backend/probe/integration-console events.
-5. Confirm the same `correlationId` appears across all involved services.
+3. Copy generated KQL and run it in Kibana Discover against `observability-logs-*`.
+4. Filter by `service.name` and `severity_text`.
+5. Follow `traceId` into Kibana APM when present.
 
 ## Kibana incident lookup guide
 
-- Baseline KQL query:
-  - `correlationId : "<id>"`
-- Optional narrowing:
-  - `service.name : "network-monitoring-backend"`
-  - `severity_text : ("ERROR" or "WARN")`
-- Expected fields:
-  - `@timestamp`, `service.name`, `severity_text`, `correlationId`, `traceId`, `body`
+- Application logs: `correlationId : "<id>"` on `observability-logs-*`
+- Platform logs: `service.name : "kafka-1"` on `observability-logs-platform-*`
+- Optional: `severity_text : ("ERROR" or "WARN")`, `tags : "_platform_parse_failure"`
 
 ## SC-004 lead-time evidence template
 
@@ -134,25 +121,30 @@ Expected outcome:
 - Lead time (`breach - alert`):
 - Meets >= 5 minutes requirement: yes/no
 
-## Validation evidence (latest run)
+## Validation evidence (implementation)
 
-- Backend unit tests:
-  - `dotnet test tests/NetworkMonitoring.Backend.UnitTests/NetworkMonitoring.Backend.UnitTests.csproj`
-  - Result: **Passed** (20/20)
-- Backend integration tests:
-  - `dotnet test tests/NetworkMonitoring.Backend.IntegrationTests/NetworkMonitoring.Backend.IntegrationTests.csproj`
-  - Result: **Passed** (34/34)
-- Probe unit tests:
-  - `dotnet test tests/NetworkMonitoring.Probe.UnitTests/NetworkMonitoring.Probe.UnitTests.csproj`
-  - Result: **Passed** (47/47)
-- Integration Console unit tests:
-  - `dotnet test tests/NetworkMonitoring.IntegrationConsole.UnitTests/NetworkMonitoring.IntegrationConsole.UnitTests.csproj`
-  - Result: **Passed** (22/22)
-- Frontend tests:
-  - `npm --prefix "/home/hugo/network-monitoring/src/NetworkMonitoring.Frontend" test`
-  - Result: **Passed** (13/13)
+### Automated suites (representative)
 
-Observed notes:
+| Suite | Command | Result |
+| --- | --- | --- |
+| Probe unit (incl. capture-loss metrics) | `dotnet test tests/NetworkMonitoring.Probe.UnitTests` | Passed |
+| Integration Console unit (incl. ingestion metrics) | `dotnet test tests/NetworkMonitoring.IntegrationConsole.UnitTests` | Passed |
+| Backend unit (incl. intake + browser contract) | `dotnet test tests/NetworkMonitoring.Backend.UnitTests` | Passed |
+| Frontend (incl. browser telemetry) | `npm --prefix src/NetworkMonitoring.Frontend test` | Passed |
+| CI observability gate | `./infrastructure/ci/check-observability.sh` | PASS |
 
-- NuGet emitted vulnerability advisories for current dependency versions during test restore.
-- These advisories do not block the baseline checks in this implementation slice but should be tracked in dependency hardening work.
+### Drill checklist (SC-007..SC-014)
+
+| Criterion | Drill | Evidence location |
+| --- | --- | --- |
+| SC-007 Platform coverage | Platform log count + Grafana platform/container panels | §2b, §4 |
+| SC-008 Log↔trace | Kibana log → APM | §3 |
+| SC-009 Parse failure visibility | Tag `_platform_parse_failure` retained | §2b |
+| SC-010 Alert delivery/suppression | Alertmanager → alert-sink; inhibition by `objective` | §8 |
+| SC-011 Pipeline rates | Pipeline dashboard consecutive stages | §4 |
+| SC-012 Loss cause | Independent capture vs unparsable series | §5 |
+| SC-013 Freshness | `observation_to_inventory_freshness_ms` | §6 |
+| SC-014 Browser segment | Frontend spans in APM | §9 |
+
+Config-load note: Collector config validates to `Everything is ready` when started in isolation;
+scrape errors to Kafka/Postgres/Elasticsearch are expected unless the full compose stack is up.

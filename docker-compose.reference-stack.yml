@@ -16,11 +16,15 @@ volumes:
   neo4j-data: {}
   grafana-data: {}
   kibana-data: {}
+  fluent-bit-storage: {}
+  logstash-data: {}
 
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.105.0
     hostname: otel-collector
+    # docker_stats needs to open the runtime socket; the image user is non-root by default.
+    user: "0:0"
     networks:
       - kafka-net
     ports:
@@ -29,6 +33,9 @@ services:
       - "9464:9464"
     volumes:
       - ./infrastructure/observability/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml:ro
+      # Required by docker_stats for per-container resource metrics. Equivalent to host root
+      # (ADR 0013); used for stats only, not for log collection.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
 
   prometheus:
@@ -45,14 +52,96 @@ services:
       otel-collector:
         condition: service_started
 
-  jaeger:
-    image: jaegertracing/all-in-one:1.60
-    hostname: jaeger
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:8.11.4
+    hostname: apm-server
     networks:
       - kafka-net
     ports:
-      - "16686:16686"
-      - "4319:4317"
+      - "8200:8200"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    command:
+      - apm-server
+      - -e
+      - -E
+      - apm-server.host=0.0.0.0:8200
+      # Dev only: no secret token. Production must authenticate ingest per ADR 0013.
+      - -E
+      - apm-server.auth.anonymous.enabled=true
+      # Local stack runs Kibana with security disabled, so Fleet cannot install the APM
+      # integration package. Do not block publish on that precondition (dev only).
+      - -E
+      - apm-server.data_streams.wait_for_integration=false
+      - -E
+      - output.elasticsearch.hosts=["elasticsearch:9200"]
+    healthcheck:
+      # publish_ready stays false until APM can index; with wait_for_integration=false this
+      # becomes true once Elasticsearch output is usable.
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8200/ | grep -q '\"publish_ready\":true'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  # Entry point for platform logs, pushed here by the container runtime's logging driver.
+  # Reassembles multi-line records before anything downstream sees them (ADR 0013).
+  fluent-bit:
+    image: fluent/fluent-bit:5.0.9
+    hostname: fluent-bit
+    networks:
+      - kafka-net
+    ports:
+      - "24224:24224"
+    volumes:
+      - ./infrastructure/observability/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./infrastructure/observability/fluent-bit-parsers.conf:/fluent-bit/etc/multiline-parsers.conf:ro
+      - fluent-bit-storage:/var/log/flb-storage
+    depends_on:
+      logstash:
+        condition: service_started
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.4
+    hostname: logstash
+    networks:
+      - kafka-net
+    ports:
+      - "8088:8080"
+    environment:
+      - LS_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - ./infrastructure/observability/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./infrastructure/observability/logstash/pipeline.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - logstash-data:/usr/share/logstash/data
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    hostname: alertmanager
+    networks:
+      - kafka-net
+    ports:
+      # Host 9093 is already kafka-2's EXTERNAL listener; keep container port 9093 for in-network clients.
+      - "9095:9093"
+    volumes:
+      - ./infrastructure/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --web.external-url=http://localhost:9095
+
+  # Stands in for a real notification channel so alert delivery is observable in dev.
+  # Received payloads are echoed to container logs.
+  alert-sink:
+    image: mendhak/http-https-echo:31
+    hostname: alert-sink
+    networks:
+      - kafka-net
+    environment:
+      HTTP_PORT: "8080"
 
   grafana:
     image: grafana/grafana:11.1.4
@@ -88,6 +177,18 @@ services:
   kafka-1:
     image: confluentinc/cp-kafka:7.6.1
     hostname: kafka-1
+    # Standard output is pushed to Fluent Bit. Asynchronous delivery is required so that an
+    # unavailable log receiver cannot stop a platform component from starting; records
+    # produced meanwhile are buffered by the runtime and replayed once it returns.
+    # Deliberately no depends_on: the connection is opened by the runtime daemon rather than
+    # by the container, so ordering would add coupling without adding any guarantee.
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "8MB"
+        tag: platform.log4j.kafka-1
     networks:
       - kafka-net
     ports:
@@ -121,6 +222,13 @@ services:
   kafka-2:
     image: confluentinc/cp-kafka:7.6.1
     hostname: kafka-2
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "8MB"
+        tag: platform.log4j.kafka-2
     networks:
       - kafka-net
     ports:
@@ -153,6 +261,13 @@ services:
   kafka-3:
     image: confluentinc/cp-kafka:7.6.1
     hostname: kafka-3
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "8MB"
+        tag: platform.log4j.kafka-3
     networks:
       - kafka-net
     ports:
@@ -235,6 +350,13 @@ services:
   kafka-connect:
     image: confluentinc/cp-kafka-connect:7.6.1
     hostname: connect
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "8MB"
+        tag: platform.log4j.connect
     networks:
       - kafka-net
     ports:
@@ -289,6 +411,13 @@ services:
   postgres:
     image: postgres:16-alpine
     hostname: postgres
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "8MB"
+        tag: platform.postgres.postgres
     networks:
       - kafka-net
     ports:
@@ -309,6 +438,13 @@ services:
   neo4j:
     image: neo4j:5.22
     hostname: neo4j
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "8MB"
+        tag: platform.neo4j.neo4j
     networks:
       - kafka-net
     ports:
@@ -337,9 +473,16 @@ services:
       - kafka-net
     ports:
       - "5090:8080"
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health/live >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     environment:
       # Uncomment the following line to enable Scalar API Documentation (Development mode only)
       # ASPNETCORE_ENVIRONMENT: Development
@@ -362,11 +505,12 @@ services:
     hostname: network-monitoring-integration-console
     networks:
       - kafka-net
+    restart: unless-stopped
     depends_on:
       schema-registry:
         condition: service_healthy
       network-monitoring-backend:
-        condition: service_started
+        condition: service_healthy
     environment:
       IntegrationConsole__KafkaBootstrapServers: kafka-1:29092,kafka-2:29092,kafka-3:29092
       IntegrationConsole__SchemaRegistryUrl: http://schema-registry:8081
@@ -383,11 +527,16 @@ services:
     build:
       context: ./src/NetworkMonitoring.Frontend
       dockerfile: Dockerfile
+      args:
+        # Browser talks to the host-published Collector port, not the compose service name.
+        VITE_OTEL_OTLP_HTTP_URL: http://localhost:4318
+        VITE_OTEL_SAMPLE_RATIO: "0.2"
     hostname: network-monitoring-device-management-ui
     networks:
       - kafka-net
     ports:
       - "3000:80"
+    restart: unless-stopped
     depends_on:
       network-monitoring-backend:
-        condition: service_started
+        condition: service_healthy

@@ -1,0 +1,350 @@
+{
+  "title": "Pipeline Stage Throughput",
+  "uid": "observability-pipeline",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Stage 1: Packets received",
+      "targets": [
+        {
+          "expr": "sum(rate(packets_received_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Packets received"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Probe: rate of network packets accepted from capture/pcap input."
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Stage 2: Sessions detected",
+      "targets": [
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Sessions detected"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Probe: rate of SessionDetected events derived from traffic."
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Stage 3: Devices discovered",
+      "targets": [
+        {
+          "expr": "sum(rate(devices_discovered_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Devices discovered"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Probe: rate of DeviceDetected events published (toward Kafka)."
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Stage 4: Devices ingested",
+      "targets": [
+        {
+          "expr": "sum(rate(devices_ingested_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Devices ingested"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Integration Console: rate of device intake attempts toward the Backend inventory (any outcome)."
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Consecutive stage rates",
+      "targets": [
+        {
+          "expr": "sum(rate(packets_received_total[1m]))",
+          "refId": "A",
+          "legendFormat": "1_packets_received"
+        },
+        {
+          "expr": "sum(rate(sessions_detected_total[1m]))",
+          "refId": "B",
+          "legendFormat": "2_sessions_detected"
+        },
+        {
+          "expr": "sum(rate(devices_discovered_total[1m]))",
+          "refId": "C",
+          "legendFormat": "3_devices_discovered"
+        },
+        {
+          "expr": "sum(rate(devices_ingested_total[1m]))",
+          "refId": "D",
+          "legendFormat": "4_devices_ingested"
+        }
+      ],
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Same four stages on one chart to compare volumes and spot where the funnel drops."
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Drop-off: capture vs parse",
+      "targets": [
+        {
+          "expr": "sum(rate(capture_dropped_total[1m])) / clamp_min(sum(rate(packets_received_total[1m]) + rate(unparsable_input_total[1m])), 1e-9)",
+          "refId": "A",
+          "legendFormat": "capture_share"
+        },
+        {
+          "expr": "sum(rate(unparsable_input_total[1m])) / clamp_min(sum(rate(packets_received_total[1m]) + rate(unparsable_input_total[1m])), 1e-9)",
+          "refId": "B",
+          "legendFormat": "unparsable_share"
+        }
+      ],
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "description": "Share of Probe loss attributed to capture drops vs unparsable input lines."
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Ingest boundary lag",
+      "description": "How many DeviceDetected messages are still waiting in Kafka for the Integration Console. 0 means caught up.",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumer_lag) or sum(kafka_consumer_group_lag_ratio{group=\"device-ingestion-local\"})",
+          "refId": "A",
+          "legendFormat": "Pending Kafka messages"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "axisLabel": "messages"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Observation\u2192inventory freshness (p95)",
+      "description": "p95 time from device observation timestamps on the event until Backend inventory accept.",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(observation_to_inventory_freshness_ms_bucket[1m])) by (le))",
+          "refId": "A",
+          "legendFormat": "p95 time to inventory"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 13
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Graph projection stage",
+      "description": "Backend writes/updates to the communication graph (Neo4j). Empty until graph projection runs; inventory alone does not fill this.",
+      "targets": [
+        {
+          "expr": "sum(rate(graph_projection_total[1m])) by (outcome)",
+          "refId": "A",
+          "legendFormat": "{{outcome}}"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Search-store primary rejections",
+      "description": "Elasticsearch primary indexing rejections under memory pressure. Flat/zero means ES accepts writes.",
+      "targets": [
+        {
+          "expr": "sum(rate(elasticsearch_indexing_pressure_memory_primary_rejections_total[1m])) or sum(elasticsearch_indexing_pressure_memory_primary_rejections_total)",
+          "refId": "A",
+          "legendFormat": "Primary indexing rejections"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
+    }
+  ],
+  "tags": [
+    "observability",
+    "008"
+  ],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "editable": true
+}

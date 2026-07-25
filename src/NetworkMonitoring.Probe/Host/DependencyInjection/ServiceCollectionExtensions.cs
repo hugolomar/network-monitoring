@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using NetworkMonitoring.Probe.Application.Configuration;
 using NetworkMonitoring.Probe.Application.Ports;
 using NetworkMonitoring.Probe.Application.UseCases;
+using NetworkMonitoring.Probe.Infrastructure.Observability;
 using NetworkMonitoring.Probe.Infrastructure.Publishing;
 using NetworkMonitoring.Probe.Infrastructure.Traffic;
 using OpenTelemetry.Logs;
@@ -54,6 +55,7 @@ public static class ServiceCollectionExtensions
                 "Probe:DeterministicPlaybackSpeed must be zero or greater.")
             .ValidateOnStart();
 
+        services.AddSingleton<IProbeFlowTelemetry, ProbeFlowTelemetry>();
         services.AddSingleton<TsharkObservationMapper>();
         services.AddSingleton<ConsoleRecordSerializer>();
         services.AddSingleton<TsharkTrafficProvider>();

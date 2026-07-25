@@ -34,10 +34,10 @@ stack defined in ADR 0013.
 
 **Architecture constraints and unresolved gaps that bound this plan**:
 - Physical-view gap on cross-environment observability normalization is currently qualitative; this plan
-  introduces explicit baseline signal requirements to reduce drift.
+  introduces explicit shared signal requirements to reduce drift.
 - Outage escalation policy for prolonged asynchronous disruption remains broader than this slice;
   observability scope includes detection/diagnosis signals, not new global escalation policy.
-- Security hardening beyond baseline telemetry hygiene is deferred; this slice enforces no-PII/no-secret
+- Security hardening beyond telemetry hygiene is deferred; this slice enforces no-PII/no-secret
   telemetry output but does not redefine all security controls.
 
 **Conflicts and resolution path**:
@@ -53,9 +53,10 @@ stack defined in ADR 0013.
 ## Technical Context
 
 **Language/Version**: C# / .NET 10 (Probe, Integration Console, Backend), TypeScript/React (Frontend)  
-**Primary Dependencies**: OpenTelemetry SDK/runtime instrumentation, OpenTelemetry Collector (OTLP ingest,
-platform log tailing, platform metric receivers), Prometheus, Alertmanager, Grafana, Elastic APM Server,
-Fluent Bit (OTLP-to-JSON adaptation), Logstash (platform log normalization), Elasticsearch, Kibana  
+**Primary Dependencies**: OpenTelemetry SDK/runtime instrumentation, OpenTelemetry Collector (application
+telemetry ingest, platform metric receivers), Prometheus, Alertmanager, Grafana, Elastic APM Server,
+Fluent Bit (platform log entry point and multi-line assembly), Logstash (platform log normalization),
+Elasticsearch, Kibana  
 **Storage**: Prometheus TSDB for metrics; Elasticsearch for centralized log indexing/search and for APM
 trace data, which is what enables log-to-trace navigation in one store; existing operational datastores
 remain authoritative for domain data (PostgreSQL/Neo4j/Kafka)  
@@ -63,11 +64,12 @@ remain authoritative for domain data (PostgreSQL/Neo4j/Kafka)
 observability gates  
 **Target Platform**: Linux containerized local/reference stack and CI  
 **Project Type**: Cross-cutting backend/probe/integration/frontend capability plus infra/docs contracts  
-**Performance Goals**: Meet spec SC-001..SC-013 (traceability coverage, diagnosis time, critical-flow
+**Performance Goals**: Meet spec SC-001..SC-014 (traceability coverage, diagnosis time, critical-flow
 signal coverage, proactive alerting, zero sensitive telemetry leakage, centralized log retrieval time,
 platform coverage, log-to-trace navigation time, parse-failure visibility, alert delivery and
-suppression, pipeline throughput comparability, loss-cause attribution, end-to-end freshness)  
-**Constraints**: Platform-agnostic baseline behavior (no vendor lock-in at requirement level), no PII in
+suppression, pipeline throughput comparability, loss-cause attribution, end-to-end freshness, browser
+segments in traces)  
+**Constraints**: Platform-agnostic required behaviors (no vendor lock-in at requirement level), no PII in
 telemetry, preserve clean/hexagonal boundaries, enforce verifiable gates. ADR 0013 defines the
 reference stack for this increment and does not alter vendor-neutral requirement semantics.  
 **Scale/Scope**: Apply the capability to all production-path services in the current repository and to
@@ -99,24 +101,24 @@ store); define the shared signal taxonomy, the log field contract, and the valid
 ## Phase 0 - Research
 
 Research outcomes are consolidated in [research.md](./research.md):
-- baseline telemetry signal taxonomy and cardinality policy,
-- correlation/trace propagation strategy across sync + async boundaries,
+- telemetry signal taxonomy and cardinality policy (including browser and pipeline stages),
+- correlation/trace propagation strategy across sync + async + browser boundaries,
 - health endpoint and readiness semantics across services,
-- alerting trigger model for critical-flow degradation,
+- alerting trigger model for critical-flow degradation with Alertmanager delivery,
 - objective verification patterns for observability gates in CI,
-- platform log collection and normalization path, including the measured payload shapes between the
-  collector, the adaptation layer, and the normalization layer,
+- platform log path (runtime driver → Fluent Bit → Logstash) with measured flat payload shapes,
 - multi-line record joining, event-time extraction, and durable buffering responsibilities per hop,
-- business-flow metric taxonomy per pipeline stage, including capture-loss attribution.
+- business-flow metric taxonomy per pipeline stage, including capture-loss attribution,
+- platform metric receivers including `docker_stats` and search-store rejection series.
 
 All initial technical unknowns for this feature slice are resolved in research artifacts.
 
 ## Phase 1 - Design Artifacts
 
 - [data-model.md](./data-model.md): observability entities/signals and validation invariants.
-- [contracts/observability-baseline.md](./contracts/observability-baseline.md): cross-service
-  observability behavior contract and required fields.
-- [quickstart.md](./quickstart.md): local validation flow for baseline observability behavior and gates.
+- [contracts/observability.md](./contracts/observability.md): cross-service observability behavior
+  contract and required fields.
+- [quickstart.md](./quickstart.md): local validation flow for observability behavior and gates.
 
 ## Project Structure
 
@@ -129,7 +131,8 @@ specs/008-observability/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   └── observability-baseline.md
+│   ├── observability.md
+│   └── critical-flow-inventory.md
 └── tasks.md
 ```
 
@@ -149,10 +152,12 @@ tests/
 └── NetworkMonitoring.IntegrationConsole.UnitTests/
 
 infrastructure/
-└── stack/
+├── observability/
+├── ci/check-observability.sh
+└── documentation/
 ```
 
-**Structure Decision**: Implement the baseline as a cross-cutting capability that touches each runtime
+**Structure Decision**: Implement observability as a cross-cutting capability that touches each runtime
 unit through its existing boundaries. Shared telemetry semantics are documented under the feature
 contracts, while service-specific implementation remains local to each deployable unit.
 
@@ -172,12 +177,15 @@ No constitutional violations identified for this planning pass.
 
 ## Implementation Compliance Record
 
-- **Validation date**: 2026-07-08 (services scope, FR-001..FR-010)
+- **Validation date**: 2026-07-25 (full scope, FR-001..FR-019 / SC-001..SC-014)
 - **Result**: PASS
-- **Pending**: platform coverage, cross-signal navigation, alert delivery, log field contract, and
-  business-flow metrics (FR-011..FR-018) are validated in the scope-extension phase of `tasks.md`.
+- **Scope delivered**: application telemetry, platform logs and metrics, Elastic APM traces, Alertmanager
+  delivery, pipeline business metrics, browser OTLP telemetry, Grafana triage/service/pipeline
+  dashboards, and documentation aligned to ADR 0013.
 - **Evidence anchors**:
-  - Observability CI gate script in `infrastructure/ci/check-observability-baseline.sh`
+  - Observability CI gate script in `infrastructure/ci/check-observability.sh`
   - SeedWork immutability gate in `infrastructure/ci/check-seedwork-immutability.sh`
-  - Baseline observability verification workflow in `specs/008-observability/quickstart.md`
+  - Observability verification workflow in `specs/008-observability/quickstart.md`
+  - Cross-service contract in `specs/008-observability/contracts/observability.md`
   - Critical-flow inventory for SC-003 in `specs/008-observability/contracts/critical-flow-inventory.md`
+  - Definitive stack decision in `docs/adr/0013-definitive-observability-stack.md`

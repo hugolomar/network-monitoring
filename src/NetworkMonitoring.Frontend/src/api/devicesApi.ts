@@ -1,4 +1,5 @@
 import { apiUrl } from "../config/runtimeConfig";
+import { tracedFetch } from "./httpClient";
 import type {
   DeviceIntakeRequestDto,
   DeviceIntakeResponseDto,
@@ -56,7 +57,7 @@ async function readJson<T>(response: Response): Promise<T | undefined> {
 export async function listDevices(signal?: AbortSignal): Promise<ListDevicesResult> {
   let response: Response;
   try {
-    response = await fetch(apiUrl("/devices"), {
+    response = await tracedFetch(apiUrl("/devices"), {
       method: "GET",
       headers: { Accept: "application/json" },
       signal,
@@ -115,7 +116,7 @@ export async function createDevice(
 ): Promise<CreateDeviceResult> {
   let response: Response;
   try {
-    response = await fetch(apiUrl("/devices"), {
+    response = await tracedFetch(apiUrl("/devices"), {
       method: "POST",
       headers: {
         Accept: "application/json",
