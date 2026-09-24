@@ -42,9 +42,9 @@ pipeline {
             }
         }
 
-        stage('Observability Baseline Gates') {
+        stage('Observability Gates') {
             steps {
-                echo 'Running observability baseline CI gates...'
+                echo 'Running observability CI gates...'
                 sh './infrastructure/ci/check-observability.sh'
                 sh './infrastructure/ci/check-seedwork-immutability.sh'
             }
