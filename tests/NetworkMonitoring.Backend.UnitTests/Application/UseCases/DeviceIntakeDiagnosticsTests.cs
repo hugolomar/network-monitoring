@@ -42,6 +42,7 @@ public sealed class DeviceIntakeDiagnosticsTests
         return new AcceptDeviceIntakeUseCase(
             repository,
             repository,
+            NoOpIntakeFlowTelemetry.Instance,
             NullLogger<AcceptDeviceIntakeUseCase>.Instance);
     }
 }

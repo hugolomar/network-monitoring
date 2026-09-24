@@ -48,6 +48,10 @@
       href: ../../docs/adr/0010-frontend-testing-convention.md
     - name: "ADR 0011: Graph Database for Device Communication Relationships"
       href: ../../docs/adr/0011-graph-database-for-device-communications.md
+    - name: "ADR 0012: Observability Stack Baseline"
+      href: ../../docs/adr/0012-observability-stack-baseline.md
+    - name: "ADR 0013: Definitive Observability Stack"
+      href: ../../docs/adr/0013-definitive-observability-stack.md
 - name: Operational Guides
   href: ../../docs/guides/README.md
   items:
@@ -68,5 +72,7 @@
       href: ../../docs/notes/005-security-hardening-backlog.md
     - name: "006 - SonarQube in Local CI (Operational Behavior)"
       href: ../../docs/notes/006-sonarqube-local-ci-behavior.md
+    - name: "007 - Elasticsearch Tenancy and Shared Fate"
+      href: ../../docs/notes/007-elasticsearch-tenancy.md
 - name: Constitution
   href: ../../.specify/memory/constitution.md

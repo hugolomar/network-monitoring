@@ -1,12 +1,14 @@
 <!--
 Sync Impact Report
-- Version change: 1.6.0 -> 1.7.0
+- Version change: 1.7.0 -> 1.8.0
 - Modified principles:
-  - Article 29 -> Generalizes documentation to include tests.
+  - None
 - Added sections:
+  - VII. Observability and Operational Safety
+- Removed sections:
   - None
 - Templates requiring updates:
-  - ✅ updated: .specify/templates/plan-template.md
+  - ✅ reviewed, no change required: .specify/templates/plan-template.md
   - ✅ reviewed, no change required: .specify/templates/spec-template.md
   - ✅ reviewed, no change required: .specify/templates/tasks-template.md
   - ✅ reviewed, no change required: .specify/templates/checklist-template.md
@@ -161,5 +163,26 @@ auditability, reducing integration errors, and ensuring the network monitoring d
 maintainable as it evolves. Inclusion of verification documentation (tests) ensures that the
 system's behavior is as documented and understandable as its production code.
 
-**Version**: 1.7.0 | **Ratified**: 2026-06-04 | **Last Amended**: 2026-06-04
+### VII. Observability and Operational Safety
+**Article 32 — Mandatory Telemetry Signals.** Every production-path service MUST emit structured
+logs, metrics, and distributed traces for critical execution paths.
+
+**Article 33 — Correlation and Trace Context.** Every cross-boundary request/event MUST carry a
+correlation identifier and trace context, and services MUST propagate them across asynchronous and
+synchronous boundaries.
+
+**Article 34 — Telemetry Data Hygiene.** Telemetry MUST NOT expose PII, credentials, secrets, or
+raw sensitive payloads. Redaction/masking policies MUST be applied before emission.
+
+**Article 35 — Operational Baseline Artifacts.** Each production-path service MUST provide minimum
+health endpoints, dashboards, and alert rules tied to agreed SLO/SLI signals.
+
+**Article 36 — Verifiable Observability Gates.** Observability requirements MUST be verifiable
+through automated checks (tests, CI gates, or contract checks) and MUST fail delivery when
+baseline obligations are not met.
+
+Rationale: runtime safety depends on measurable behavior and fast diagnosis in production-like
+conditions. Observability is an architectural requirement, not an optional implementation detail.
+
+**Version**: 1.8.0 | **Ratified**: 2026-06-04 | **Last Amended**: 2026-07-07
 

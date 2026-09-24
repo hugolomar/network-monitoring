@@ -1,9 +1,7 @@
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Probe.Application.Configuration;
-using NetworkMonitoring.Probe.Application.UseCases;
 using NetworkMonitoring.Probe.Infrastructure.Publishing;
-using NetworkMonitoring.Probe.Infrastructure.Traffic;
+using NetworkMonitoring.Probe.IntegrationTests.Support;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -63,16 +61,12 @@ public sealed class DeterministicPcapTrafficProviderIntegrationTests
                 DeviceDeduplicationWindowMinutes = 0,
             });
 
-        var trafficProvider = new PcapFileTrafficProvider(
-            probeOptions,
-            new TsharkObservationMapper(),
-            NullLogger<PcapFileTrafficProvider>.Instance);
+        var trafficProvider = ProbeTestFactory.CreatePcapProvider(probeOptions);
 
-        var useCase = new ProcessObservationsUseCase(
+        var useCase = ProbeTestFactory.CreateUseCase(
             trafficProvider,
             new ConsolePublisher(new ConsoleRecordSerializer()),
-            probeOptions,
-            NullLogger<ProcessObservationsUseCase>.Instance);
+            probeOptions);
 
         var originalOut = Console.Out;
         using var writer = new StringWriter();

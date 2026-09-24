@@ -42,6 +42,14 @@ pipeline {
             }
         }
 
+        stage('Observability Gates') {
+            steps {
+                echo 'Running observability CI gates...'
+                sh './infrastructure/ci/check-observability.sh'
+                sh './infrastructure/ci/check-seedwork-immutability.sh'
+            }
+        }
+
         stage('SonarQube - End Analysis') {
             steps {
                 echo 'Completing SonarQube Analysis...'

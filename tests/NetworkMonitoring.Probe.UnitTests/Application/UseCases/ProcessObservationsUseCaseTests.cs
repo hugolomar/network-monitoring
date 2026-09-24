@@ -1,10 +1,8 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using NetworkMonitoring.Domain.Entities;
-using NetworkMonitoring.Probe.Application.Configuration;
 using NetworkMonitoring.Probe.Application.Models;
 using NetworkMonitoring.Probe.Application.Ports;
 using NetworkMonitoring.Probe.Application.UseCases;
+using NetworkMonitoring.Probe.UnitTests.Support;
 
 namespace NetworkMonitoring.Probe.UnitTests.Application.UseCases;
 
@@ -176,16 +174,10 @@ public sealed class ProcessObservationsUseCaseTests
         ]);
 
         var publisher = new RecordingPublisher();
-        var options = Options.Create(new ProbeOptions
-        {
-            SessionDeduplicationWindowMinutes = 0,
-            DeviceDeduplicationWindowMinutes = 10
-        });
-        var useCase = new ProcessObservationsUseCase(
+        var useCase = ProbeTestFactory.CreateUseCase(
             provider,
             publisher,
-            options,
-            NullLogger<ProcessObservationsUseCase>.Instance);
+            deviceDeduplicationWindowMinutes: 10);
 
         await useCase.ExecuteAsync(CancellationToken.None);
 
@@ -197,20 +189,8 @@ public sealed class ProcessObservationsUseCaseTests
 
     private static ProcessObservationsUseCase CreateUseCase(
         ITrafficProvider provider,
-        IMessagePublisher publisher)
-    {
-        var options = Options.Create(new ProbeOptions
-        {
-            SessionDeduplicationWindowMinutes = 0,
-            DeviceDeduplicationWindowMinutes = 0
-        });
-
-        return new ProcessObservationsUseCase(
-            provider,
-            publisher,
-            options,
-            NullLogger<ProcessObservationsUseCase>.Instance);
-    }
+        IMessagePublisher publisher) =>
+        ProbeTestFactory.CreateUseCase(provider, publisher);
 
     /// <summary>
     /// Tests for FakeTrafficProvider.

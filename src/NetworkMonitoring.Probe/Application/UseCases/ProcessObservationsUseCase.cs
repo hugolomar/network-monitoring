@@ -16,6 +16,7 @@ namespace NetworkMonitoring.Probe.Application.UseCases;
 public sealed class ProcessObservationsUseCase(
     ITrafficProvider trafficProvider,
     IMessagePublisher messagePublisher,
+    IProbeFlowTelemetry flowTelemetry,
     IOptions<ProbeOptions> options,
     ILogger<ProcessObservationsUseCase> logger)
 {
@@ -56,6 +57,7 @@ public sealed class ProcessObservationsUseCase(
                 if (ShouldPublishSession(session, observation.ObservedAtUtc))
                 {
                     await messagePublisher.PublishSessionDetected(session, cancellationToken);
+                    flowTelemetry.TrackSessionDetected();
                 }
                 else
                 {
@@ -267,6 +269,7 @@ public sealed class ProcessObservationsUseCase(
         }
 
         await messagePublisher.PublishDeviceDetected(device, cancellationToken);
+        flowTelemetry.TrackDeviceDiscovered();
     }
 
     private static DiscoveryValidationResult ValidateDiscovery(string? mac)

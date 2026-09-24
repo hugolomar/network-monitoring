@@ -1,4 +1,5 @@
 import { apiUrl } from "../config/runtimeConfig";
+import { tracedFetch } from "./httpClient";
 import type { DeviceGraphResponseDto } from "../models/graphDtos";
 
 /**
@@ -66,7 +67,7 @@ export async function getDeviceGraph(
 
   let response: Response;
   try {
-    response = await fetch(apiUrl(`/api/graph/devices?${params.toString()}`), {
+    response = await tracedFetch(apiUrl(`/api/graph/devices?${params.toString()}`), {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -174,7 +175,7 @@ export async function getDeviceGraphSnapshot(
   let response: Response;
   try {
     const path = params.size > 0 ? `/api/graph/devices/all?${params.toString()}` : "/api/graph/devices/all";
-    response = await fetch(apiUrl(path), {
+    response = await tracedFetch(apiUrl(path), {
       method: "GET",
       headers: {
         Accept: "application/json",

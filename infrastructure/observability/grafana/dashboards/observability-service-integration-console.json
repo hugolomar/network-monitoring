@@ -1,0 +1,204 @@
+{
+  "title": "Service: Integration Console",
+  "uid": "observability-service-console",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Ingested rate",
+      "targets": [
+        {
+          "expr": "sum(rate(devices_ingested_total[1m]))",
+          "refId": "A",
+          "legendFormat": "Ingested"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Overall rate of device ingestion outcomes processed by the Integration Console."
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Succeeded rate",
+      "targets": [
+        {
+          "expr": "sum(rate(devices_ingested_total{outcome=\"succeeded\"}[1m]))",
+          "refId": "A",
+          "legendFormat": "Succeeded"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Rate of successful forwards of DeviceDetected into the Backend inventory."
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Rejected rate",
+      "targets": [
+        {
+          "expr": "sum(rate(devices_ingested_total{outcome=\"rejected\"}[1m]))",
+          "refId": "A",
+          "legendFormat": "Rejected"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "description": "Rate of permanently rejected intakes (validation/poison), not transient retries."
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Ingestion by outcome",
+      "targets": [
+        {
+          "expr": "sum(rate(devices_ingested_total[1m])) by (outcome)",
+          "refId": "A",
+          "legendFormat": "{{outcome}}"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Ingestion rate split by outcome (succeeded, rejected, retryexhausted, etc.)."
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Kafka consumer lag",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumer_lag) by (messaging_destination, messaging_kafka_partition)",
+          "refId": "A",
+          "legendFormat": "{{messaging_destination}}[{{messaging_kafka_partition}}]"
+        },
+        {
+          "expr": "kafka_consumer_group_lag_ratio{group=\"device-ingestion-local\"}",
+          "refId": "B",
+          "legendFormat": "{{topic}}[{{partition}}]"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Per-partition lag on devices.detected for the console consumer group."
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": ".NET exceptions",
+      "targets": [
+        {
+          "expr": "sum(rate(process_runtime_dotnet_exceptions_count_total[1m]))",
+          "refId": "A",
+          "legendFormat": ".NET exceptions"
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "description": "Rate of .NET runtime exceptions in the Integration Console process."
+    }
+  ],
+  "tags": [
+    "observability",
+    "008"
+  ],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": []
+  },
+  "editable": true
+}

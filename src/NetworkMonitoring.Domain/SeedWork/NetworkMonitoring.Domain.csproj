@@ -11,5 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared\**\*.cs" />
+    <Compile Include="..\Abstractions\**\*.cs" />
   </ItemGroup>
 </Project>

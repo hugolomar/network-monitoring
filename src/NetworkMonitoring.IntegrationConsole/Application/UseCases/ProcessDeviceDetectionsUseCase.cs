@@ -11,10 +11,12 @@ namespace NetworkMonitoring.IntegrationConsole.Application.UseCases;
 /// </summary>
 /// <param name="consumer">The device event consumer.</param>
 /// <param name="intakeClient">The backend intake client.</param>
+/// <param name="flowTelemetry">Ingestion throughput and lag telemetry.</param>
 /// <param name="logger">The logger.</param>
 public sealed class ProcessDeviceDetectionsUseCase(
     IDeviceEventConsumer consumer,
     IDeviceIntakeClient intakeClient,
+    IIngestionFlowTelemetry flowTelemetry,
     ILogger<ProcessDeviceDetectionsUseCase> logger)
 {
     /// <summary>
@@ -52,6 +54,7 @@ public sealed class ProcessDeviceDetectionsUseCase(
             // Even for rejected events, we acknowledge them so they are not re-processed.
             // Malformed data is considered "poison" and should be handled (e.g. sent to DLQ) or discarded.
             await consumer.Acknowledge(consumedEvent, cancellationToken);
+            flowTelemetry.TrackIngestion("rejected");
             return IngestionOutcome.Rejected(rejectionReason);
         }
 
@@ -83,6 +86,7 @@ public sealed class ProcessDeviceDetectionsUseCase(
 
         // Successfully processed (or permanently failed) events are acknowledged.
         await consumer.Acknowledge(consumedEvent, cancellationToken);
+        flowTelemetry.TrackIngestion(outcome.Kind.ToString().ToLowerInvariant());
         return outcome;
     }
 

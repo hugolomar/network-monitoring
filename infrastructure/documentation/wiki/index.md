@@ -19,7 +19,7 @@ This directory contains the "plumbing" that makes the system run:
     *   `register/`: Scripts to register/update connectors via REST API.
 *   **`acceptance/`**: Quality and contract validation.
     *   `contract/`: Data-level verification (e.g., sampling Elasticsearch hits to ensure schema parity).
-*   **`wiki/`**: The source files for this documentation site.
+*   **`documentation/wiki/`**: The source files for this documentation site.
 
 ### 📦 Core Folders
 *   **`src/`**: The heart of the project (Backend, Frontend, Probe, Domain).
@@ -31,6 +31,6 @@ This directory contains the "plumbing" that makes the system run:
 ---
 
 ## Where to Start?
-- [Read the Constitution](../../.specify/memory/constitution.md): Understand the laws and principles governing this repository.
-- [Architecture Decisions (ADRs)](../../docs/adr/0000-technology-stack-choice.md): Explore why we chose certain technologies and patterns.
-- [API Reference](../../artifacts/docs/api/toc.yml): Browse the automatically generated documentation for classes and methods.
+- [Read the Constitution](../../../.specify/memory/constitution.md): Understand the laws and principles governing this repository.
+- [Architecture Decisions (ADRs)](../../../docs/adr/0000-technology-stack-choice.md): Explore why we chose certain technologies and patterns.
+- [API Reference](../technical/index.md): Browse the automatically generated documentation for classes and methods.

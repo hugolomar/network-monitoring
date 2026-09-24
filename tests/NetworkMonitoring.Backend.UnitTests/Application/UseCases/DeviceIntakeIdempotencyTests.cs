@@ -80,6 +80,7 @@ public sealed class DeviceIntakeIdempotencyTests
         return new NetworkMonitoring.Backend.Application.UseCases.AcceptDeviceIntakeUseCase(
             repository,
             repository,
+            Support.NoOpIntakeFlowTelemetry.Instance,
             Microsoft.Extensions.Logging.Abstractions.NullLogger<NetworkMonitoring.Backend.Application.UseCases.AcceptDeviceIntakeUseCase>.Instance);
     }
 }

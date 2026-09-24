@@ -20,6 +20,7 @@ public sealed class DeviceIntakePersistenceFailureTests
         var useCase = new AcceptDeviceIntakeUseCase(
             repository,
             repository,
+            NoOpIntakeFlowTelemetry.Instance,
             NullLogger<AcceptDeviceIntakeUseCase>.Instance);
 
         var outcome = await useCase.Execute(AcceptDeviceIntakeUseCaseTests.ValidCommand(), CancellationToken.None);

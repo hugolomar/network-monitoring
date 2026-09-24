@@ -2,10 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Backend.Application.Configuration;
 using NetworkMonitoring.Backend.Application.Ports;
+using NetworkMonitoring.Backend.Application.Services;
 using NetworkMonitoring.Backend.Application.UseCases;
 using NetworkMonitoring.Backend.Infrastructure;
 using NetworkMonitoring.Backend.Infrastructure.Graph;
+using NetworkMonitoring.Backend.Infrastructure.Observability;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
+using NetworkMonitoring.Backend.Host.Health;
 using NetworkMonitoring.Backend.Host.Services;
 
 namespace NetworkMonitoring.Backend.Host.DependencyInjection;
@@ -26,6 +29,10 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         services
+            .AddBackendLogging(configuration)
+            .AddBackendTelemetry(configuration);
+
+        services
             .AddOptions<BackendOptions>()
             .Bind(configuration.GetSection(BackendOptions.SectionName))
             .Validate(options => !string.IsNullOrWhiteSpace(options.ConnectionString), "Backend connection string is required.")
@@ -45,6 +52,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AcceptDeviceIntakeUseCase>();
         services.AddScoped<ListDevicesUseCase>();
         services.AddSingleton<IGraphTelemetry, NullGraphTelemetry>();
+        services.AddSingleton<IIntakeFlowTelemetry, IntakeFlowTelemetry>();
         services.AddSingleton<InMemoryGraphStore>();
         services.AddSingleton(sp =>
         {
@@ -94,7 +102,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ProjectCommunicationGraphUseCase>();
         services.AddScoped<GetDeviceGraphUseCase>();
         services.AddScoped<RunGraphRetentionSweepUseCase>();
+        services.AddSingleton<CriticalFlowObjectiveEvaluator>();
         services.AddHostedService<GraphRetentionHostedService>();
+        services.AddHealthChecks()
+            .AddCheck("backend-live", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: ["live"])
+            .AddCheck<BackendReadinessHealthCheck>("backend-ready", tags: ["ready"]);
 
         return services;
     }

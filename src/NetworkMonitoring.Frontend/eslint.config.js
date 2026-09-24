@@ -7,7 +7,7 @@ import tsdoc from "eslint-plugin-tsdoc";
 import jsdoc from "eslint-plugin-jsdoc";
 
 export default tseslint.config(
-  { ignores: ["dist", "node_modules"] },
+  { ignores: ["dist", "build", "coverage", "node_modules"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

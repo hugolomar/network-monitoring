@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Backend.Application.Configuration;
 using NetworkMonitoring.Backend.Host.DependencyInjection;
 using NetworkMonitoring.Backend.Host.Endpoints;
+using NetworkMonitoring.Backend.Host.Middleware;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
 using Scalar.AspNetCore;
 
@@ -29,8 +31,18 @@ if (!app.Environment.IsEnvironment("Testing"))
     await app.ApplyDeviceInventoryMigrations();
 }
 
+app.UseMiddleware<CorrelationMiddleware>();
+
 app.MapDeviceEndpoints();
 app.MapGraphEndpoints();
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live")
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 app.Run();
 
@@ -63,6 +75,26 @@ internal static class DeviceInventoryMigrationExtensions
         }
 
         var dbContext = scope.ServiceProvider.GetRequiredService<DeviceInventoryDbContext>();
-        await dbContext.Database.MigrateAsync();
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+            .CreateLogger("NetworkMonitoring.Backend.Migrations");
+
+        const int maxAttempts = 10;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await dbContext.Database.MigrateAsync();
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts)
+            {
+                logger.LogWarning(
+                    ex,
+                    "Device inventory migration attempt {Attempt}/{MaxAttempts} failed; retrying",
+                    attempt,
+                    maxAttempts);
+                await Task.Delay(TimeSpan.FromSeconds(Math.Min(30, attempt * 2)));
+            }
+        }
     }
 }

@@ -21,6 +21,7 @@ public sealed class ListDevicesUseCaseTests
         var intake = new AcceptDeviceIntakeUseCase(
             repository,
             repository,
+            NoOpIntakeFlowTelemetry.Instance,
             NullLogger<AcceptDeviceIntakeUseCase>.Instance);
 
         await intake.Execute(AcceptDeviceIntakeUseCaseTests.ValidCommand(

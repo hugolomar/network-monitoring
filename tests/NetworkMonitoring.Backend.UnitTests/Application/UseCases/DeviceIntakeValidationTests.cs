@@ -93,6 +93,7 @@ public sealed class DeviceIntakeValidationTests
         return new AcceptDeviceIntakeUseCase(
             repository,
             repository,
+            NoOpIntakeFlowTelemetry.Instance,
             NullLogger<AcceptDeviceIntakeUseCase>.Instance);
     }
 }
