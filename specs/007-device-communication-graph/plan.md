@@ -5,7 +5,7 @@
 
 ## Summary
 
-Deliver a bounded, authenticated communication-graph capability that projects enriched session facts
+Deliver a bounded, authenticated communication-graph capability that projects indexed session facts
 into graph relationships, exposes `GET /api/graph/devices` for neighborhood traversal plus
 `GET /api/graph/devices/all` for full-snapshot retrieval, executes scheduled retention cleanup without
 impacting existing non-graph backend behavior, and adds a frontend graph exploration view with
@@ -49,16 +49,16 @@ inventory-correlation hints for operators.
 
 ## Technical Context
 
-**Language/Version**: C# / .NET 10 for API/hosted services; JSON for connector configuration  
-**Primary Dependencies**: ASP.NET Core minimal APIs, Microsoft DI/options hosting stack, graph database adapter boundary, Kafka Connect Neo4j sink contract  
+**Language/Version**: C# / .NET 10 for API/hosted services  
+**Primary Dependencies**: ASP.NET Core minimal APIs, Microsoft DI/options hosting stack, graph database adapter boundary, Elasticsearch query/aggregation client  
 **Storage**: Graph database for communication projection; existing inventory store remains authoritative for internal devices  
 **Testing**: xUnit backend integration tests plus frontend Vitest coverage for graph API/page behavior  
 **Target Platform**: Linux containerized runtime in local/CI environments  
-**Project Type**: Backend web-service extension plus frontend UI extension plus connector/config contract artifacts  
-**Performance Goals**: SC-001 median projection latency <= 2s; bounded retrieval responsive within configured depth/limit caps  
+**Project Type**: Backend web-service extension plus frontend UI extension  
+**Performance Goals**: SC-001 projection sweeps complete within operational freshness bounds; bounded retrieval responsive within configured depth/limit caps  
 **Constraints**: Auth required for graph endpoint; scheduled-only 24h retention; bounded projection retries; structured logs + counters/latency metrics; graph outage isolation from existing endpoint families  
 **Scale/Scope**: Neighborhood + snapshot graph endpoints, projection + retention lifecycle, graph UI
-exploration page with inventory-correlation hints, connector baseline, and validation artifacts for
+exploration page with inventory-correlation hints and validation artifacts for
 FR-001..FR-024 / SC-001..SC-007
 
 ### Runtime implementation note (2026-06-15)
@@ -141,9 +141,6 @@ src/
 │       ├── components/
 │       └── models/
 └── ...
-
-infrastructure/connectors/configs/
-└── neo4j-sink-sessions-enriched.json
 
 tests/
 └── NetworkMonitoring.Backend.IntegrationTests/

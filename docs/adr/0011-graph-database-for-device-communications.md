@@ -1,7 +1,8 @@
 # ADR 0011: Graph Database for Device Communication Relationships
 
-- Status: Accepted
+- Status: Accepted (Amended)
 - Date: 2026-06-17
+- Amended: 2026-09-24
 
 ## Context
 
@@ -27,6 +28,15 @@ workloads, with **Neo4j** as the reference implementation in non-testing environ
 - Device inventory remains the authoritative store for internal-device lifecycle; the graph store is
   a query-optimized projection.
 - In-memory graph repositories remain available for tests and optional local fallback.
+
+### Amendment: Projection Input and Runtime Writer
+
+Graph writes are sourced from the existing session dataset in Elasticsearch (`sessions-detected` index)
+and executed by the Backend runtime. The backend performs periodic aggregation by
+`(sourceIp, destinationIp, protocol)`, resolves destination kind using device-inventory evidence, and
+upserts graph relationships into Neo4j.
+
+This amendment defines the production projection path for communication-graph population.
 
 ## Rationale
 
@@ -74,3 +84,6 @@ workloads, with **Neo4j** as the reference implementation in non-testing environ
 - **Negative:** introduces graph database operational overhead (deployment, credentials, monitoring).
 - **Boundary note:** graph data is a projection; canonical internal-device ownership stays in inventory.
 - **Testing note:** in-memory repositories remain valid for fast tests and deterministic local scenarios.
+- **Operational note:** graph freshness depends on the backend projection sweep cadence rather than
+  per-event write latency.
+- **Data quality note:** graph completeness now inherits session-index completeness in Elasticsearch.
