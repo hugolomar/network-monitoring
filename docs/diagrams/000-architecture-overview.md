@@ -25,11 +25,14 @@ flowchart TB
     Schema["Schema Registry\nAvro contracts"]
   end
 
+  subgraph PT["PLATFORM INTEGRATION"]
+    Connect["Kafka Connect"]
+  end
+
   subgraph APP["APPLICATION SERVICES"]
     Console["Integration Console"]
     Backend["Backend API"]
     DeviceUI["Device Management UI"]
-    Connect["Kafka Connect"]
   end
 
   subgraph OBS["OBSERVABILITY"]
@@ -41,6 +44,7 @@ flowchart TB
     Logstash["Logstash"]
     APM["Elastic APM Server"]
     Kibana["Kibana"]
+    Elasob[("Elasticsearch\n(same as business)")]
   end
 
   subgraph DATA["DATA LAYER"]
@@ -54,6 +58,7 @@ flowchart TB
   Probe -->|"schemas"| Schema
   Kafka -->|"consume"| Console
   Kafka -->|"consume"| Connect
+  
 
   %% Application services: direction + protocol
   Console -->|"REST"| Backend
@@ -63,16 +68,14 @@ flowchart TB
   Connect -->|"bulk"| Elastic
 
   %% CI/CD
-  Jenkins -->|"deploy"| APP
+  Jenkins -.->|"build+deploy"| APP
+  Jenkins -.->|"deploy"| BACKBONE
+  Jenkins -.->|"deploy"| DATA
 
   %% Telemetry per component
-  Probe -->|"logs+metrics+traces"| OTel
-  Kafka -->|"logs+metrics+traces"| OTel
-  Schema -->|"logs+metrics+traces"| OTel
-  Console -->|"logs+metrics+traces"| OTel
-  Backend -->|"logs+metrics+traces"| OTel
-  Connect -->|"logs+metrics+traces"| OTel
-  DeviceUI -->|"metrics+traces"| OTel
+  Probe -->|"logs+met+trs"| OTel
+  APP -->|"logs+met+trs"| OTel
+  DeviceUI -->|"only trs"| OTel
 
   %% Metrics leg
   OTel -->|"metrics"| Prom
@@ -83,9 +86,9 @@ flowchart TB
   OTel -->|"logs"| FluentBit
   OTel -->|"traces"| APM
   FluentBit --> Logstash
-  Logstash --> Elastic
-  APM --> Elastic
-  Elastic --> Kibana
+  Logstash --> Elasob
+  APM --> Elasob
+  Elasob --> Kibana
 ```
 
 ## Key flows
