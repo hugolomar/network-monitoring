@@ -1,10 +1,9 @@
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Probe.Application.Configuration;
 using NetworkMonitoring.Probe.Application.Models;
 using NetworkMonitoring.Probe.Application.Ports;
-using NetworkMonitoring.Probe.Application.UseCases;
 using NetworkMonitoring.Probe.Infrastructure.Publishing;
+using NetworkMonitoring.Probe.IntegrationTests.Support;
 
 namespace NetworkMonitoring.Probe.IntegrationTests;
 
@@ -42,11 +41,7 @@ public sealed class ProbeCaptureToConsoleTests
             SessionDeduplicationWindowMinutes = 0,
             DeviceDeduplicationWindowMinutes = 0
         });
-        var useCase = new ProcessObservationsUseCase(
-            provider,
-            publisher,
-            options,
-            NullLogger<ProcessObservationsUseCase>.Instance);
+        var useCase = ProbeTestFactory.CreateUseCase(provider, publisher, options);
 
         var originalOut = Console.Out;
         using var writer = new StringWriter();
@@ -109,11 +104,7 @@ public sealed class ProbeCaptureToConsoleTests
             SessionDeduplicationWindowMinutes = 0,
             DeviceDeduplicationWindowMinutes = 0
         });
-        var useCase = new ProcessObservationsUseCase(
-            provider,
-            publisher,
-            options,
-            NullLogger<ProcessObservationsUseCase>.Instance);
+        var useCase = ProbeTestFactory.CreateUseCase(provider, publisher, options);
 
         var originalOut = Console.Out;
         using var writer = new StringWriter();

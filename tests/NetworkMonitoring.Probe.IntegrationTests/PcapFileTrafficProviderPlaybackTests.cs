@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NetworkMonitoring.Probe.Application.Configuration;
 using NetworkMonitoring.Probe.Infrastructure.Traffic;
+using NetworkMonitoring.Probe.IntegrationTests.Support;
 using System.Diagnostics;
 
 namespace NetworkMonitoring.Probe.IntegrationTests;
@@ -73,7 +73,7 @@ public sealed class PcapFileTrafficProviderPlaybackTests
     }
 
     private static PcapFileTrafficProvider CreateProvider(string pcapPath, double playbackSpeed) =>
-        new(
+        ProbeTestFactory.CreatePcapProvider(
             Options.Create(
                 new ProbeOptions
                 {
@@ -81,9 +81,7 @@ public sealed class PcapFileTrafficProviderPlaybackTests
                     DeterministicTestPcapPath = pcapPath,
                     DeterministicPlaybackSpeed = playbackSpeed,
                     TSharkPath = "tshark",
-                }),
-            new TsharkObservationMapper(),
-            NullLogger<PcapFileTrafficProvider>.Instance);
+                }));
 
     private static string CreateTwoPacketPcapWithSpacing(string sourcePcap, double spacingSeconds)
     {

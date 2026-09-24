@@ -125,13 +125,17 @@ Expected outcome: baseline metric coverage plus pipeline stage rates (SC-011).
 
 ### Automated suites (representative)
 
+Run the whole solution, not individual test projects. Per-project runs skip whatever is not named on
+the command line, so they cannot prove the repository still builds.
+
 | Suite | Command | Result |
 | --- | --- | --- |
-| Probe unit (incl. capture-loss metrics) | `dotnet test tests/NetworkMonitoring.Probe.UnitTests` | Passed |
-| Integration Console unit (incl. ingestion metrics) | `dotnet test tests/NetworkMonitoring.IntegrationConsole.UnitTests` | Passed |
-| Backend unit (incl. intake + browser contract) | `dotnet test tests/NetworkMonitoring.Backend.UnitTests` | Passed |
-| Frontend (incl. browser telemetry) | `npm --prefix src/NetworkMonitoring.Frontend test` | Passed |
+| Backend, probe, and integration console (incl. capture-loss, ingestion, intake, and browser contract) | `dotnet test src/NetworkMonitoring.sln` | Passed: 142, Skipped: 3, Failed: 0 |
+| Frontend (incl. browser telemetry) | `npm --prefix src/NetworkMonitoring.Frontend test` | Passed: 18 |
 | CI observability gate | `./infrastructure/ci/check-observability.sh` | PASS |
+
+Skipped tests are the Kafka and `tshark` integration cases, which self-skip unless
+`RUN_KAFKA_INTEGRATION=1` and a capture toolchain are available.
 
 ### Drill checklist (SC-007..SC-014)
 

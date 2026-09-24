@@ -1,11 +1,8 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using NetworkMonitoring.Domain.Entities;
-using NetworkMonitoring.Probe.Application.Configuration;
 using NetworkMonitoring.Probe.Application.Models;
 using NetworkMonitoring.Probe.Application.Ports;
-using NetworkMonitoring.Probe.Application.UseCases;
 using NetworkMonitoring.Probe.Infrastructure.Traffic;
+using NetworkMonitoring.Probe.UnitTests.Support;
 
 namespace NetworkMonitoring.Probe.UnitTests.Observability;
 
@@ -36,16 +33,7 @@ public sealed class CaptureLossMetricTests
                 "host-a",
                 "arp")
         ]);
-        var useCase = new ProcessObservationsUseCase(
-            provider,
-            new RecordingPublisher(),
-            telemetry,
-            Options.Create(new ProbeOptions
-            {
-                SessionDeduplicationWindowMinutes = 0,
-                DeviceDeduplicationWindowMinutes = 0
-            }),
-            NullLogger<ProcessObservationsUseCase>.Instance);
+        var useCase = ProbeTestFactory.CreateUseCase(provider, new RecordingPublisher(), telemetry);
 
         await useCase.ExecuteAsync(CancellationToken.None);
 
