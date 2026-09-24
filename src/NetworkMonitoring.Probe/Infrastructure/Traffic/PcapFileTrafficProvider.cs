@@ -84,7 +84,9 @@ public sealed class PcapFileTrafficProvider(
             if (!mapper.TryMap(line, out var observation) || observation is null)
             {
                 flowTelemetry.TrackUnparsableInput();
-                logger.LogWarning("Skipping malformed tshark PCAP line: {Line}", line);
+                // Non-IP frames (ARP, link-local broadcasts) reach this path routinely, so the
+                // volume is tracked as a metric instead of one warning per frame.
+                logger.LogDebug("Skipping malformed tshark PCAP line: {Line}", line);
                 continue;
             }
 
@@ -119,8 +121,11 @@ public sealed class PcapFileTrafficProvider(
 
         // Keep the output fields aligned with TsharkTrafficProvider so the same mapper and
         // downstream use-case behavior are reused in deterministic validation mode.
+        // 'occurrence=f' keeps only the outermost value when a field repeats within a packet
+        // (e.g. ICMP errors embedding the original IP header); otherwise tshark joins every
+        // occurrence with commas and the resulting addresses fail validation.
         var fieldArgs =
-            "-T fields " +
+            "-T fields -E occurrence=f " +
             "-e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport -e ip.proto " +
             "-e frame.time_epoch -e frame.len -e eth.src -e eth.dst -e dhcp.option.hostname";
 
