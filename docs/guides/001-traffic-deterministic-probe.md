@@ -135,7 +135,7 @@ On WSL, `Probe__KafkaBootstrapServers=localhost:9092,9093,9094` can fail on IPv6
 
 - **Devices:** probe → `devices.detected` → integration-console → Postgres ✅
 - **Sessions:** probe → `sessions.detected` → Elasticsearch (Kafka Connect sink) ✅
-- **Communication graph (Neo4j):** not wired in reference bootstrap yet; empty graph is expected even when devices and sessions flow. See `specs/007-device-communication-graph/`.
+- **Communication graph (Neo4j):** backend sweep aggregates `sessions-detected` → Neo4j ✅. The graph is populated on a cadence (`Backend__Graph__ProjectionSource__SweepCadenceMinutes`, 5 minutes by default), so it lags the session index by up to one sweep. See `specs/007-device-communication-graph/`.
 
 ### Timestamps in generated PCAPs
 
@@ -143,7 +143,7 @@ Scenario-built PCAPs use synthetic `frame.time_epoch` values aligned to the YAML
 
 ### Malformed lines in some PCAPs
 
-Non-IP frames (ARP-only, malformed tshark field rows) are skipped with warnings. Valid IP traffic still flows; warnings at the end of a scenario are normal for mixed captures.
+Non-IP frames (ARP, link-local broadcasts) produce empty address fields and are skipped at debug level; the skip count is exposed through the probe unparsable-input metric. Valid IP traffic still flows, so a mixed capture such as a scenario with an ARP track will always report some skips.
 
 ## See also
 
