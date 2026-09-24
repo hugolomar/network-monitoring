@@ -22,16 +22,16 @@
           uid: NetworkMonitoring.Probe.Infrastructure.Publishing
         - name: Tshark Integration
           uid: NetworkMonitoring.Probe.Infrastructure.Traffic
-        - name: Full Namespace
-          uid: NetworkMonitoring.Probe
+        - name: Observability
+          uid: NetworkMonitoring.Probe.Infrastructure.Observability
     - name: 🌉 Integration Console
       items:
         - name: Event Ingestion
           uid: NetworkMonitoring.IntegrationConsole.Application.UseCases
         - name: Backend Client
           uid: NetworkMonitoring.IntegrationConsole.Infrastructure.Backend
-        - name: Full Namespace
-          uid: NetworkMonitoring.IntegrationConsole
+        - name: Observability
+          uid: NetworkMonitoring.IntegrationConsole.Infrastructure.Observability
 - name: 📂 Domain Model
   items:
     - name: Entities
