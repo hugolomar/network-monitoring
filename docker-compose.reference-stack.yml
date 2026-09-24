@@ -497,6 +497,10 @@ services:
       Backend__Graph__Neo4jUri: bolt://neo4j:7687
       Backend__Graph__Neo4jUsername: neo4j
       Backend__Graph__Neo4jPassword: networkmonitoring123
+      Backend__Graph__ProjectionSource__Enabled: "true"
+      Backend__Graph__ProjectionSource__ElasticsearchBaseUrl: http://elasticsearch:9200
+      Backend__Graph__ProjectionSource__SessionsIndexName: sessions-detected
+      Backend__Graph__ProjectionSource__SweepCadenceMinutes: "5"
 
   network-monitoring-integration-console:
     build:

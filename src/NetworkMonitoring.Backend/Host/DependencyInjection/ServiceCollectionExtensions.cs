@@ -8,6 +8,7 @@ using NetworkMonitoring.Backend.Infrastructure;
 using NetworkMonitoring.Backend.Infrastructure.Graph;
 using NetworkMonitoring.Backend.Infrastructure.Observability;
 using NetworkMonitoring.Backend.Infrastructure.Persistence;
+using NetworkMonitoring.Backend.Infrastructure.Projection;
 using NetworkMonitoring.Backend.Host.Health;
 using NetworkMonitoring.Backend.Host.Services;
 
@@ -99,10 +100,17 @@ public static class ServiceCollectionExtensions
 
             return sp.GetRequiredService<Neo4jGraphRetentionRepository>();
         });
+        services.AddHttpClient("graph-projection-source", (sp, client) =>
+        {
+            var projectionSource = sp.GetRequiredService<IOptions<BackendOptions>>().Value.Graph.ProjectionSource;
+            client.BaseAddress = new Uri($"{projectionSource.ElasticsearchBaseUrl.TrimEnd('/')}/");
+        });
+        services.AddScoped<ISessionProjectionSource, ElasticsearchSessionProjectionSource>();
         services.AddScoped<ProjectCommunicationGraphUseCase>();
         services.AddScoped<GetDeviceGraphUseCase>();
         services.AddScoped<RunGraphRetentionSweepUseCase>();
         services.AddSingleton<CriticalFlowObjectiveEvaluator>();
+        services.AddHostedService<GraphProjectionHostedService>();
         services.AddHostedService<GraphRetentionHostedService>();
         services.AddHealthChecks()
             .AddCheck("backend-live", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: ["live"])

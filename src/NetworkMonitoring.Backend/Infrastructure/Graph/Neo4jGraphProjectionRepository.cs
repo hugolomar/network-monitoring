@@ -45,6 +45,54 @@ public sealed class Neo4jGraphProjectionRepository(Neo4jDriverAccessor driverAcc
         }, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public Task UpsertCommunicationAggregate(
+        string sourceIdentity,
+        string destinationIdentity,
+        string destinationKind,
+        string protocol,
+        long weight,
+        DateTimeOffset firstSeenUtc,
+        DateTimeOffset lastSeenUtc,
+        CancellationToken cancellationToken)
+    {
+        var cypher = """
+            MERGE (source:Device {id: $sourceIdentity})
+            ON CREATE SET source.kind = 'InternalDevice'
+            SET source.kind = 'InternalDevice'
+            MERGE (destination:Device {id: $destinationIdentity})
+            ON CREATE SET destination.kind = $destinationKind
+            SET destination.kind = $destinationKind
+            MERGE (source)-[edge:COMMUNICATED_WITH {protocol: $protocol}]->(destination)
+            ON CREATE SET edge.weight = $weight,
+                          edge.firstSeenUtc = datetime($firstSeenUtc),
+                          edge.lastSeenUtc = datetime($lastSeenUtc)
+            ON MATCH SET edge.weight = CASE
+                             WHEN coalesce(edge.weight, 0) > $weight THEN edge.weight
+                             ELSE $weight
+                         END,
+                         edge.firstSeenUtc = CASE
+                             WHEN edge.firstSeenUtc < datetime($firstSeenUtc) THEN edge.firstSeenUtc
+                             ELSE datetime($firstSeenUtc)
+                         END,
+                         edge.lastSeenUtc = CASE
+                             WHEN edge.lastSeenUtc > datetime($lastSeenUtc) THEN edge.lastSeenUtc
+                             ELSE datetime($lastSeenUtc)
+                         END
+            """;
+
+        return WriteAsync(cypher, new
+        {
+            sourceIdentity,
+            destinationIdentity,
+            destinationKind,
+            protocol,
+            weight,
+            firstSeenUtc = firstSeenUtc.UtcDateTime.ToString("O"),
+            lastSeenUtc = lastSeenUtc.UtcDateTime.ToString("O")
+        }, cancellationToken);
+    }
+
     private async Task WriteAsync(string cypher, object parameters, CancellationToken cancellationToken)
     {
         var driver = driverAccessor.GetOrCreate();
