@@ -45,6 +45,35 @@ public sealed class InMemoryGraphStore
     }
 
     /// <summary>
+    /// Upserts one communication edge using absolute aggregate values.
+    /// </summary>
+    /// <param name="sourceId">Source identity.</param>
+    /// <param name="destinationId">Destination identity.</param>
+    /// <param name="protocol">Protocol dimension.</param>
+    /// <param name="weight">Absolute relationship weight.</param>
+    /// <param name="firstSeenUtc">Earliest seen timestamp.</param>
+    /// <param name="lastSeenUtc">Latest seen timestamp.</param>
+    public void UpsertEdgeAggregate(
+        string sourceId,
+        string destinationId,
+        string protocol,
+        long weight,
+        DateTimeOffset firstSeenUtc,
+        DateTimeOffset lastSeenUtc)
+    {
+        var key = new GraphEdgeKey(sourceId, destinationId, protocol);
+        _edges.AddOrUpdate(
+            key,
+            _ => new GraphEdge(sourceId, destinationId, protocol, weight, firstSeenUtc, lastSeenUtc),
+            (_, existing) => existing with
+            {
+                Weight = Math.Max(existing.Weight, weight),
+                FirstSeenUtc = firstSeenUtc < existing.FirstSeenUtc ? firstSeenUtc : existing.FirstSeenUtc,
+                LastSeenUtc = lastSeenUtc > existing.LastSeenUtc ? lastSeenUtc : existing.LastSeenUtc
+            });
+    }
+
+    /// <summary>
     /// Returns a bounded neighborhood from the requested root.
     /// </summary>
     /// <param name="rootIdentity">Root identity.</param>

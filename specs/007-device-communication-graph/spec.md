@@ -18,24 +18,24 @@
 
 ### User Story 1 - Build Communication Links from Session Traffic (Priority: P1)
 
-As a platform operator, I want enriched session traffic to be projected into a device communication
+As a platform operator, I want indexed session traffic to be projected into a device communication
 graph so communication relationships can be explored without reading raw traffic streams.
 
 **Why this priority**: This is the core value of the feature; without graph projection there is no
 communication topology to inspect.
 
-**Independent Test**: Submit representative enriched session traffic and verify that communication
+**Independent Test**: Submit representative indexed session traffic and verify that communication
 relationships appear quickly as graph nodes/edges with stable identity and timestamps.
 
 **Acceptance Scenarios**:
 
-1. **Given** valid enriched traffic between two known internal devices, **When** projection runs,
+1. **Given** valid indexed traffic between two known internal devices, **When** projection runs,
    **Then** one communication relationship exists between those device identities and reflects first/last
    observed times plus cumulative interaction count.
-2. **Given** valid enriched traffic from an internal device to an unresolved destination identity,
+2. **Given** valid indexed traffic from an internal device to an unresolved destination identity,
    **When** projection runs, **Then** the destination is represented as an external host and linked from
    the source device.
-3. **Given** duplicated delivery of the same enriched event, **When** both deliveries are processed,
+3. **Given** duplicated delivery of the same indexed record, **When** both deliveries are processed,
    **Then** graph structure is not duplicated and only relationship counters/timestamps are advanced per
    identity rules.
 4. **Given** a projection write fails transiently, **When** bounded retries are exhausted, **Then** the
@@ -155,16 +155,16 @@ the backend contract.
 - **External Host**: Non-inventory destination represented as `:Device:ExternalHost`.
 - **Node**: Graph representation of either a Device or External Host identity.
 - **Relationship**: Directed `COMMUNICATED_WITH` edge keyed by `(sourceIdentity, destinationIdentity, protocol)`.
-- **Valid Enriched Session Event**: Event containing, at minimum, `sourceIdentity`, `protocol`,
-  `detectedAt`, and destination evidence (`destinationIdentity` or destination network evidence such as
-  `destinationIp`). Events missing these minimum fields are dropped and counted in diagnostics.
+- **Valid Session Observation Record**: Session record containing, at minimum, `sourceIp`,
+  `destinationIp`, `protocol`, and observation timestamps (`firstSeenUtc`, `lastSeenUtc`). Records
+  missing these minimum fields are skipped and counted in diagnostics.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST project each valid enriched session event into a communication graph as a
-  relationship from source identity to destination identity.
+- **FR-001**: The system MUST project each valid session observation record into a communication graph
+  as a relationship from source identity to destination identity.
 - **FR-002**: Communication relationship identity MUST be unique by source identity, destination
   identity, and protocol.
 - **FR-003**: Repeated observations for an existing relationship identity MUST increment communication
@@ -233,17 +233,17 @@ the backend contract.
 
 ### Dependency Requirements
 
-- **DR-001**: If upstream enriched-session events are unavailable, the system does not fabricate graph
-  records and emits an operational signal indicating input starvation.
-- **DR-002**: If incoming enriched events fail minimum validity checks, the system skips projection for
-  those events, increments invalid-event counters, and continues with subsequent events.
-- **DR-003**: Connector/graph-store dependency failures are isolated to graph projection/retrieval paths
-  and MUST NOT alter non-graph endpoint behavior.
+- **DR-001**: If the session dataset is unavailable, the system does not fabricate graph records and
+  emits an operational signal indicating projection-source unavailability.
+- **DR-002**: If incoming session records fail minimum validity checks, the system skips projection for
+  those records, increments invalid-record counters, and continues with subsequent records.
+- **DR-003**: Projection-source/graph-store dependency failures are isolated to graph
+  projection/retrieval paths and MUST NOT alter non-graph endpoint behavior.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Enriched Session Event**: A validated traffic event carrying source/destination identity context and
-  protocol needed for communication projection.
+- **Session Observation Record**: A validated session record carrying source/destination network context
+  and protocol needed for communication projection.
 - **Communication Node**: A graph node representing either an internal device identity or an external
   host identity.
 - **Communication Relationship**: A directed relationship between two communication nodes, keyed by
@@ -256,8 +256,8 @@ the backend contract.
 
 ### Measurable Outcomes
 
-- **SC-001**: In validation runs, median projection delay from enriched event receipt to visible graph
-  relationship is 2 seconds or less.
+- **SC-001**: In validation runs, 95% of projection sweeps complete within 2 minutes and publish graph
+  updates no older than one configured sweep interval.
 - **SC-002**: Replaying the same event payload twice results in no increase of node/relationship counts
   beyond expected identity-unique structure.
 - **SC-003**: After retention execution, 100% of sampled relationships older than 90 days are absent.
@@ -272,10 +272,10 @@ the backend contract.
 
 ### Measurement Protocol
 
-- **MP-001 (SC-001 timing points)**: Measurement starts at consumer receipt timestamp and ends at first
-  successful graph query visibility of the projected relationship.
-- **MP-002 (SC-001 sampling window)**: Median is computed over at least 500 consecutive valid events
-  under nominal test load.
+- **MP-001 (SC-001 timing points)**: Measurement starts at scheduled sweep start timestamp and ends at
+  first successful graph query visibility of updates produced by that sweep.
+- **MP-002 (SC-001 sampling window)**: Completion timing and freshness are computed over at least 20
+  consecutive sweeps under nominal test load.
 - **MP-003 (SC-003/SC-004 sampling)**: Validation samples at least 100 stale relationships and 100 orphan
   external-host candidates after a retention run.
 - **MP-004 (SC-003/SC-004 pass threshold)**: Pass requires 100% compliance in sampled set, with any miss
@@ -298,8 +298,8 @@ the backend contract.
 
 - Historical design decisions imported from prior documentation are treated as baseline constraints for
   this feature unless explicitly superseded in this spec.
-- Graph projection consumes enriched session events already produced by prior session-processing
-  capabilities.
+- Graph projection consumes the session dataset already indexed in Elasticsearch by prior
+  session-processing capabilities.
 - Device inventory remains the authoritative source for internal device identity existence and lifecycle.
 - The communication graph UI consumes the backend retrieval contract and remains additive to existing
   inventory management capabilities.
@@ -312,5 +312,5 @@ the backend contract.
   signals for operational validation.
 - This feature does not include per-role data filtering beyond the allowed read-role set; fine-grained
   role scoping is deferred to a future authorization hardening feature.
-- This feature does not include connector self-healing orchestration beyond bounded retries and failure
-  diagnostics in projection paths.
+- This feature does not include projection-source self-healing orchestration beyond bounded retries and
+  failure diagnostics in projection paths.

@@ -4,7 +4,7 @@
 
 Validate end-to-end communication graph behavior:
 
-1. Enriched session events project into communication relationships.
+1. Indexed session records project into communication relationships.
 2. Graph retrieval returns bounded node/edge neighborhoods.
 3. Retention removes stale relationships and orphan external hosts.
 4. Graph-store outage is isolated from existing non-graph endpoints.
@@ -13,7 +13,7 @@ Validate end-to-end communication graph behavior:
 
 - .NET 10 SDK.
 - Local graph-store runtime available.
-- Existing backend and session enrichment flow from previous features.
+- Existing backend and session indexing flow from previous features.
 
 ## Start required services
 
@@ -25,7 +25,7 @@ Validate end-to-end communication graph behavior:
 
 2. Validate Neo4j Browser is reachable at `http://localhost:7474` and Bolt at `localhost:7687`.
 3. Ensure backend graph configuration points to Neo4j (`Provider=Neo4j`).
-4. Ensure enriched session facts are available to the projection path.
+4. Ensure session records are present in Elasticsearch index `sessions-detected` before running graph projection checks.
 
 ### Neo4j credentials (local reference stack)
 
@@ -36,7 +36,7 @@ Validate end-to-end communication graph behavior:
 
 ## Validate projection behavior
 
-1. Produce enriched session events representing:
+1. Produce indexed session records representing:
    - internal-to-internal communication,
    - internal-to-external communication,
    - duplicate/replay delivery of same event identity.
@@ -131,6 +131,18 @@ curl -sS -H "Authorization: Bearer test" -H "X-Role: analyst" \
   - `npm --prefix src/NetworkMonitoring.Frontend run test -- --run` -> `11 passed`.
   - `npm --prefix src/NetworkMonitoring.Frontend run build` -> success.
   - `dotnet build src/NetworkMonitoring.Backend/NetworkMonitoring.Backend.csproj` -> success.
+
+## Recorded validation evidence (2026-09-24)
+
+- Projection-source alignment checks:
+  - `dotnet test tests/NetworkMonitoring.Backend.IntegrationTests/NetworkMonitoring.Backend.IntegrationTests.csproj --filter "FullyQualifiedName~Graph"` -> `Passed: 16, Failed: 0`.
+- Coverage now includes sweep-driven graph projection from indexed sessions (`GraphProjectionSweepTests`).
+- Reference-stack end-to-end run (deterministic PCAP `five-minute-mac-coverage.pcap`):
+  - `sessions-detected` document count -> `362`.
+  - Backend startup sweep -> `POST http://elasticsearch:9200/sessions-detected/_search` -> `200`.
+  - Neo4j -> `189` `Device` nodes, `200` `COMMUNICATED_WITH` relationships.
+  - `GET /api/graph/devices/all?limit=200` (with `Authorization` and `X-Role: analyst`) -> `200`, `189` nodes (`11` internal, `178` external), `200` edges, `truncated=false`.
+  - Inventory correlation confirmed: source IPs resolve to `device-*` identities while unmatched destinations stay `ExternalHost`.
 
 ## Suggested automated checks
 

@@ -14,11 +14,11 @@
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Prepare feature scaffolding, graph options, and baseline connector/documentation artifacts.
+**Purpose**: Prepare feature scaffolding, graph options, and baseline projection/documentation artifacts.
 
 - [X] T001 Create graph feature scaffolding placeholders in `src/NetworkMonitoring.Backend/Host/Endpoints/.gitkeep`, `src/NetworkMonitoring.Backend/Host/Services/.gitkeep`, `src/NetworkMonitoring.Backend/Application/UseCases/.gitkeep`, `src/NetworkMonitoring.Backend/Application/Ports/.gitkeep`, and `src/NetworkMonitoring.Backend/Infrastructure/Graph/.gitkeep`
 - [X] T002 Add graph option defaults/caps/retry/retention flags in `src/NetworkMonitoring.Backend/Application/Configuration/BackendOptions.cs` and `src/NetworkMonitoring.Backend/appsettings.json`
-- [X] T003 [P] Add connector baseline for `sessions.enriched` projection in `infrastructure/connectors/configs/neo4j-sink-sessions-enriched.json`
+- [X] T003 [P] Add projection-source baseline defaults (index name and sweep cadence) in `src/NetworkMonitoring.Backend/Application/Configuration/BackendOptions.cs` and `src/NetworkMonitoring.Backend/appsettings.json`
 - [X] T004 [P] Align quickstart + contract with defaults/error payload/auth clarifications in `specs/007-device-communication-graph/quickstart.md` and `specs/007-device-communication-graph/contracts/graph-api.md`
 
 ---
@@ -41,9 +41,9 @@
 
 ## Phase 3: User Story 1 - Build Communication Links from Session Traffic (Priority: P1) 🎯 MVP
 
-**Goal**: Project enriched session observations into idempotent communication relationships with bounded retry behavior.
+**Goal**: Project indexed session observations into idempotent communication relationships with bounded retry behavior.
 
-**Independent Test**: Inject representative enriched observations (internal/internal, internal/external, replay duplicates, transient write failure) and verify identity uniqueness, monotonic updates, and continuation after retry exhaustion.
+**Independent Test**: Inject representative indexed observations (internal/internal, internal/external, replay duplicates, transient write failure) and verify identity uniqueness, monotonic updates, and continuation after retry exhaustion.
 
 ### Tests for User Story 1
 
@@ -192,6 +192,21 @@ help identify which graph nodes correspond to inventory records.
 
 ---
 
+## Phase 11: Projection-source alignment - Elasticsearch sessions to graph (design correction)
+
+**Purpose**: Establish the production graph-population path from indexed sessions and remove unused projection assumptions.
+
+- [X] T064 Add graph projection-source options (index name, sweep cadence, batch sizing/lookback) in `src/NetworkMonitoring.Backend/Application/Configuration/BackendOptions.cs` and `src/NetworkMonitoring.Backend/appsettings.json`
+- [X] T065 Implement backend hosted projection service that aggregates `sessions-detected` and invokes graph upserts in `src/NetworkMonitoring.Backend/Host/Services/GraphProjectionHostedService.cs`
+- [X] T066 Add projection-source repository/adapter for Elasticsearch aggregation queries in `src/NetworkMonitoring.Backend/Application/Ports/ISessionProjectionSource.cs` and `src/NetworkMonitoring.Backend/Infrastructure/Projection/ElasticsearchSessionProjectionSource.cs`
+- [X] T067 Add inventory-IP correlation helper for internal/external destination resolution in `src/NetworkMonitoring.Backend/Application/UseCases/ProjectCommunicationGraphUseCase.cs`
+- [X] T068 Update projection persistence semantics to support sweep-safe idempotency (absolute counters/timestamps) in `src/NetworkMonitoring.Backend/Infrastructure/Graph/Neo4jGraphProjectionRepository.cs` and `src/NetworkMonitoring.Backend/Infrastructure/Graph/InMemoryGraphRepositories.cs`
+- [X] T069 Remove obsolete Neo4j sink baseline artifacts in `infrastructure/connectors/configs/` and update related docs
+- [X] T070 Add integration coverage for end-to-end sweep projection (`sessions-detected` index -> graph visibility) in `tests/NetworkMonitoring.Backend.IntegrationTests/Graph/GraphProjectionSweepTests.cs`
+- [X] T071 Run projection-alignment verification (`dotnet test ... --filter "FullyQualifiedName~GraphProjectionSweep|FullyQualifiedName~Graph"`) and record evidence in `specs/007-device-communication-graph/quickstart.md`
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -206,6 +221,7 @@ help identify which graph nodes correspond to inventory records.
 - **Phase 8 (US5 UI)**: Depends on Phase 4 contract stability and Phase 7 runtime-ready graph source.
 - **Phase 9 (Polish)**: Depends on all targeted user stories complete.
 - **Phase 10 (Snapshot UX + correlation)**: Depends on Phase 8 baseline UI and Phase 7 Neo4j runtime path.
+- **Phase 11 (Projection-source alignment)**: Depends on Phase 7 Neo4j runtime hardening and existing session indexing pipeline availability.
 
 ### User Story Dependency Graph
 

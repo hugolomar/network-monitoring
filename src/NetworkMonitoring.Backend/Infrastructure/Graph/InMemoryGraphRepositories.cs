@@ -22,6 +22,23 @@ public sealed class InMemoryGraphProjectionRepository(InMemoryGraphStore store) 
         store.UpsertEdge(sourceIdentity, destinationIdentity, protocol, detectedAtUtc);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc />
+    public Task UpsertCommunicationAggregate(
+        string sourceIdentity,
+        string destinationIdentity,
+        string destinationKind,
+        string protocol,
+        long weight,
+        DateTimeOffset firstSeenUtc,
+        DateTimeOffset lastSeenUtc,
+        CancellationToken cancellationToken)
+    {
+        store.UpsertNode(sourceIdentity, "InternalDevice");
+        store.UpsertNode(destinationIdentity, destinationKind);
+        store.UpsertEdgeAggregate(sourceIdentity, destinationIdentity, protocol, weight, firstSeenUtc, lastSeenUtc);
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>

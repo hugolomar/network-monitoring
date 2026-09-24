@@ -106,4 +106,45 @@ public sealed class GraphOptions
     /// Gets a value indicating whether graph metrics are enabled.
     /// </summary>
     public bool EnableMetrics { get; init; } = true;
+
+    /// <summary>
+    /// Gets projection-source options used to build graph updates from indexed sessions.
+    /// </summary>
+    public GraphProjectionSourceOptions ProjectionSource { get; init; } = new();
+}
+
+/// <summary>
+/// Configuration values for graph projection-source access and sweep cadence.
+/// </summary>
+public sealed class GraphProjectionSourceOptions
+{
+    /// <summary>
+    /// Gets a value indicating whether scheduled projection sweeps are enabled.
+    /// </summary>
+    public bool Enabled { get; init; } = true;
+
+    /// <summary>
+    /// Gets Elasticsearch base URL hosting indexed session records.
+    /// </summary>
+    public string ElasticsearchBaseUrl { get; init; } = "http://localhost:9200";
+
+    /// <summary>
+    /// Gets the source index name used for session aggregation.
+    /// </summary>
+    public string SessionsIndexName { get; init; } = "sessions-detected";
+
+    /// <summary>
+    /// Gets sweep cadence in minutes.
+    /// </summary>
+    public int SweepCadenceMinutes { get; init; } = 5;
+
+    /// <summary>
+    /// Gets lookback window in minutes for each projection sweep.
+    /// </summary>
+    public int SweepLookbackMinutes { get; init; } = 10;
+
+    /// <summary>
+    /// Gets maximum aggregation buckets requested per sweep.
+    /// </summary>
+    public int SweepBucketSize { get; init; } = 1000;
 }

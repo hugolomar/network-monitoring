@@ -2,25 +2,25 @@
 
 ## Overview
 
-This feature introduces a projection model for communication relationships derived from enriched session
+This feature introduces a projection model for communication relationships derived from indexed session
 facts. The projection is query-oriented and does not replace authoritative device inventory ownership.
 
 ## Entities
 
-### 1) Enriched Session Event (input fact)
+### 1) Session Observation Record (input fact)
 
-Represents one validated session observation supplied by prior session-processing features.
+Represents one validated session observation indexed by prior session-processing features.
 
 **Relevant fields**
-- Source identity
-- Destination identity or destination network evidence
+- Source IP
+- Destination IP
 - Protocol
-- Observation timestamp
+- Observation timestamps (`firstSeenUtc`, `lastSeenUtc`)
 
 **Validation rules**
-- Source identity is required for projection.
+- Source IP is required for projection.
 - Protocol is required for relationship identity.
-- Destination must resolve either as an internal identity or external-host evidence.
+- Destination IP is required so destination kind can resolve as internal-device or external-host.
 
 ### 2) Communication Node
 
@@ -95,7 +95,7 @@ Result of scheduled graph hygiene execution.
 
 ## Relationships
 
-- Enriched Session Event -> upserts one Communication Relationship between two Communication Nodes.
+- Session Observation Record -> upserts one Communication Relationship between two Communication Nodes.
 - Communication Relationship references exactly one source node and one destination node.
 - Graph Query Result materializes a bounded subgraph around one root node.
 - Retention Sweep Outcome summarizes cleanup over Communication Relationship and Communication Node sets.

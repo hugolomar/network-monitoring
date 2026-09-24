@@ -8,7 +8,7 @@
 
 ## Requirement Completeness
 
-- [x] CHK001 Are projection input requirements explicit about the minimum event fields required for processing (source, destination evidence, protocol, timestamp) instead of assuming prior validation? [Completeness, Spec §FR-001, Spec §Enriched Session Event]
+- [x] CHK001 Are projection input requirements explicit about the minimum event fields required for processing (source, destination evidence, protocol, timestamp) instead of assuming prior validation? [Completeness, Spec §FR-001, Spec §Session Observation Record]
 - [x] CHK002 Are destination-resolution requirements complete for all destination classes (internal, external-host, and unresolved-with-network-evidence)? [Completeness, Spec §FR-005, Spec §Edge Cases]
 - [x] CHK003 Are graph retrieval requirements complete for all caller-provided inputs, including defaults when depth/limit are omitted? [Completeness, Spec §FR-006, Spec §FR-007, Spec §FR-008]
 - [x] CHK004 Are outage-handling requirements complete for both graph endpoint behavior and explicit non-graph continuity expectations? [Completeness, Spec §FR-012, Spec §FR-013, Spec §User Story 4]
@@ -16,7 +16,7 @@
 
 ## Requirement Clarity
 
-- [x] CHK006 Is "valid enriched session event" unambiguous, with a clear linkage to validation ownership boundaries? [Clarity, Ambiguity, Spec §FR-001, Spec §Assumptions]
+- [x] CHK006 Is "valid session observation record" unambiguous, with a clear linkage to validation ownership boundaries? [Clarity, Ambiguity, Spec §FR-001, Spec §Assumptions]
 - [x] CHK007 Is "bounded retries" quantified with explicit retry count/backoff expectations or a normative reference to configuration keys? [Clarity, Ambiguity, Spec §FR-016, Plan §Technical Context]
 - [x] CHK008 Is "meaningful error details" for service-unavailable responses defined with required fields to avoid interpretation drift? [Clarity, Spec §FR-012, Spec §User Story 4]
 - [x] CHK009 Is "all authenticated roles are authorized" scoped clearly enough to avoid future conflict with role-specific policies? [Clarity, Spec §FR-014]
@@ -57,9 +57,9 @@
 
 ## Dependencies & Assumptions
 
-- [x] CHK029 Are assumptions about upstream enriched-event availability and quality validated or bounded with explicit failure-handling requirements? [Assumption, Dependency, Spec §Assumptions, Spec §FR-001]
+- [x] CHK029 Are assumptions about upstream session-dataset availability and quality validated or bounded with explicit failure-handling requirements? [Assumption, Dependency, Spec §Assumptions, Spec §FR-001]
 - [x] CHK030 Are assumptions about authoritative device inventory ownership reflected consistently in retention requirements and edge-case behavior? [Consistency, Assumption, Spec §FR-011, Spec §Assumptions]
-- [x] CHK031 Are external dependency obligations (graph driver and connector behavior) reflected in requirements rather than only in plan/tasks artifacts? [Dependency, Gap, Plan §Technical Context, Tasks §Phase 1]
+- [x] CHK031 Are external dependency obligations (graph driver and projection-source behavior) reflected in requirements rather than only in plan/tasks artifacts? [Dependency, Gap, Plan §Technical Context, Tasks §Phase 1]
 
 ## Ambiguities & Conflicts
 
